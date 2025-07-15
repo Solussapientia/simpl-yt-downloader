@@ -7,6 +7,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app import app
 
+# Export app for gunicorn
+application = app
+
 def main():
     # Get PORT from environment with detailed logging
     port_env = os.environ.get("PORT")
