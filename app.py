@@ -51,7 +51,7 @@ class ProgressHook:
     def __init__(self, download_id):
         self.download_id = download_id
         self.last_update = time.time()
-
+        
     def __call__(self, d):
         current_time = time.time()
         # Update progress at most once per second
@@ -102,7 +102,7 @@ class ProgressHook:
                 file_size = f"{total_bytes / (1024*1024):.1f} MB"
             else:
                 file_size = "-- MB"
-            
+                
             download_progress[self.download_id] = {
                 'status': 'downloading',
                 'percent': percent,
@@ -713,7 +713,7 @@ def extract_video_info(url):
                 # Skip HLS/M3U8/DASH formats
                 if fmt.get('protocol') in ['m3u8', 'm3u8_native', 'hls', 'dash']:
                     continue
-                    
+                
                 # Skip formats without direct URLs
                 if not fmt.get('url') or 'manifest' in fmt.get('url', ''):
                     continue
@@ -731,12 +731,12 @@ def extract_video_info(url):
                 # Create quality label
                 if height:
                     quality = f"{height}p"
-                else:
+                    else:
                     quality = "Standard"
-                
+                    
                 # Avoid duplicates
                 if quality in seen_qualities:
-                    continue
+                        continue
                 seen_qualities.add(quality)
                 
                 # Format file size
@@ -745,9 +745,9 @@ def extract_video_info(url):
                     size_text = f"{size_mb:.1f}MB"
                 else:
                     size_text = "Unknown"
-                
-                formats.append({
-                    'format_id': format_id,
+                    
+                    formats.append({
+                        'format_id': format_id,
                     'ext': 'mp4',
                     'quality': quality,
                     'filesize': filesize,

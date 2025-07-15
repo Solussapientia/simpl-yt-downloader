@@ -56,7 +56,7 @@
         <div class="container mx-auto px-4">
             <h1 class="text-4xl font-bold text-center">
                 Simpl YT Downloader
-            </h1>
+                </h1>
             <p class="text-center text-lg mt-2 opacity-90">
                 Free YouTube to MP4 Downloader - Fast & Easy
             </p>
@@ -65,21 +65,21 @@
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
-        <!-- URL Input Section -->
+            <!-- URL Input Section -->
         <div class="max-w-4xl mx-auto">
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
                 <div class="mb-4">
                     <label for="url-input" class="block text-sm font-medium text-gray-700 mb-2">
                         Enter YouTube URL
                     </label>
-                    <input 
-                        type="text" 
+                <input 
+                    type="text" 
                         id="url-input" 
                         placeholder="Paste your YouTube URL here..."
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                </div>
-                
+                >
+            </div>
+
                 <button 
                     id="extract-btn"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
@@ -94,11 +94,11 @@
                 <div class="flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                    </svg>
+                        </svg>
                     <span id="error-text"></span>
-                </div>
             </div>
-            
+        </div>
+
             <!-- Video Info Section -->
             <div id="video-info" class="bg-white rounded-lg shadow-lg p-6 mb-6 hidden">
                 <div class="flex flex-col md:flex-row gap-6">
@@ -109,16 +109,16 @@
                             <p><span class="font-medium">Channel:</span> <span id="video-uploader"></span></p>
                             <p><span class="font-medium">Duration:</span> <span id="video-duration"></span></p>
                             <p><span class="font-medium">Views:</span> <span id="video-views"></span></p>
-                        </div>
+                </div>
                     </div>
                     
                     <!-- Thumbnail -->
                     <div class="flex-shrink-0">
                         <img id="video-thumbnail" class="w-full md:w-48 h-auto rounded-lg shadow-md" alt="Video thumbnail">
-                    </div>
                 </div>
             </div>
-            
+        </div>
+
             <!-- Download Options -->
             <div id="download-options" class="bg-white rounded-lg shadow-lg p-6 hidden">
                 <h3 class="text-xl font-bold text-gray-800 mb-4">MP4 Download Options</h3>
@@ -127,8 +127,8 @@
                 <div id="format-list" class="space-y-3">
                     <!-- Format options will be populated here -->
                 </div>
+                </div>
             </div>
-        </div>
     </main>
 
     <!-- Footer -->
@@ -138,7 +138,7 @@
             <p class="text-gray-400 text-sm mt-2">
                 Download videos responsibly. Respect copyright and terms of service.
             </p>
-        </div>
+            </div>
     </footer>
 
     <script>
@@ -293,12 +293,12 @@
                             <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                             </svg>
-                        </div>
+                </div>
                         <div>
                             <div class="font-medium text-gray-800">${format.display_name}</div>
                             <div class="text-sm text-gray-500">MP4 • High Quality</div>
-                        </div>
-                    </div>
+                </div>
+                </div>
                     <button onclick="downloadFormat('${video.id}', '${format.format_id}')" 
                             class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -373,7 +373,7 @@
                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                     </svg>
                     <span>${message}</span>
-                </div>
+            </div>
             `;
             
             const main = document.querySelector('main');
