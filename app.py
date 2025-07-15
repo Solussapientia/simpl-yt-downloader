@@ -384,38 +384,13 @@ def download_video():
     if not os.path.exists(downloads_dir):
         os.makedirs(downloads_dir)
     
-    # Configure format selector - SIMPLE formats that work without ffmpeg
+    # Configure format selector - ULTRA SIMPLE to work with any video
     if format_type == 'mp3':
         # This shouldn't be reached due to the check above, but just in case
-        format_selector = 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best'
+        format_selector = 'worst'
     else:
-        # For MP4, use simple format selectors that work without ffmpeg
-        quality_lower = quality.lower()
-        
-        if quality == 'best':
-            # Simple best format selector
-            format_selector = 'best[ext=mp4]/best'
-        elif '2160' in quality_lower or '4k' in quality_lower:
-            # 4K with simple fallbacks
-            format_selector = 'best[height>=2160][ext=mp4]/best[height>=1080][ext=mp4]/best[ext=mp4]/best'
-        elif '1440' in quality_lower:
-            # 1440p with simple fallbacks
-            format_selector = 'best[height>=1440][ext=mp4]/best[height>=1080][ext=mp4]/best[ext=mp4]/best'
-        elif '1080' in quality_lower:
-            # 1080p with simple fallbacks
-            format_selector = 'best[height>=1080][ext=mp4]/best[height>=720][ext=mp4]/best[ext=mp4]/best'
-        elif '720' in quality_lower:
-            # 720p with simple fallbacks
-            format_selector = 'best[height>=720][ext=mp4]/best[height>=480][ext=mp4]/best[ext=mp4]/best'
-        elif '480' in quality_lower:
-            # 480p with simple fallbacks
-            format_selector = 'best[height>=480][ext=mp4]/best[height>=360][ext=mp4]/best[ext=mp4]/best'
-        elif '360' in quality_lower:
-            # 360p with simple fallbacks
-            format_selector = 'best[height>=360][ext=mp4]/best[ext=mp4]/best'
-        else:
-            # Default simple fallback
-            format_selector = 'best[ext=mp4]/best'
+        # For MP4, use the simplest possible format selector
+        format_selector = 'worst'
     
     # Initialize progress
     download_progress[download_id] = {
