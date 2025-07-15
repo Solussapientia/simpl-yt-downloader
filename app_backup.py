@@ -16,10 +16,8 @@ import subprocess
 import tempfile
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_file, Response, redirect, url_for
-from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from urllib.parse import urlparse, parse_qs
-from flask_cors import CORS
 
 # Import yt-dlp with fallback
 try:
@@ -30,7 +28,6 @@ except ImportError:
     import yt_dlp
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
 # Global variables
 download_progress = {}
@@ -660,32 +657,44 @@ def download_thread_func(url, format_id, download_id):
             'file_size': "-- MB"
         }
 
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, jsonify, redirect, Response
 import yt_dlp
+import json
 import re
 import time
+from urllib.parse import urlparse, parse_qs
+import requests
+from threading import Thread
 import os
-import logging
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Global storage for video info (in production, use Redis or database)
+video_cache = {}
+
+def is_valid_youtube_url(url):
+    """Check if URL is a valid YouTube URL"""
+    youtube_regex = re.compile(
+        r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/'
+        r'(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})'
+    )
+    return bool(youtube_regex.match(url))
 
 def extract_video_info(url):
-    """Extract video information including available MP4 formats"""
+    """Extract video information like Y2mate does"""
     try:
-        # yt-dlp configuration for better compatibility
+        # Configure yt-dlp to avoid HLS and get direct URLs
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
+            'format': 'best[ext=mp4][protocol^=http][protocol!=m3u8_native][protocol!=m3u8][protocol!=hls]',
+            'ignoreerrors': True,
+            'no_playlist': True,
             'extractor_args': {
                 'youtube': {
                     'player_client': ['web', 'android', 'ios'],
-                    'skip': ['dash', 'hls']
+                    'player_skip': ['hls', 'dash']
                 }
             }
         }
@@ -693,28 +702,24 @@ def extract_video_info(url):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             
-            # Extract basic video information
-            video_info = {
-                'id': info.get('id', ''),
-                'title': info.get('title', 'Unknown'),
-                'thumbnail': info.get('thumbnail', ''),
-                'duration': info.get('duration', 0),
-                'view_count': info.get('view_count', 0),
-                'uploader': info.get('uploader', 'Unknown'),
-                'formats': []
-            }
+            if not info:
+                return None
             
-            # Process available formats - show multiple quality options
+            # Filter formats to get only MP4 direct download URLs
+            formats = []
             seen_qualities = set()
             
-            # Get various quality MP4 formats
             for fmt in info.get('formats', []):
+                # Skip HLS/M3U8/DASH formats
+                if fmt.get('protocol') in ['m3u8', 'm3u8_native', 'hls', 'dash']:
+                    continue
+                
+                # Skip formats without direct URLs
+                if not fmt.get('url') or 'manifest' in fmt.get('url', ''):
+                    continue
+                
                 # Only MP4 formats
                 if fmt.get('ext') != 'mp4':
-                    continue
-                    
-                # Skip HLS/M3U8 formats
-                if 'hls' in fmt.get('protocol', '').lower() or 'm3u8' in fmt.get('protocol', '').lower():
                     continue
                     
                 # Get quality info
@@ -729,94 +734,106 @@ def extract_video_info(url):
                 else:
                     quality = "Standard"
                     
-                # Allow multiple formats of same quality (some may have audio, some may not)
-                quality_key = f"{quality}_{format_id}"
-                if quality_key in seen_qualities:
+                # Avoid duplicates
+                if quality in seen_qualities:
                     continue
-                seen_qualities.add(quality_key)
+                seen_qualities.add(quality)
                 
                 # Format file size
                 if filesize:
                     size_mb = filesize / (1024 * 1024)
                     size_text = f"{size_mb:.1f}MB"
                 else:
-                    size_text = "Unknown size"
-                
-                video_info['formats'].append({
-                    'format_id': format_id,
+                    size_text = "Unknown"
+                    
+                    formats.append({
+                        'format_id': format_id,
+                    'ext': 'mp4',
                     'quality': quality,
-                    'size': size_text,
-                    'height': height,
-                    'width': width
+                    'filesize': filesize,
+                    'size_text': size_text,
+                    'url': fmt.get('url'),
+                    'display_name': f"{quality} MP4 - {size_text}"
                 })
             
-            # Sort formats by quality (highest first)
-            video_info['formats'].sort(key=lambda x: x['height'], reverse=True)
+            # Sort by quality (higher first)
+            formats.sort(key=lambda x: x['filesize'] if x['filesize'] else 0, reverse=True)
             
-            # If we don't have many formats, add some common ones
-            if len(video_info['formats']) < 3:
-                # Add some standard format options
-                standard_formats = [
-                    {'format_id': 'best[height<=1080]', 'quality': '1080p', 'size': 'Best available', 'height': 1080, 'width': 1920},
-                    {'format_id': 'best[height<=720]', 'quality': '720p', 'size': 'Good quality', 'height': 720, 'width': 1280},
-                    {'format_id': 'best[height<=480]', 'quality': '480p', 'size': 'Medium quality', 'height': 480, 'width': 854},
-                    {'format_id': 'best[height<=360]', 'quality': '360p', 'size': 'Standard quality', 'height': 360, 'width': 640},
-                    {'format_id': 'worst', 'quality': 'Lowest', 'size': 'Smallest size', 'height': 240, 'width': 426}
-                ]
-                
-                # Add formats that don't exist yet
-                existing_qualities = {f['quality'] for f in video_info['formats']}
-                for std_fmt in standard_formats:
-                    if std_fmt['quality'] not in existing_qualities:
-                        video_info['formats'].append(std_fmt)
-                
-                # Re-sort by quality
-                video_info['formats'].sort(key=lambda x: x['height'], reverse=True)
-            
-            return video_info
+            return {
+                'id': info.get('id'),
+                'title': info.get('title', 'Unknown'),
+                'duration': info.get('duration', 0),
+                'thumbnail': info.get('thumbnail', ''),
+                'uploader': info.get('uploader', 'Unknown'),
+                'view_count': info.get('view_count', 0),
+                'formats': formats[:8],  # Limit to top 8 MP4 formats
+                'original_url': url,
+                'extracted_at': time.time()
+            }
             
     except Exception as e:
-        logger.error(f"Error extracting video info: {str(e)}")
+        print(f"Error extracting video info: {e}")
         return None
 
-def get_download_url(video_url, format_id):
-    """Get fresh download URL for a specific format"""
+def get_fresh_download_url(url, format_id):
+    """Get a fresh download URL like Y2mate does"""
     try:
+        print(f"Getting fresh download URL for format: {format_id}")
+        
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
             'format': format_id,
+            'ignoreerrors': True,
+            'no_playlist': True,
             'extractor_args': {
                 'youtube': {
                     'player_client': ['web', 'android', 'ios'],
-                    'skip': ['dash', 'hls']
+                    'player_skip': ['hls', 'dash']
                 }
             }
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(video_url, download=False)
+            info = ydl.extract_info(url, download=False)
             
-            # For format selectors like 'best[height<=720]', get the selected format
-            if 'requested_formats' in info and info['requested_formats']:
-                # Multiple formats selected (video + audio)
-                for fmt in info['requested_formats']:
-                    if fmt.get('url'):
-                        return fmt.get('url')
+            if not info:
+                print("No video info extracted")
+                return None
             
-            # Single format selected
-            if 'url' in info:
-                return info['url']
-            
-            # Fallback: try to find by format_id for simple IDs like '18'
+            # Find the requested format
             for fmt in info.get('formats', []):
                 if fmt.get('format_id') == format_id:
-                    return fmt.get('url')
+                    download_url = fmt.get('url')
+                    if not download_url:
+                        print(f"No URL found for format {format_id}")
+                        continue
+                    
+                    # Test if URL is accessible
+                    try:
+                        test_response = requests.head(download_url, timeout=10)
+                        if test_response.status_code != 200:
+                            print(f"URL not accessible: {test_response.status_code}")
+                            continue
+                    except:
+                        print(f"URL test failed for format {format_id}")
+                        continue
+                    
+                    result = {
+                        'url': download_url,
+                        'filename': f"{info.get('title', 'download')}.{fmt.get('ext', 'mp4')}",
+                        'filesize': fmt.get('filesize', 0),
+                        'ext': fmt.get('ext', 'mp4')
+                    }
+                    
+                    print(f"Found working URL for {format_id}: {len(download_url)} chars")
+                    return result
             
+            print(f"Format {format_id} not found in available formats")
             return None
             
     except Exception as e:
-        logger.error(f"Error getting download URL: {str(e)}")
+        print(f"Error getting fresh download URL: {e}")
         return None
 
 @app.route('/')
@@ -824,28 +841,27 @@ def index():
     return render_template('index.html')
 
 @app.route('/extract', methods=['POST'])
-def extract():
-    """Extract video information"""
+def extract_video():
+    """Extract video information like Y2mate's first step"""
     try:
         data = request.get_json()
         url = data.get('url', '').strip()
         
         if not url:
-            return jsonify({'error': 'URL is required'}), 400
-            
-        # Basic URL validation
-        if not ('youtube.com' in url or 'youtu.be' in url):
-            return jsonify({'error': 'Please enter a valid YouTube URL'}), 400
-            
-        # Extract video information
+            return jsonify({'error': 'Please provide a YouTube URL'}), 400
+        
+        if not is_valid_youtube_url(url):
+            return jsonify({'error': 'Please provide a valid YouTube URL'}), 400
+        
+        # Extract video info
         video_info = extract_video_info(url)
         
         if not video_info:
-            return jsonify({'error': 'Could not extract video information'}), 500
-            
-        # Add extraction timestamp and original URL
-        video_info['original_url'] = url
-        video_info['extracted_at'] = time.time()
+            return jsonify({'error': 'Failed to extract video information'}), 400
+        
+        # Cache the video info
+        video_id = video_info['id']
+        video_cache[video_id] = video_info
         
         return jsonify({
             'success': True,
@@ -853,28 +869,30 @@ def extract():
         })
         
     except Exception as e:
-        logger.error(f"Error in extract endpoint: {str(e)}")
-        return jsonify({'error': 'Server error occurred'}), 500
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
 
 @app.route('/download/<video_id>/<format_id>')
-def download(video_id, format_id):
-    """Get direct download URL and redirect"""
+def download_video(video_id, format_id):
+    """Redirect to direct video URL for user to download"""
     try:
-        # Reconstruct YouTube URL
-        video_url = f"https://www.youtube.com/watch?v={video_id}"
+        # Get cached video info
+        if video_id not in video_cache:
+            return jsonify({'error': 'Video not found'}), 404
+        
+        video_info = video_cache[video_id]
         
         # Get fresh download URL
-        download_url = get_download_url(video_url, format_id)
+        download_info = get_fresh_download_url(video_info['original_url'], format_id)
         
-        if not download_url:
-            return jsonify({'error': 'Could not get download URL'}), 500
-            
-        # Redirect to the direct YouTube URL
-        return redirect(download_url)
+        if not download_info:
+            return jsonify({'error': 'Failed to get download URL'}), 400
+        
+        # Simply redirect to the video URL - it will open in new tab
+        return redirect(download_info['url'])
         
     except Exception as e:
-        logger.error(f"Error in download endpoint: {str(e)}")
-        return jsonify({'error': 'Server error occurred'}), 500
+        print(f"Download error: {e}")
+        return jsonify({'error': f'Download failed: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001) 
