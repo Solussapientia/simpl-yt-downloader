@@ -367,14 +367,17 @@ def index():
 def download_video():
     data = request.get_json()
     url = data.get('url', '').strip()
-    quality = data.get('quality', 'best')
-    format_type = data.get('format', 'mp4')  # 'mp4' or 'mp3'
+    format_id = data.get('format_id', 'best')  # Use exact format ID from get_video_info
+    format_type = data.get('format_type', 'video')  # 'video' or 'audio'
     
     if not url:
         return jsonify({'error': 'Please provide a YouTube URL'}), 400
     
     if not is_valid_youtube_url(url):
         return jsonify({'error': 'Please provide a valid YouTube URL'}), 400
+    
+    if not format_id:
+        return jsonify({'error': 'Please provide a format ID'}), 400
     
     # Generate unique download ID
     download_id = str(int(time.time() * 1000))
@@ -383,31 +386,6 @@ def download_video():
     downloads_dir = 'downloads'
     if not os.path.exists(downloads_dir):
         os.makedirs(downloads_dir)
-    
-    # Configure format selector - COMPREHENSIVE with FFmpeg support
-    if format_type == 'mp3':
-        # For MP3, extract best audio quality
-        format_selector = 'bestaudio/best'
-    else:
-        # For MP4, use quality-based selectors with good fallbacks
-        quality_lower = quality.lower()
-        
-        if quality == 'best':
-            format_selector = 'best[height<=1080]/best'
-        elif '2160' in quality_lower or '4k' in quality_lower:
-            format_selector = 'best[height>=2160]/best[height>=1080]/best'
-        elif '1440' in quality_lower:
-            format_selector = 'best[height>=1440]/best[height>=1080]/best'
-        elif '1080' in quality_lower:
-            format_selector = 'best[height>=1080]/best[height>=720]/best'
-        elif '720' in quality_lower:
-            format_selector = 'best[height>=720]/best[height>=480]/best'
-        elif '480' in quality_lower:
-            format_selector = 'best[height>=480]/best[height>=360]/best'
-        elif '360' in quality_lower:
-            format_selector = 'best[height>=360]/worst'
-        else:
-            format_selector = 'best[height<=720]/best'
     
     # Initialize progress
     download_progress[download_id] = {
@@ -418,9 +396,9 @@ def download_video():
         'eta': 0
     }
     
-    # Robust yt-dlp configuration with ffmpeg fallback
+    # Configure yt-dlp to use exact format ID
     ydl_opts = {
-        'format': format_selector,
+        'format': format_id,  # Use exact format ID - no guessing!
         'outtmpl': os.path.join(downloads_dir, '%(title)s.%(ext)s'),
         'no_warnings': True,
         'overwrites': True,
@@ -431,16 +409,12 @@ def download_video():
         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
     }
     
-    # NEVER use merge_output_format to avoid ffmpeg requirement
-    # ydl_opts['merge_output_format'] = 'mp4'  # Disabled to prevent merging
-    
     # Debug output
-    print(f"DEBUG: Quality selected: {quality}")
-    print(f"DEBUG: Format selector: {format_selector}")
+    print(f"DEBUG: Format ID: {format_id}")
     print(f"DEBUG: Format type: {format_type}")
     
-    # Add audio extraction options for MP3 - NOW ENABLED WITH FFMPEG
-    if format_type == 'mp3':
+    # Add MP3 conversion if requested
+    if format_type == 'audio':
         ydl_opts.update({
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
@@ -527,7 +501,7 @@ def get_video_info():
         return jsonify({'error': 'Please provide a valid YouTube URL'}), 400
     
     try:
-        # Simplified yt-dlp configuration to avoid the 'bool' object is not iterable error
+        # Simple yt-dlp configuration to get video info and formats
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
@@ -539,18 +513,13 @@ def get_video_info():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             
-            # Validate that we got proper video info
             if not info:
                 return jsonify({'error': 'Failed to extract video information'}), 500
             
-            # Extract available formats with proper type checking
-            formats = []
-            seen_qualities = set()
-            
-            # Get formats from info
+            # Get all available formats
             raw_formats = info.get('formats', [])
-            if not isinstance(raw_formats, list):
-                raw_formats = []
+            video_formats = []
+            audio_formats = []
             
             # Process each format
             for f in raw_formats:
@@ -559,68 +528,76 @@ def get_video_info():
                 
                 format_id = f.get('format_id', '')
                 height = f.get('height')
-                width = f.get('width')
                 vcodec = f.get('vcodec', '')
                 acodec = f.get('acodec', '')
+                ext = f.get('ext', '')
+                filesize = f.get('filesize')
                 
-                # Skip if no format ID
                 if not format_id:
                     continue
                 
-                # Skip audio-only formats for video download options
-                if vcodec == 'none' or not height:
-                    continue
-                
-                # Create quality label based on height
-                if height:
-                    if height >= 2160:
-                        quality_label = "4K (2160p)"
-                        sort_key = 2160
-                    elif height >= 1440:
-                        quality_label = "1440p"
-                        sort_key = 1440
-                    elif height >= 1080:
-                        quality_label = "1080p"
-                        sort_key = 1080
-                    elif height >= 720:
-                        quality_label = "720p"
-                        sort_key = 720
-                    elif height >= 480:
-                        quality_label = "480p"
-                        sort_key = 480
-                    elif height >= 360:
-                        quality_label = "360p"
-                        sort_key = 360
-                    elif height >= 240:
-                        quality_label = "240p"
-                        sort_key = 240
-                    elif height >= 144:
-                        quality_label = "144p"
-                        sort_key = 144
-                    else:
-                        continue  # Skip very low quality
+                # Video formats (has video and height)
+                if vcodec and vcodec != 'none' and height:
+                    quality_label = f"{height}p"
+                    if ext:
+                        quality_label += f" ({ext.upper()})"
                     
-                    # Check if we already have this quality
-                    if quality_label in seen_qualities:
-                        continue
+                    # Add file size if available
+                    if filesize:
+                        size_mb = filesize / (1024 * 1024)
+                        quality_label += f" - {size_mb:.1f}MB"
                     
-                    seen_qualities.add(quality_label)
-                    
-                    formats.append({
+                    video_formats.append({
                         'format_id': format_id,
-                        'format_note': quality_label,
+                        'display_name': quality_label,
                         'height': height,
-                        'sort_key': sort_key
+                        'ext': ext,
+                        'has_audio': acodec and acodec != 'none'
+                    })
+                
+                # Audio formats (audio-only)
+                elif vcodec == 'none' and acodec and acodec != 'none':
+                    quality_label = f"Audio Only"
+                    if ext:
+                        quality_label += f" ({ext.upper()})"
+                    if f.get('abr'):  # audio bitrate
+                        quality_label += f" - {f.get('abr')}kbps"
+                    
+                    if filesize:
+                        size_mb = filesize / (1024 * 1024)
+                        quality_label += f" - {size_mb:.1f}MB"
+                    
+                    audio_formats.append({
+                        'format_id': format_id,
+                        'display_name': quality_label,
+                        'ext': ext,
+                        'abr': f.get('abr', 0)
                     })
             
-            # Sort formats by quality (highest first)
-            formats.sort(key=lambda x: x['sort_key'], reverse=True)
+            # Sort video formats by quality (highest first)
+            video_formats.sort(key=lambda x: x['height'], reverse=True)
             
-            # If no formats found, add fallback options
-            if not formats:
-                formats = [
-                    {'format_id': 'best', 'format_note': 'Best Available', 'height': 1080, 'sort_key': 1080},
-                    {'format_id': 'worst', 'format_note': 'Lowest Quality', 'height': 360, 'sort_key': 360}
+            # Sort audio formats by bitrate (highest first)
+            audio_formats.sort(key=lambda x: x['abr'], reverse=True)
+            
+            # Remove duplicate video qualities (keep highest quality for each resolution)
+            seen_heights = set()
+            unique_video_formats = []
+            for fmt in video_formats:
+                if fmt['height'] not in seen_heights:
+                    unique_video_formats.append(fmt)
+                    seen_heights.add(fmt['height'])
+            
+            # Add fallback formats if nothing found
+            if not unique_video_formats:
+                unique_video_formats = [
+                    {'format_id': 'best', 'display_name': 'Best Available', 'height': 1080, 'ext': 'mp4', 'has_audio': True},
+                    {'format_id': 'worst', 'display_name': 'Lowest Quality', 'height': 360, 'ext': 'mp4', 'has_audio': True}
+                ]
+            
+            if not audio_formats:
+                audio_formats = [
+                    {'format_id': 'bestaudio', 'display_name': 'Best Audio (M4A)', 'ext': 'm4a', 'abr': 128}
                 ]
             
             return jsonify({
@@ -629,10 +606,12 @@ def get_video_info():
                 'duration': info.get('duration', 0),
                 'thumbnail': info.get('thumbnail', ''),
                 'view_count': info.get('view_count', 0),
-                'formats': formats
+                'video_formats': unique_video_formats,
+                'audio_formats': audio_formats
             })
             
     except Exception as e:
+        print(f"Error in get_video_info: {e}")
         return jsonify({'error': f'Failed to get video information: {str(e)}'}), 500
 
 @app.route('/download_file/<download_id>')
