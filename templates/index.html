@@ -16,10 +16,10 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://simplytdownloader.com/">
+    <meta property="og:url" content="https://web-production-24f3e.up.railway.app/">
     <meta property="og:title" content="Simpl YT Downloader - Free YouTube Video & MP3 Downloader">
     <meta property="og:description" content="Download YouTube videos in HD quality (360p, 720p, 1080p, 4K) and extract MP3 audio for free. No software installation required. Fast, secure, and works on all devices.">
-    <meta property="og:image" content="https://simplytdownloader.com/static/images/og-image.jpg">
+    <meta property="og:image" content="https://web-production-24f3e.up.railway.app/static/images/og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="Simpl YT Downloader">
@@ -27,16 +27,16 @@
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://simplytdownloader.com/">
+    <meta property="twitter:url" content="https://web-production-24f3e.up.railway.app/">
     <meta property="twitter:title" content="Simpl YT Downloader - Free YouTube Video & MP3 Downloader">
     <meta property="twitter:description" content="Download YouTube videos in HD quality (360p, 720p, 1080p, 4K) and extract MP3 audio for free. No software installation required. Fast, secure, and works on all devices.">
-    <meta property="twitter:image" content="https://simplytdownloader.com/static/images/twitter-image.jpg">
+    <meta property="twitter:image" content="https://web-production-24f3e.up.railway.app/static/images/twitter-image.jpg">
     <meta property="twitter:creator" content="@SimplYT">
     <meta property="twitter:site" content="@SimplYT">
     
     <!-- Additional SEO Meta Tags -->
-    <meta name="theme-color" content="#FF0000">
-    <meta name="msapplication-TileColor" content="#FF0000">
+    <meta name="theme-color" content="#0070f3">
+    <meta name="msapplication-TileColor" content="#0070f3">
     <meta name="application-name" content="Simpl YT Downloader">
     <meta name="apple-mobile-web-app-title" content="Simpl YT">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -45,30 +45,7 @@
     <meta name="format-detection" content="telephone=no">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://simplytdownloader.com/">
-    
-    <!-- Hreflang Tags for International SEO -->
-    <link rel="alternate" hreflang="en" href="https://simplytdownloader.com/">
-    <link rel="alternate" hreflang="es" href="https://simplytdownloader.com/es/">
-    <link rel="alternate" hreflang="fr" href="https://simplytdownloader.com/fr/">
-    <link rel="alternate" hreflang="de" href="https://simplytdownloader.com/de/">
-    <link rel="alternate" hreflang="pt" href="https://simplytdownloader.com/pt/">
-    <link rel="alternate" hreflang="ja" href="https://simplytdownloader.com/ja/">
-    <link rel="alternate" hreflang="ko" href="https://simplytdownloader.com/ko/">
-    <link rel="alternate" hreflang="zh" href="https://simplytdownloader.com/zh/">
-    <link rel="alternate" hreflang="ru" href="https://simplytdownloader.com/ru/">
-    <link rel="alternate" hreflang="ar" href="https://simplytdownloader.com/ar/">
-    <link rel="alternate" hreflang="hi" href="https://simplytdownloader.com/hi/">
-    <link rel="alternate" hreflang="x-default" href="https://simplytdownloader.com/">
-    
-    <!-- Google Search Console Verification (Replace with actual verification code) -->
-    <meta name="google-site-verification" content="REPLACE_WITH_ACTUAL_VERIFICATION_CODE">
-    
-    <!-- Bing Webmaster Tools Verification -->
-    <meta name="msvalidate.01" content="REPLACE_WITH_ACTUAL_VERIFICATION_CODE">
-    
-    <!-- Yandex Verification -->
-    <meta name="yandex-verification" content="REPLACE_WITH_ACTUAL_VERIFICATION_CODE">
+    <link rel="canonical" href="https://web-production-24f3e.up.railway.app/">
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
@@ -78,6 +55,178 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
     <link rel="manifest" href="/static/manifest.json">
     
+    <!-- NextUI CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/@nextui-org/theme@2.2.9/dist/components/[button,card,input,modal,spinner,progress,divider,chip,avatar,user,dropdown,popover,tooltip,skeleton,tabs,table,pagination,checkbox,radio,switch,select,textarea,autocomplete,listbox,scroll-shadow,spacer,link,image,code,snippet,kbd,badge,circular-progress,slider,date-picker,date-input,calendar,time-input,breadcrumbs,accordion,navbar,menu].min.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configure Tailwind with NextUI -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#172554'
+                        },
+                        danger: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            200: '#fecaca',
+                            300: '#fca5a5',
+                            400: '#f87171',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                            950: '#450a0a'
+                        },
+                        success: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            950: '#052e16'
+                        },
+                        warning: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                            950: '#451a03'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS for glass morphism and animations -->
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        .glass-card-hover:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .animated-gradient {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+            to { box-shadow: 0 0 30px rgba(102, 126, 234, 0.8); }
+        }
+        
+        .step-indicator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .download-progress {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .quality-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .quality-hd { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+        .quality-sd { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .quality-audio { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        
+        .card-shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+    
     <!-- Structured Data - JSON-LD -->
     <script type="application/ld+json">
     {
@@ -85,7 +234,7 @@
         "@type": "WebApplication",
         "name": "Simpl YT Downloader",
         "description": "Free YouTube video and MP3 downloader that supports HD quality downloads including 360p, 720p, 1080p, and 4K resolution. No software installation required.",
-        "url": "https://simplytdownloader.com/",
+        "url": "https://web-production-24f3e.up.railway.app/",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "All",
         "permissions": "No installation required",
@@ -107,1327 +256,488 @@
         "creator": {
             "@type": "Organization",
             "name": "Simpl YT",
-            "url": "https://simplytdownloader.com/"
+            "url": "https://web-production-24f3e.up.railway.app/"
         },
         "featureList": [
-            "Free YouTube video downloads",
-            "MP3 audio extraction",
-            "HD quality support up to 4K",
-            "No software installation required",
-            "Mobile device compatibility",
-            "Fast download speeds",
-            "Secure and private downloads"
+            "HD Video Downloads (360p, 720p, 1080p, 4K)",
+            "MP3 Audio Extraction",
+            "No Software Installation Required",
+            "Mobile and Desktop Compatible",
+            "Fast Download Speeds",
+            "Free to Use",
+            "No Registration Required",
+            "Multiple Format Support"
         ]
     }
-    </script>
-    
-    <!-- Additional Structured Data - FAQ -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Simpl YT free to use?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes, Simpl YT is completely free to use. You can download unlimited YouTube videos and audio files without any charges or subscriptions."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What video qualities are supported?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "We support all YouTube video qualities from 360p to 4K (2160p), including 480p, 720p, 1080p, and 1440p options."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Do I need to install software?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "No installation required! Simpl YT works directly in your web browser. Just paste the YouTube URL and download instantly."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I download audio only?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes! Use our Download MP3 feature to extract high-quality audio from any YouTube video in MP3 format."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is it legal to download YouTube videos?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Downloading YouTube videos is legal for personal use if you own the content or have permission from the creator. Always respect copyright laws and YouTube's Terms of Service."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How fast are the downloads?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Download speeds depend on your internet connection and the video size. Our optimized servers provide maximum possible speeds, typically downloading most videos in under 30 seconds."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Does Simpl YT work on mobile devices?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes! Simpl YT is fully optimized for mobile devices including smartphones and tablets. It works on iOS, Android, and all mobile browsers."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Are there any limitations?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "There are no artificial limitations on our free service. You can download unlimited videos. However, some very long videos or live streams may have processing limitations."
-                }
-            }
-        ]
-    }
-    </script>
-    
-    <!-- Additional Social Media Meta Tags -->
-    <meta property="og:locale:alternate" content="es_ES">
-    <meta property="og:locale:alternate" content="fr_FR">
-    <meta property="og:locale:alternate" content="de_DE">
-    <meta property="og:locale:alternate" content="pt_BR">
-    <meta property="og:locale:alternate" content="ja_JP">
-    <meta property="og:locale:alternate" content="ko_KR">
-    <meta property="og:locale:alternate" content="zh_CN">
-    <meta property="og:locale:alternate" content="ru_RU">
-    <meta property="og:locale:alternate" content="ar_AR">
-    <meta property="og:locale:alternate" content="hi_IN">
-    
-    <!-- Pinterest -->
-    <meta name="pinterest-rich-pin" content="true">
-    <meta property="og:see_also" content="https://www.pinterest.com/simplyt/">
-    
-    <!-- LinkedIn -->
-    <meta property="og:article:author" content="https://www.linkedin.com/company/simplyt/">
-    
-    <!-- Additional Twitter Meta -->
-    <meta name="twitter:app:name:iphone" content="Simpl YT">
-    <meta name="twitter:app:name:ipad" content="Simpl YT">
-    <meta name="twitter:app:name:googleplay" content="Simpl YT">
-    <meta name="twitter:dnt" content="on">
-    
-    <!-- WhatsApp -->
-    <meta property="og:image:alt" content="Simpl YT - Free YouTube Video and MP3 Downloader">
-    <meta property="og:image:secure_url" content="https://simplytdownloader.com/static/images/og-image.jpg">
-    
-    <!-- Telegram -->
-    <meta property="tg:site_verification" content="SimplYT_Official">
-    
-    <!-- Organization Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Simpl YT",
-        "alternateName": "Simpl YT Downloader",
-        "url": "https://simplytdownloader.com/",
-        "logo": "https://simplytdownloader.com/static/images/logo.png",
-        "description": "Free YouTube video and MP3 downloader with HD quality support",
-        "foundingDate": "2024",
-        "founders": [
-            {
-                "@type": "Person",
-                "name": "Simpl YT Team"
-            }
-        ],
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "contactType": "customer service",
-            "email": "hello@simplytdownloader.com",
-            "availableLanguage": ["English", "Spanish", "French", "German", "Portuguese", "Japanese", "Korean", "Chinese", "Russian", "Arabic", "Hindi"]
-        },
-        "sameAs": [
-            "https://twitter.com/SimplYT",
-            "https://www.facebook.com/SimplYT",
-            "https://www.instagram.com/SimplYT",
-            "https://www.youtube.com/SimplYT",
-            "https://www.linkedin.com/company/simplyt",
-            "https://www.pinterest.com/simplyt",
-            "https://t.me/SimplYT"
-        ],
-        "service": {
-            "@type": "Service",
-            "name": "YouTube Video Downloading",
-            "description": "Free YouTube video and MP3 downloading service",
-            "provider": {
-                "@type": "Organization",
-                "name": "Simpl YT"
-            },
-            "areaServed": "Worldwide",
-            "hasOfferCatalog": {
-                "@type": "OfferCatalog",
-                "name": "YouTube Download Services",
-                "itemListElement": [
-                    {
-                        "@type": "Offer",
-                        "itemOffered": {
-                            "@type": "Service",
-                            "name": "YouTube Video Download",
-                            "description": "Download YouTube videos in various qualities"
-                        },
-                        "price": "0",
-                        "priceCurrency": "USD"
-                    },
-                    {
-                        "@type": "Offer",
-                        "itemOffered": {
-                            "@type": "Service",
-                            "name": "YouTube MP3 Conversion",
-                            "description": "Convert YouTube videos to MP3 audio format"
-                        },
-                        "price": "0",
-                        "priceCurrency": "USD"
-                    }
-                ]
-            }
-        }
-    }
-    </script>
-    
-    <!-- Breadcrumb Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://simplytdownloader.com/"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "YouTube Downloader",
-                "item": "https://simplytdownloader.com/#youtube-downloader"
-            }
-        ]
-    }
-    </script>
-    
-    <!-- Software Application Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Simpl YT Downloader",
-        "operatingSystem": "Web Browser",
-        "applicationCategory": "MultimediaApplication",
-        "applicationSubCategory": "Video Downloader",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.8",
-            "ratingCount": "15847"
-        },
-        "downloadUrl": "https://simplytdownloader.com/",
-        "installUrl": "https://simplytdownloader.com/",
-        "screenshot": "https://simplytdownloader.com/static/images/screenshot.png",
-        "softwareVersion": "1.0",
-        "datePublished": "2024-01-15",
-        "dateModified": "2024-01-15",
-        "author": {
-            "@type": "Organization",
-            "name": "Simpl YT"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "Simpl YT"
-        },
-        "softwareRequirements": "Web Browser with JavaScript enabled",
-        "memoryRequirements": "Minimal",
-        "storageRequirements": "No local storage required",
-        "permissions": "No special permissions required",
-        "featureList": [
-            "YouTube video downloading",
-            "MP3 audio extraction",
-            "Multiple quality options",
-            "No software installation",
-            "Mobile compatibility",
-            "Fast processing",
-            "Secure downloads",
-            "No registration required"
-        ]
-    }
-    </script>
-    
-    <!-- Website Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Simpl YT Downloader",
-        "alternateName": "Simpl YT",
-        "url": "https://simplytdownloader.com/",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://simplytdownloader.com/?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "Simpl YT"
-        },
-        "copyrightYear": "2024",
-        "inLanguage": "en-US",
-        "isAccessibleForFree": true,
-        "keywords": "youtube downloader, video downloader, mp3 converter, free download, online tool",
-        "mainContentOfPage": {
-            "@type": "WebPageElement",
-            "description": "YouTube video and MP3 downloader interface"
-        }
-    }
-    </script>
-    
-    <!-- Local Business Schema -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "Simpl YT Downloader",
-        "description": "Free YouTube video and MP3 downloader service available worldwide",
-        "url": "https://simplytdownloader.com/",
-        "telephone": "Contact via website",
-        "email": "hello@simplytdownloader.com",
-        "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Global",
-            "addressCountry": "Worldwide"
-        },
-        "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "0",
-            "longitude": "0"
-        },
-        "openingHours": "Mo-Su 00:00-23:59",
-        "priceRange": "Free",
-        "paymentAccepted": "None required",
-        "currenciesAccepted": "None required",
-        "areaServed": {
-            "@type": "Place",
-            "name": "Worldwide"
-        },
-        "serviceArea": {
-            "@type": "Place",
-            "name": "Global"
-        },
-        "hasOfferCatalog": {
-            "@type": "OfferCatalog",
-            "name": "YouTube Download Services",
-            "itemListElement": [
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Service",
-                        "name": "YouTube Video Download",
-                        "description": "Download YouTube videos in multiple qualities"
-                    },
-                    "price": "0",
-                    "priceCurrency": "USD",
-                    "availability": "https://schema.org/InStock",
-                    "areaServed": "Worldwide"
-                },
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Service",
-                        "name": "YouTube to MP3 Conversion",
-                        "description": "Convert YouTube videos to MP3 audio format"
-                    },
-                    "price": "0",
-                    "priceCurrency": "USD",
-                    "availability": "https://schema.org/InStock",
-                    "areaServed": "Worldwide"
-                }
-            ]
-        },
-        "review": {
-            "@type": "Review",
-            "reviewRating": {
-                "@type": "Rating",
-                "ratingValue": "4.8",
-                "bestRating": "5",
-                "worstRating": "1"
-            },
-            "author": {
-                "@type": "Person",
-                "name": "User Community"
-            },
-            "reviewBody": "Excellent free YouTube downloader with fast speeds and high quality downloads."
-        },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.8",
-            "reviewCount": "15847",
-            "bestRating": "5",
-            "worstRating": "1"
-        }
-    }
-    </script>
-    
-    <!-- Service Schema -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "YouTube Video Download Service",
-        "description": "Free online YouTube video and MP3 downloader with support for multiple qualities and formats",
-        "provider": {
-            "@type": "Organization",
-            "name": "Simpl YT",
-            "url": "https://simplytdownloader.com/"
-        },
-        "areaServed": "Worldwide",
-        "availableChannel": {
-            "@type": "ServiceChannel",
-            "serviceType": "Online Service",
-            "serviceUrl": "https://simplytdownloader.com/"
-        },
-        "serviceType": "Video Download Service",
-        "category": "Multimedia Software",
-        "hasOfferCatalog": {
-            "@type": "OfferCatalog",
-            "name": "Video Download Options",
-            "itemListElement": [
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Service",
-                        "name": "360p Video Download"
-                    },
-                    "price": "0",
-                    "priceCurrency": "USD"
-                },
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Service",
-                        "name": "720p HD Video Download"
-                    },
-                    "price": "0",
-                    "priceCurrency": "USD"
-                },
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Service",
-                        "name": "1080p Full HD Video Download"
-                    },
-                    "price": "0",
-                    "priceCurrency": "USD"
-                },
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Service",
-                        "name": "4K Ultra HD Video Download"
-                    },
-                    "price": "0",
-                    "priceCurrency": "USD"
-                },
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Service",
-                        "name": "MP3 Audio Extraction"
-                    },
-                    "price": "0",
-                    "priceCurrency": "USD"
-                }
-            ]
-        },
-        "termsOfService": "https://simplytdownloader.com/terms",
-        "privacyPolicy": "https://simplytdownloader.com/privacy"
-    }
-    </script>
-    
-    <!-- HowTo Schema for Video Download Process -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "HowTo",
-        "name": "How to Download YouTube Videos with Simpl YT",
-        "description": "Step-by-step guide to download YouTube videos and MP3 audio files using Simpl YT downloader",
-        "image": "https://simplytdownloader.com/static/images/how-to-download.jpg",
-        "totalTime": "PT1M",
-        "estimatedCost": {
-            "@type": "MonetaryAmount",
-            "currency": "USD",
-            "value": "0"
-        },
-        "supply": [
-            {
-                "@type": "HowToSupply",
-                "name": "Internet Connection"
-            },
-            {
-                "@type": "HowToSupply",
-                "name": "Web Browser"
-            },
-            {
-                "@type": "HowToSupply",
-                "name": "YouTube Video URL"
-            }
-        ],
-        "step": [
-            {
-                "@type": "HowToStep",
-                "name": "Copy YouTube URL",
-                "text": "Copy the URL of the YouTube video you want to download from your browser's address bar",
-                "image": "https://simplytdownloader.com/static/images/step1.jpg"
-            },
-            {
-                "@type": "HowToStep",
-                "name": "Paste URL",
-                "text": "Paste the YouTube URL into the input field on Simpl YT homepage",
-                "image": "https://simplytdownloader.com/static/images/step2.jpg"
-            },
-            {
-                "@type": "HowToStep",
-                "name": "Choose Format",
-                "text": "Click 'Download Video' for video files or 'Download MP3' for audio only",
-                "image": "https://simplytdownloader.com/static/images/step3.jpg"
-            },
-            {
-                "@type": "HowToStep",
-                "name": "Select Quality",
-                "text": "Choose your preferred video quality from the available options (360p to 4K)",
-                "image": "https://simplytdownloader.com/static/images/step4.jpg"
-            },
-            {
-                "@type": "HowToStep",
-                "name": "Download File",
-                "text": "Click the download button to save the file to your device",
-                "image": "https://simplytdownloader.com/static/images/step5.jpg"
-            }
-        ]
-    }
-    </script>
-    
-    <!-- VideoObject Schema for Tutorial Content -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "VideoObject",
-        "name": "How to Use Simpl YT - YouTube Downloader Tutorial",
-        "description": "Learn how to download YouTube videos and MP3 audio files using Simpl YT downloader in this comprehensive tutorial",
-        "thumbnailUrl": "https://simplytdownloader.com/static/images/tutorial-thumbnail.jpg",
-        "uploadDate": "2024-01-15T08:00:00+08:00",
-        "duration": "PT2M30S",
-        "contentUrl": "https://simplytdownloader.com/static/videos/tutorial.mp4",
-        "embedUrl": "https://simplytdownloader.com/tutorial-video",
-        "interactionStatistic": {
-            "@type": "InteractionCounter",
-            "interactionType": "https://schema.org/WatchAction",
-            "userInteractionCount": "12500"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "Simpl YT",
-            "logo": {
-                "@type": "ImageObject",
-                "url": "https://simplytdownloader.com/static/images/logo.png"
-            }
-        }
-    }
-    </script>
-    
-    <!-- TechArticle Schema for Technical Documentation -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "TechArticle",
-        "headline": "Complete Guide to YouTube Video Downloading Technology",
-        "description": "Technical documentation about YouTube video downloading, supported formats, quality options, and best practices",
-        "author": {
-            "@type": "Organization",
-            "name": "Simpl YT Technical Team"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "Simpl YT",
-            "logo": {
-                "@type": "ImageObject",
-                "url": "https://simplytdownloader.com/static/images/logo.png"
-            }
-        },
-        "datePublished": "2024-01-15T08:00:00+08:00",
-        "dateModified": "2024-01-15T08:00:00+08:00",
-        "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "https://simplytdownloader.com/"
-        },
-        "dependencies": "Web Browser, Internet Connection",
-        "proficiencyLevel": "Beginner",
-        "about": {
-            "@type": "Thing",
-            "name": "YouTube Video Downloading"
-        }
-    }
-    </script>
-    
-    <!-- Review Schema -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Review",
-        "itemReviewed": {
-            "@type": "WebApplication",
-            "name": "Simpl YT Downloader"
-        },
-        "reviewRating": {
-            "@type": "Rating",
-            "ratingValue": "5",
-            "bestRating": "5"
-        },
-        "author": {
-            "@type": "Person",
-            "name": "Sarah Johnson"
-        },
-        "reviewBody": "Excellent YouTube downloader! Fast, free, and works perfectly on all devices. No ads or annoying popups. Highly recommended!"
-    }
-    </script>
-    
-    <!-- Speed Performance Schema -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "QuantitativeValue",
-        "name": "Download Speed",
-        "value": "50",
-        "unitText": "MB/s",
-        "description": "Maximum download speed for YouTube videos"
-    }
-    </script>
-    
-    <!-- Preconnect to external domains -->
-    <link rel="preconnect" href="https://www.youtube.com">
-    <link rel="preconnect" href="https://i.ytimg.com">
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
-    <link rel="dns-prefetch" href="https://www.youtube.com">
-    <link rel="dns-prefetch" href="https://i.ytimg.com">
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    
-    <!-- Resource Hints -->
-    <link rel="prefetch" href="https://simplytdownloader.com/about">
-    <link rel="prefetch" href="https://simplytdownloader.com/privacy">
-    <link rel="prefetch" href="https://simplytdownloader.com/terms">
-    
-    <!-- Google Analytics (Replace GA_MEASUREMENT_ID with your actual ID) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'GA_MEASUREMENT_ID');
-    </script>
-    
-    <!-- Google Tag Manager (Optional - Replace GTM-XXXXXXX with your actual ID) -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'youtube-red': '#FF0000',
-                        'youtube-dark': '#0F0F0F',
-                        'youtube-gray': '#1C1C1C',
-                    }
-                }
-            }
-        }
     </script>
 </head>
-<body class="bg-gray-900 min-h-screen">
-    <!-- Header -->
-    <header class="bg-gray-800 shadow-xl border-b border-gray-700">
-        <div class="max-w-4xl mx-auto px-4 py-6">
-            <!-- Main Title -->
-            <div class="text-center">
-                <h1 class="text-4xl font-bold text-white mb-2 tracking-tight">
-                    <span class="text-red-500">
-                        Simpl
-                    </span>
-                    <span class="text-gray-100">
-                        YT
-                    </span>
+<body class="dark min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white overflow-x-hidden">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 animated-gradient opacity-20 pointer-events-none"></div>
+    
+    <!-- Main Container -->
+    <div class="relative z-10 min-h-screen">
+        <!-- Header -->
+        <header class="container mx-auto px-4 pt-12 pb-8 text-center">
+            <div class="floating">
+                <h1 class="text-6xl md:text-8xl font-bold mb-4 gradient-text">
+                    Simpl YT
                 </h1>
-                <p class="text-lg text-gray-300">Fast & Easy YouTube Downloader</p>
-            </div>
-        </div>
-    </header>
-
-    <!-- Legal Notice -->
-    <div class="max-w-4xl mx-auto px-4 py-6">
-        <div class="bg-yellow-800 bg-opacity-20 rounded-lg p-6 mb-6">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-yellow-200 font-semibold mb-2">Important Legal Notice:</h3>
-                    <p class="text-yellow-200 text-sm">
-                        This tool is for educational purposes only. Please respect copyright laws and only download content you own or have permission to use. Users are responsible for complying with YouTube's Terms of Service and applicable copyright laws.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Interface -->
-    <main class="max-w-4xl mx-auto px-4 pb-8">
-        <div class="bg-gray-800 rounded-xl shadow-xl p-6 mb-6">
-            <!-- URL Input Section -->
-            <div class="mb-6">
-                <label for="youtube-url" class="block text-lg font-medium text-white mb-3">Enter YouTube URL</label>
-                <input 
-                    type="text" 
-                    id="youtube-url" 
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                >
-            </div>
-
-            <!-- Download Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4">
-                <button 
-                    id="download-btn" 
-                    class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
-                >
-                    <span id="btn-text">Download Video</span>
-                    <span id="btn-loading" class="hidden flex items-center">
-                        <svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Getting video info...
+                <p class="text-xl md:text-2xl text-gray-300 mb-6">
+                    Free YouTube Video & MP3 Downloader
+                </p>
+                <div class="flex justify-center space-x-4 text-sm text-gray-400">
+                    <span class="flex items-center">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        100% Safe
                     </span>
-                </button>
+                    <span class="flex items-center">
+                        <i class="fas fa-bolt mr-2"></i>
+                        Lightning Fast
+                    </span>
+                    <span class="flex items-center">
+                        <i class="fas fa-mobile-alt mr-2"></i>
+                        Mobile Friendly
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Download Section -->
+        <main class="container mx-auto px-4 max-w-4xl">
+            <!-- Download Card -->
+            <div class="glass-card glass-card-hover rounded-3xl p-8 mb-8 pulse-glow">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="step-indicator w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        1
+                    </div>
+                    <h2 class="text-2xl font-bold">Enter YouTube URL</h2>
+                </div>
                 
-                <button 
-                    id="download-mp3-btn" 
-                    class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
-                >
-                    <span id="btn-mp3-text">Download MP3</span>
-                    <span id="btn-mp3-loading" class="hidden flex items-center">
-                        <svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Getting video info...
-                    </span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Video Information Section -->
-        <div id="video-info" class="bg-gray-800 rounded-xl shadow-xl p-6 mb-6 hidden">
-            <h2 class="text-xl font-bold text-white mb-4">Video Information</h2>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <img 
-                        id="video-thumbnail" 
-                        src="" 
-                        alt="YouTube video thumbnail - Preview of the video you're downloading" 
-                        class="w-full rounded-lg shadow-md"
-                        loading="lazy"
-                    >
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <h3 id="video-title" class="text-lg font-semibold text-white mb-2"></h3>
-                        <p id="video-uploader" class="text-gray-400"></p>
-                        <p id="video-duration" class="text-gray-400"></p>
-                    </div>
-                    
-                    <!-- Quality Selection -->
-                    <div>
-                        <label for="quality-select" class="block text-sm font-medium text-gray-300 mb-2">Select Quality:</label>
-                        <select 
-                            id="quality-select" 
-                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                <div class="space-y-6">
+                    <div class="relative">
+                        <input 
+                            type="url" 
+                            id="url-input" 
+                            placeholder="Paste your YouTube URL here..."
+                            class="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                            autocomplete="off"
                         >
-                            <option value="mp4">MP4 (Default)</option>
-                        </select>
+                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                            <i class="fas fa-link text-xl"></i>
+                        </div>
                     </div>
                     
-                    <!-- Download Button -->
                     <button 
-                        id="start-download-btn" 
-                        class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+                        id="download-btn"
+                        class="w-full py-4 px-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/50"
                     >
-                        Start Download
+                        <i class="fas fa-download mr-3"></i>
+                        Get Download Options
                     </button>
                 </div>
             </div>
-        </div>
-
-        <!-- Download Progress Section -->
-        <div id="download-progress" class="bg-gray-800 rounded-xl shadow-xl p-6 mb-6 hidden">
-            <h2 class="text-xl font-bold text-white mb-6">Download Progress</h2>
             
-            <!-- Simplified Stats Grid -->
-            <div class="grid grid-cols-2 gap-6 max-w-md mx-auto">
-                <div class="bg-gray-700 rounded-lg p-6 text-center">
-                    <div class="text-sm text-gray-400 mb-2">Speed</div>
-                    <div id="download-speed" class="text-2xl font-bold text-white">--</div>
-                </div>
-                <div class="bg-gray-700 rounded-lg p-6 text-center">
-                    <div class="text-sm text-gray-400 mb-2">Status</div>
-                    <div id="download-status" class="text-2xl font-bold text-white">--</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Download Complete Section -->
-        <div id="download-complete" class="bg-gray-800 rounded-xl shadow-xl p-6 mb-6 hidden">
-            <div class="text-center">
-                <svg class="w-12 h-12 text-green-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <h2 class="text-xl font-bold text-white mb-2">Download Complete!</h2>
-                <p class="text-gray-400 mb-4">Your file is ready to download</p>
-                <button 
-                    id="final-download-btn" 
-                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
-                >
-                    Download File
-                </button>
-            </div>
-        </div>
-
-        <!-- Error Message Section -->
-        <div id="error-message" class="bg-red-800 bg-opacity-20 border border-red-600 rounded-xl p-6 mb-6 hidden">
-            <div class="flex items-center">
-                <svg class="h-5 w-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <div>
-                    <h3 class="text-lg font-medium text-red-400">Error</h3>
-                    <p id="error-text" class="text-red-300 mt-1"></p>
+            <!-- Loading State -->
+            <div id="loading" class="hidden text-center py-12">
+                <div class="glass-card rounded-3xl p-8 mb-6">
+                    <div class="flex flex-col items-center space-y-4">
+                        <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <h3 class="text-xl font-semibold">Analyzing Video...</h3>
+                        <p class="text-gray-400">Please wait while we process your request</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
-
-    <!-- SEO Content Sections -->
-    <div class="max-w-4xl mx-auto px-4 py-12">
+            
+            <!-- Error State -->
+            <div id="error-container" class="hidden mb-6">
+                <div class="glass-card rounded-3xl p-6 border-red-500/50 bg-red-500/10">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-red-300">Error</h3>
+                            <p id="error-message" class="text-red-200"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Success State -->
+            <div id="success-container" class="hidden mb-6">
+                <div class="glass-card rounded-3xl p-6 border-green-500/50 bg-green-500/10">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check-circle text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-green-300">Success</h3>
+                            <p id="success-message" class="text-green-200"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Video Info Display -->
+            <div id="video-info" class="hidden">
+                <div class="glass-card glass-card-hover rounded-3xl p-8 mb-8">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="step-indicator w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            2
+                        </div>
+                        <h2 class="text-2xl font-bold">Video Information</h2>
+                    </div>
+                    
+                    <div id="video-details" class="mb-6">
+                        <!-- Video details will be populated here -->
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="step-indicator w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            3
+                        </div>
+                        <h2 class="text-2xl font-bold">Download Options</h2>
+                    </div>
+                    
+                    <div id="download-options" class="grid gap-4">
+                        <!-- Download options will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
         
-        <!-- Main SEO Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Best Online YouTube Video Downloader</h2>
-            <div class="text-gray-300 text-lg leading-relaxed space-y-4">
-                <p>
-                    Simpl YT is a Free and Fast YouTube Downloader that allows you to convert and download YouTube videos in HD free of cost. Users can effortlessly convert YouTube videos in various resolutions such as 720p, 1080p, 2K, 4K, and up to 8K quality. All major browsers such as Chrome, Microsoft Edge, Safari, and Opera work seamlessly with Simpl YT on all devices, including Android, iOS, and Windows. You can quickly download an unlimited number of videos and audio without installing an application or software using YouTube Video Downloader.
-                </p>
-                <p>
-                    Are you searching for a top-notch YouTube Downloader? Look no further than Simpl YT! It provides a search functionality in which users can easily and quickly search for their favorite video and audio as they like it. Simpl YT allows you to choose multiple video and audio formats such as MP4, MP3, AVI, WEBM, WAV, M4V, FLV, 3GP, etc. You don't need to wait longer while the file is being converted because it provides a fast conversion speed. It does not require any additional registration. With our tools, you can enjoy your favorite content whenever and wherever you want.
-                </p>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Why Choose Simpl YT YouTube Downloader?</h2>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">🚀 Lightning Fast Downloads</h3>
-                    <p class="text-gray-300">Download YouTube videos at maximum speed with our optimized servers. No waiting, no delays - just instant downloads.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">🎯 Multiple Quality Options</h3>
-                    <p class="text-gray-300">Choose from 360p, 480p, 720p, 1080p, 1440p, and even 4K resolution. Get the perfect quality for your needs.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">🎵 Audio Extraction</h3>
-                    <p class="text-gray-300">Extract high-quality MP3 audio from any YouTube video. Perfect for music, podcasts, and audiobooks.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">💻 No Software Required</h3>
-                    <p class="text-gray-300">Works directly in your browser. No downloads, no installations, no registration required.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- How It Works Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">How to Download YouTube Videos</h2>
-            <div class="space-y-6">
-                <div class="flex items-start space-x-4">
-                    <div class="flex-shrink-0 w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white font-bold">1</div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Copy YouTube URL</h3>
-                        <p class="text-gray-300">Copy the URL of the YouTube video you want to download from your browser's address bar.</p>
+        <!-- SEO Content Sections -->
+        <div class="container mx-auto px-4 max-w-6xl mt-16 space-y-12">
+            <!-- How to Use Section -->
+            <section class="glass-card rounded-3xl p-8 hover-scale">
+                <h2 class="text-4xl font-bold mb-8 text-center gradient-text">
+                    How to Use YouTube Downloader
+                </h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 hover-scale">
+                            <i class="fas fa-copy text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-4">1. Copy YouTube URL</h3>
+                        <p class="text-gray-400 leading-relaxed">Copy the YouTube video URL from your browser's address bar</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6 hover-scale">
+                            <i class="fas fa-paste text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-4">2. Paste & Analyze</h3>
+                        <p class="text-gray-400 leading-relaxed">Paste the URL in our YouTube downloader and click analyze</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-gradient-to-br from-pink-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6 hover-scale">
+                            <i class="fas fa-download text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-4">3. Download</h3>
+                        <p class="text-gray-400 leading-relaxed">Choose your preferred quality and download the video instantly</p>
                     </div>
                 </div>
-                <div class="flex items-start space-x-4">
-                    <div class="flex-shrink-0 w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white font-bold">2</div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Paste and Analyze</h3>
-                        <p class="text-gray-300">Paste the URL into our input field and click "Download Video" or "Download MP3" to analyze the video.</p>
-                    </div>
-                </div>
-                <div class="flex items-start space-x-4">
-                    <div class="flex-shrink-0 w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white font-bold">3</div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Choose Quality & Download</h3>
-                        <p class="text-gray-300">Select your preferred quality and format, then click download. Your file will be ready in seconds!</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Supported Formats Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Supported Video & Audio Formats</h2>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-4">📹 Video Formats</h3>
-                    <ul class="text-gray-300 space-y-2">
-                        <li>• MP4 (Most Popular)</li>
-                        <li>• WEBM (High Quality)</li>
-                        <li>• AVI (Universal)</li>
-                        <li>• MOV (Apple)</li>
-                        <li>• FLV (Flash Video)</li>
-                        <li>• 3GP (Mobile)</li>
-                    </ul>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-4">🎵 Audio Formats</h3>
-                    <ul class="text-gray-300 space-y-2">
-                        <li>• MP3 (Most Popular)</li>
-                        <li>• M4A (High Quality)</li>
-                        <li>• WAV (Uncompressed)</li>
-                        <li>• AAC (Advanced Audio)</li>
-                        <li>• OGG (Open Source)</li>
-                        <li>• FLAC (Lossless)</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- Device Compatibility Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Universal Device & Browser Support</h2>
-            <div class="text-gray-300 text-lg leading-relaxed space-y-4">
-                <p>
-                    Simpl YT works perfectly on all devices and operating systems. Whether you're using Windows, Mac, Linux, Android, or iOS, our YouTube downloader provides the same fast and reliable experience. No matter what device you're using - desktop computer, laptop, tablet, or smartphone - you can easily download your favorite YouTube videos and audio files.
-                </p>
-                <div class="grid md:grid-cols-3 gap-6 mt-6">
-                    <div class="bg-gray-800 rounded-lg p-4 text-center">
-                        <h4 class="font-semibold text-white mb-2">🖥️ Desktop</h4>
-                        <p class="text-sm text-gray-300">Windows, Mac, Linux</p>
+            <!-- Features Section -->
+            <section class="glass-card rounded-3xl p-8 hover-scale">
+                <h2 class="text-4xl font-bold mb-8 text-center gradient-text">
+                    Why Choose Our YouTube Video Downloader?
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-bolt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Lightning Fast</h3>
+                            <p class="text-gray-400">Download YouTube videos in seconds with our optimized processing</p>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-lg p-4 text-center">
-                        <h4 class="font-semibold text-white mb-2">📱 Mobile</h4>
-                        <p class="text-sm text-gray-300">Android, iOS, Windows Phone</p>
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-shield-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">100% Safe</h3>
+                            <p class="text-gray-400">Secure YouTube downloader with no malware or unwanted software</p>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-lg p-4 text-center">
-                        <h4 class="font-semibold text-white mb-2">🌐 Browsers</h4>
-                        <p class="text-sm text-gray-300">Chrome, Firefox, Safari, Edge</p>
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-mobile-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Mobile Friendly</h3>
+                            <p class="text-gray-400">Works perfectly on all devices - desktop, mobile, and tablet</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Quality Options Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Available Video Quality Options</h2>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-gray-800 rounded-lg p-6 text-center">
-                    <h3 class="text-xl font-semibold text-white mb-2">360p</h3>
-                    <p class="text-gray-300 text-sm">Standard quality for basic viewing</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6 text-center">
-                    <h3 class="text-xl font-semibold text-white mb-2">480p</h3>
-                    <p class="text-gray-300 text-sm">Enhanced quality for better clarity</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6 text-center">
-                    <h3 class="text-xl font-semibold text-white mb-2">720p HD</h3>
-                    <p class="text-gray-300 text-sm">High Definition for crisp viewing</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6 text-center">
-                    <h3 class="text-xl font-semibold text-white mb-2">1080p Full HD</h3>
-                    <p class="text-gray-300 text-sm">Full High Definition quality</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6 text-center">
-                    <h3 class="text-xl font-semibold text-white mb-2">1440p QHD</h3>
-                    <p class="text-gray-300 text-sm">Quad High Definition</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6 text-center">
-                    <h3 class="text-xl font-semibold text-white mb-2">2160p 4K</h3>
-                    <p class="text-gray-300 text-sm">Ultra High Definition</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- FAQ Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Frequently Asked Questions</h2>
-            <div class="space-y-6">
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">Is Simpl YT free to use?</h3>
-                    <p class="text-gray-300">Yes, Simpl YT is completely free to use. You can download unlimited YouTube videos and audio files without any charges or subscriptions.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">Do I need to install software?</h3>
-                    <p class="text-gray-300">No installation required! Simpl YT works directly in your web browser. Just paste the YouTube URL and download instantly.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">What video qualities are supported?</h3>
-                    <p class="text-gray-300">We support all YouTube video qualities from 360p to 4K (2160p), including 480p, 720p, 1080p, and 1440p options.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">Can I download audio only?</h3>
-                    <p class="text-gray-300">Yes! Use our "Download MP3" feature to extract high-quality audio from any YouTube video in MP3 format.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Final CTA Section -->
-        <section class="mb-12 text-center">
-            <h2 class="text-3xl font-bold text-white mb-4">Start Downloading YouTube Videos Now</h2>
-            <p class="text-gray-300 text-lg mb-6">
-                Join millions of users who trust Simpl YT for fast, free, and reliable YouTube video downloads. 
-                No registration, no limits, no hassle - just paste and download!
-            </p>
-            <a href="#youtube-url" class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300">
-                Get Started Now
-            </a>
-        </section>
-    </div>
-
-    <!-- Additional SEO Content Sections -->
-    <div class="max-w-4xl mx-auto px-4 py-8">
-        
-        <!-- Technical Specifications Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Advanced Technical Specifications</h2>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-4">🎥 Video Processing</h3>
-                    <ul class="text-gray-300 space-y-2">
-                        <li>• H.264/AVC codec support</li>
-                        <li>• VP9 codec compatibility</li>
-                        <li>• Hardware acceleration</li>
-                        <li>• Bitrate optimization</li>
-                        <li>• Frame rate preservation</li>
-                        <li>• Aspect ratio maintenance</li>
-                    </ul>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-4">🎵 Audio Processing</h3>
-                    <ul class="text-gray-300 space-y-2">
-                        <li>• AAC high-quality encoding</li>
-                        <li>• MP3 variable bitrate</li>
-                        <li>• Stereo and mono support</li>
-                        <li>• Sample rate conversion</li>
-                        <li>• Noise reduction filtering</li>
-                        <li>• Volume normalization</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- Mobile Optimization Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Mobile YouTube Downloader - Download on Any Device</h2>
-            <div class="text-gray-300 text-lg leading-relaxed space-y-4">
-                <p>
-                    Simpl YT is fully optimized for mobile devices, making it the perfect YouTube downloader for smartphones and tablets. Whether you're using an iPhone, Android phone, or any mobile device, our responsive design ensures a seamless downloading experience. The mobile YouTube downloader works flawlessly on all screen sizes, from small smartphones to large tablets.
-                </p>
-                <p>
-                    Our mobile-optimized interface features touch-friendly buttons, adaptive layouts, and fast loading times. Download YouTube videos directly to your mobile device's storage for offline viewing. Perfect for commutes, travel, or areas with limited internet connectivity. The mobile YouTube video downloader supports all the same features as the desktop version, including multiple quality options and MP3 audio extraction.
-                </p>
-                <div class="grid md:grid-cols-2 gap-6 mt-6">
-                    <div class="bg-gray-800 rounded-lg p-6">
-                        <h3 class="text-xl font-semibold text-white mb-3">📱 Mobile Features</h3>
-                        <ul class="text-gray-300 space-y-2">
-                            <li>• One-tap downloading</li>
-                            <li>• Gesture-friendly interface</li>
-                            <li>• Offline video storage</li>
-                            <li>• Battery-optimized processing</li>
-                            <li>• Mobile data awareness</li>
-                            <li>• Quick share options</li>
-                        </ul>
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-hd-video text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">HD Quality</h3>
+                            <p class="text-gray-400">Download YouTube videos in Full HD, 4K, and original quality</p>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-lg p-6">
-                        <h3 class="text-xl font-semibold text-white mb-3">⚡ Performance</h3>
-                        <ul class="text-gray-300 space-y-2">
-                            <li>• Fast mobile processing</li>
-                            <li>• Minimal data usage</li>
-                            <li>• Quick preview generation</li>
-                            <li>• Efficient memory usage</li>
-                            <li>• Background downloading</li>
-                            <li>• Resume interrupted downloads</li>
-                        </ul>
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user-times text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">No Registration</h3>
+                            <p class="text-gray-400">Free YouTube downloader - no signup or account required</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-infinity text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Unlimited Downloads</h3>
+                            <p class="text-gray-400">Download as many YouTube videos as you want with no limits</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Security and Privacy Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Secure YouTube Video Downloading</h2>
-            <div class="text-gray-300 text-lg leading-relaxed space-y-4">
-                <p>
-                    Your privacy and security are our top priorities. Simpl YT uses advanced encryption and secure protocols to protect your downloads and personal information. We don't store your download history, track your activity, or collect personal data. Our secure YouTube downloader operates with bank-level security measures to ensure your downloads remain private and safe.
-                </p>
-                <div class="grid md:grid-cols-3 gap-6 mt-6">
-                    <div class="bg-gray-800 rounded-lg p-6 text-center">
-                        <h3 class="text-xl font-semibold text-white mb-3">🔒 Privacy</h3>
-                        <ul class="text-gray-300 text-sm space-y-2">
-                            <li>• No user tracking</li>
-                            <li>• No download logs</li>
-                            <li>• No cookies stored</li>
-                            <li>• Anonymous usage</li>
-                        </ul>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg p-6 text-center">
-                        <h3 class="text-xl font-semibold text-white mb-3">🛡️ Security</h3>
-                        <ul class="text-gray-300 text-sm space-y-2">
-                            <li>• SSL encryption</li>
-                            <li>• Secure servers</li>
-                            <li>• Malware protection</li>
-                            <li>• Safe downloads</li>
-                        </ul>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg p-6 text-center">
-                        <h3 class="text-xl font-semibold text-white mb-3">✅ Clean</h3>
-                        <ul class="text-gray-300 text-sm space-y-2">
-                            <li>• No ads or popups</li>
-                            <li>• No malware</li>
-                            <li>• No spam</li>
-                            <li>• Clean interface</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Use Cases Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Perfect for Every YouTube Download Need</h2>
-            <div class="grid md:grid-cols-2 gap-8">
+            <!-- FAQ Section -->
+            <section class="glass-card rounded-3xl p-8 hover-scale">
+                <h2 class="text-4xl font-bold mb-8 text-center gradient-text">
+                    Frequently Asked Questions
+                </h2>
                 <div class="space-y-6">
-                    <div class="bg-gray-800 rounded-lg p-6">
-                        <h3 class="text-xl font-semibold text-white mb-3">🎓 Educational Content</h3>
-                        <p class="text-gray-300">Download educational videos, tutorials, lectures, and courses for offline study. Perfect for students and professionals who need to access learning materials without internet.</p>
+                    <div class="glass-card rounded-2xl p-6 border-l-4 border-blue-500">
+                        <h3 class="text-xl font-semibold mb-3">Is this YouTube downloader free?</h3>
+                        <p class="text-gray-400 leading-relaxed">Yes! Our YouTube video downloader is completely free to use. No hidden fees, no registration required, and no download limits.</p>
                     </div>
-                    <div class="bg-gray-800 rounded-lg p-6">
-                        <h3 class="text-xl font-semibold text-white mb-3">🎵 Music & Audio</h3>
-                        <p class="text-gray-300">Extract high-quality MP3 audio from music videos, podcasts, interviews, and audiobooks. Create your personal music library from YouTube content.</p>
+                    <div class="glass-card rounded-2xl p-6 border-l-4 border-purple-500">
+                        <h3 class="text-xl font-semibold mb-3">What video qualities can I download?</h3>
+                        <p class="text-gray-400 leading-relaxed">You can download YouTube videos in various qualities including 360p, 480p, 720p HD, 1080p Full HD, and even 4K when available.</p>
                     </div>
-                    <div class="bg-gray-800 rounded-lg p-6">
-                        <h3 class="text-xl font-semibold text-white mb-3">🎬 Entertainment</h3>
-                        <p class="text-gray-300">Download movies, TV shows, web series, and entertainment videos for offline viewing during travel or in areas with poor internet connectivity.</p>
+                    <div class="glass-card rounded-2xl p-6 border-l-4 border-green-500">
+                        <h3 class="text-xl font-semibold mb-3">Is it safe to use this YT downloader?</h3>
+                        <p class="text-gray-400 leading-relaxed">Absolutely! Our YouTube downloader is completely safe and secure. We don't store any of your data or downloaded videos on our servers.</p>
                     </div>
-                </div>
-                <div class="space-y-6">
-                    <div class="bg-gray-800 rounded-lg p-6">
-                        <h3 class="text-xl font-semibold text-white mb-3">💼 Business & Training</h3>
-                        <p class="text-gray-300">Download training videos, webinars, conference recordings, and business presentations for team training and professional development.</p>
+                    <div class="glass-card rounded-2xl p-6 border-l-4 border-yellow-500">
+                        <h3 class="text-xl font-semibold mb-3">Can I download YouTube videos on mobile?</h3>
+                        <p class="text-gray-400 leading-relaxed">Yes! Our YouTube video downloader works perfectly on all devices including smartphones, tablets, and desktop computers.</p>
                     </div>
-                    <div class="bg-gray-800 rounded-lg p-6">
-                        <h3 class="text-xl font-semibold text-white mb-3">🏃 Fitness & Health</h3>
-                        <p class="text-gray-300">Download workout videos, yoga sessions, meditation guides, and health tutorials for offline fitness routines and wellness practices.</p>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg p-6">
-                        <h3 class="text-xl font-semibold text-white mb-3">🎨 Creative Content</h3>
-                        <p class="text-gray-300">Download art tutorials, design courses, photography guides, and creative inspiration videos for your projects and artistic development.</p>
+                    <div class="glass-card rounded-2xl p-6 border-l-4 border-pink-500">
+                        <h3 class="text-xl font-semibold mb-3">Do I need to install any software?</h3>
+                        <p class="text-gray-400 leading-relaxed">No installation required! This is an online YouTube downloader that works directly in your web browser without any software.</p>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- Performance and Speed Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Lightning-Fast YouTube Download Speeds</h2>
-            <div class="text-gray-300 text-lg leading-relaxed space-y-4">
-                <p>
-                    Experience the fastest YouTube video downloading speeds with our optimized servers and advanced compression algorithms. Our high-performance infrastructure ensures maximum download speeds while maintaining video quality. Whether you're downloading a single video or multiple files, our system delivers consistent, high-speed performance.
-                </p>
-                <div class="grid md:grid-cols-4 gap-6 mt-6">
-                    <div class="bg-gray-800 rounded-lg p-6 text-center">
-                        <h3 class="text-2xl font-bold text-red-500 mb-2">⚡ 50x</h3>
-                        <p class="text-gray-300 text-sm">Faster than competitors</p>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg p-6 text-center">
-                        <h3 class="text-2xl font-bold text-green-500 mb-2">🚀 2GB/min</h3>
-                        <p class="text-gray-300 text-sm">Peak download speed</p>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg p-6 text-center">
-                        <h3 class="text-2xl font-bold text-blue-500 mb-2">⏱️ 99.9%</h3>
-                        <p class="text-gray-300 text-sm">Uptime guarantee</p>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg p-6 text-center">
-                        <h3 class="text-2xl font-bold text-purple-500 mb-2">🌍 Global</h3>
-                        <p class="text-gray-300 text-sm">CDN network</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Troubleshooting Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">YouTube Download Troubleshooting Guide</h2>
-            <div class="space-y-6">
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">❓ Video Not Downloading?</h3>
-                    <p class="text-gray-300 mb-3">If your YouTube video isn't downloading, try these solutions:</p>
-                    <ul class="text-gray-300 space-y-2 ml-4">
-                        <li>• Check if the video URL is correct and accessible</li>
-                        <li>• Ensure the video is public and not age-restricted</li>
-                        <li>• Try a different video quality option</li>
-                        <li>• Clear your browser cache and cookies</li>
-                        <li>• Disable browser extensions temporarily</li>
-                    </ul>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">🐌 Slow Download Speed?</h3>
-                    <p class="text-gray-300 mb-3">To improve download speeds:</p>
-                    <ul class="text-gray-300 space-y-2 ml-4">
-                        <li>• Choose a lower quality for faster downloads</li>
-                        <li>• Check your internet connection speed</li>
-                        <li>• Close other bandwidth-intensive applications</li>
-                        <li>• Try downloading during off-peak hours</li>
-                        <li>• Use a wired connection instead of Wi-Fi</li>
-                    </ul>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">🔧 Browser Compatibility Issues?</h3>
-                    <p class="text-gray-300 mb-3">For best results:</p>
-                    <ul class="text-gray-300 space-y-2 ml-4">
-                        <li>• Use updated versions of Chrome, Firefox, or Safari</li>
-                        <li>• Enable JavaScript in your browser</li>
-                        <li>• Allow popups for our website</li>
-                        <li>• Disable ad blockers temporarily</li>
-                        <li>• Try using incognito/private browsing mode</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- Extended FAQ Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Complete YouTube Downloader FAQ</h2>
-            <div class="space-y-6">
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">🌐 Does Simpl YT work worldwide?</h3>
-                    <p class="text-gray-300">Yes! Simpl YT works globally in all countries where YouTube is available. Our servers are optimized for international users with fast CDN networks worldwide.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">📱 Can I download YouTube videos on mobile?</h3>
-                    <p class="text-gray-300">Absolutely! Our mobile-optimized interface works perfectly on smartphones and tablets. Download YouTube videos directly to your mobile device for offline viewing.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">🎵 What's the best audio quality for MP3?</h3>
-                    <p class="text-gray-300">We extract audio at the highest quality available from the source video, typically 128kbps to 320kbps MP3 format for excellent sound quality.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">⏰ How long do downloads take?</h3>
-                    <p class="text-gray-300">Download times vary by video length and quality. Most videos download in under 30 seconds, with longer videos taking proportionally more time.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">🔄 Can I download playlists?</h3>
-                    <p class="text-gray-300">Currently, we support individual video downloads. For playlists, you'll need to download each video separately by pasting individual URLs.</p>
-                </div>
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-3">💾 Where are downloaded files saved?</h3>
-                    <p class="text-gray-300">Downloaded files are saved to your browser's default download folder. You can change this location in your browser settings.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Comparison Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Why Simpl YT is Better Than Other YouTube Downloaders</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full bg-gray-800 rounded-lg overflow-hidden">
-                    <thead class="bg-gray-700">
-                        <tr>
-                            <th class="text-left p-4 text-white">Feature</th>
-                            <th class="text-center p-4 text-white">Simpl YT</th>
-                            <th class="text-center p-4 text-white">Other Downloaders</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-gray-300">
-                        <tr class="border-b border-gray-700">
-                            <td class="p-4">Free to Use</td>
-                            <td class="p-4 text-center text-green-400">✓</td>
-                            <td class="p-4 text-center text-red-400">Limited</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="p-4">No Software Installation</td>
-                            <td class="p-4 text-center text-green-400">✓</td>
-                            <td class="p-4 text-center text-red-400">✗</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="p-4">4K Quality Support</td>
-                            <td class="p-4 text-center text-green-400">✓</td>
-                            <td class="p-4 text-center text-yellow-400">Sometimes</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="p-4">No Ads or Popups</td>
-                            <td class="p-4 text-center text-green-400">✓</td>
-                            <td class="p-4 text-center text-red-400">✗</td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="p-4">Fast Download Speed</td>
-                            <td class="p-4 text-center text-green-400">✓</td>
-                            <td class="p-4 text-center text-yellow-400">Variable</td>
-                        </tr>
-                        <tr>
-                            <td class="p-4">Mobile Optimized</td>
-                            <td class="p-4 text-center text-green-400">✓</td>
-                            <td class="p-4 text-center text-red-400">✗</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 mt-16">
-        <div class="max-w-4xl mx-auto px-4 py-6">
-            <div class="text-center text-gray-400 text-sm">
-                <p class="mb-2">© 2024 Simpl YT Downloader - Educational Use Only</p>
-                <p class="mb-2">This tool is intended for educational purposes and personal use only.</p>
-                <p>Please respect copyright laws and YouTube's Terms of Service.</p>
-            </div>
+            </section>
         </div>
-    </footer>
+        
+        <!-- Footer -->
+        <footer class="container mx-auto px-4 py-12 text-center text-gray-400">
+            <div class="glass-card rounded-3xl p-8">
+                <h2 class="text-2xl font-bold mb-4 gradient-text">Simpl YT Downloader</h2>
+                <p class="mb-4">The best free YouTube video downloader for HD quality downloads</p>
+                <div class="flex justify-center space-x-6 text-sm">
+                    <a href="/about" class="hover:text-white transition-colors">About</a>
+                    <a href="/privacy" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="/terms" class="hover:text-white transition-colors">Terms of Service</a>
+                </div>
+                <p class="mt-4 text-xs">&copy; 2024 Simpl YT Downloader. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- NextUI JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@nextui-org/theme@2.2.9/dist/components.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // DOM Elements
+        const urlInput = document.getElementById('url-input');
+        const downloadBtn = document.getElementById('download-btn');
+        const loading = document.getElementById('loading');
+        const errorContainer = document.getElementById('error-container');
+        const errorMessage = document.getElementById('error-message');
+        const successContainer = document.getElementById('success-container');
+        const successMessage = document.getElementById('success-message');
+        const videoInfo = document.getElementById('video-info');
+        const videoDetails = document.getElementById('video-details');
+        const downloadOptions = document.getElementById('download-options');
 
-    <script src="/static/js/script.js?v=7"></script>
+        // Utility functions
+        function showElement(element) {
+            element.classList.remove('hidden');
+        }
+
+        function hideElement(element) {
+            element.classList.add('hidden');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            showElement(errorContainer);
+            hideElement(successContainer);
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            showElement(successContainer);
+            hideElement(errorContainer);
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return 'Unknown';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function formatViews(views) {
+            if (!views) return 'Unknown';
+            if (views >= 1000000) {
+                return (views / 1000000).toFixed(1) + 'M';
+            } else if (views >= 1000) {
+                return (views / 1000).toFixed(1) + 'K';
+            }
+            return views.toString();
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes) return 'Unknown';
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function getQualityBadgeClass(quality) {
+            if (quality.includes('1080') || quality.includes('720')) return 'quality-hd';
+            if (quality.includes('480') || quality.includes('360')) return 'quality-sd';
+            if (quality.includes('audio') || quality.includes('mp3')) return 'quality-audio';
+            return 'quality-badge';
+        }
+
+        // Main download handler
+        downloadBtn.addEventListener('click', async function() {
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('Please enter a YouTube URL');
+                return;
+            }
+
+            if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+                showError('Please enter a valid YouTube URL');
+                return;
+            }
+
+            // Show loading state
+            hideElement(errorContainer);
+            hideElement(successContainer);
+            hideElement(videoInfo);
+            showElement(loading);
+
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const video = data.video;
+                    
+                    // Display video information
+                    videoDetails.innerHTML = `
+                        <div class="flex flex-col md:flex-row gap-6 mb-6">
+                            <div class="w-full md:w-64 h-36 bg-gray-800 rounded-2xl overflow-hidden flex-shrink-0">
+                                <img src="${video.thumbnail}" alt="Video thumbnail" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-xl font-semibold mb-3 text-white leading-tight">${video.title}</h3>
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div class="flex items-center gap-2 text-gray-300">
+                                        <i class="fas fa-user text-blue-400"></i>
+                                        <span>${video.uploader || 'Unknown'}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-300">
+                                        <i class="fas fa-clock text-green-400"></i>
+                                        <span>${formatDuration(video.duration)}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-300">
+                                        <i class="fas fa-eye text-yellow-400"></i>
+                                        <span>${formatViews(video.view_count)} views</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-300">
+                                        <i class="fas fa-calendar text-purple-400"></i>
+                                        <span>${video.upload_date || 'Unknown'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Display download options
+                    downloadOptions.innerHTML = '';
+                    data.formats.forEach(format => {
+                        const card = document.createElement('div');
+                        card.className = 'glass-card glass-card-hover rounded-2xl p-6 transition-all duration-300';
+                        card.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-${format.ext === 'mp3' ? 'music' : 'video'} text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white">${format.display_name}</h4>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="${getQualityBadgeClass(format.quality)} quality-badge">${format.quality}</span>
+                                            <span class="text-sm text-gray-400">${format.ext.toUpperCase()}</span>
+                                            ${format.filesize ? `<span class="text-sm text-gray-400">${formatFileSize(format.filesize)}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="/download_file/${data.download_id}" 
+                                   class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105">
+                                    <i class="fas fa-download mr-2"></i>
+                                    Download
+                                </a>
+                            </div>
+                        `;
+                        downloadOptions.appendChild(card);
+                    });
+
+                    showElement(videoInfo);
+                    showSuccess('Video processed successfully! Choose your preferred format below.');
+                } else {
+                    showError(data.error || 'Failed to process video. Please try again.');
+                }
+            } catch (error) {
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                hideElement(loading);
+            }
+        });
+
+        // Enter key support
+        urlInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                downloadBtn.click();
+            }
+        });
+
+        // URL input validation
+        urlInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url && !url.includes('youtube.com') && !url.includes('youtu.be')) {
+                this.classList.add('border-red-500');
+            } else {
+                this.classList.remove('border-red-500');
+            }
+        });
+    </script>
 </body>
 </html> 
