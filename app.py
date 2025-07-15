@@ -241,115 +241,31 @@ def download_thread_func(url, ydl_opts, download_id):
         progress_hook = ProgressHook(download_id)
         ydl_opts['progress_hooks'] = [progress_hook]
         
-        # Get the original format and create fallback formats
-        original_format = ydl_opts.get('format', 'best')
+        # Use exact format selected by user - no fallbacks
+        selected_format = ydl_opts.get('format', 'best')
         format_type = 'mp3' if ydl_opts.get('postprocessors') else 'mp4'
         
-        # Define fallback formats based on type - start from highest to lowest quality
-        if format_type == 'mp4':
-            # Try highest quality first, then work down to lower qualities
-            fallback_formats = [
-                'best',  # Start with absolute best quality available
-                'best[ext=mp4]',  # Best MP4 format
-                'best[height<=2160]',  # 4K and below
-                'best[height<=1440]',  # 2K and below
-                'best[height<=1080]',  # 1080p and below
-                'best[height<=720]',   # 720p and below
-                'best[height<=480]',   # 480p and below
-                'best[height<=360]',   # 360p and below
-                original_format,       # Try exact format ID as fallback
-                'worst[ext=mp4]',      # Worst MP4 format (very reliable)
-                'worst'                # Absolute fallback
-            ]
-        else:  # audio
-            fallback_formats = [
-                'bestaudio',           # Start with best audio quality
-                'bestaudio[ext=m4a]',  # Best M4A audio
-                'bestaudio[ext=webm]', # Best WebM audio
-                'bestaudio[acodec!=none]',  # Any audio codec
-                original_format,       # Try exact format ID as fallback
-                'best[acodec!=none]',  # Any format with audio
-                'worst[acodec!=none]', # Worst with audio (reliable)
-                'worst'                # Absolute fallback
-            ]
+        print(f"Downloading exact format selected by user: '{selected_format}'")
         
-        successful_download = False
-        last_error = None
-        
-        for attempt, format_selector in enumerate(fallback_formats, 1):
-            try:
-                print(f"Attempt {attempt}: Trying format '{format_selector}'")
-                
-                # Add delay between attempts to avoid rate limiting
-                if attempt > 1:
-                    delay = min(2 ** (attempt - 1), 10)  # Exponential backoff, max 10 seconds
-                    print(f"Waiting {delay} seconds before retry...")
-                    time.sleep(delay)
-                
-                # Update the format in ydl_opts
-                current_ydl_opts = ydl_opts.copy()
-                current_ydl_opts['format'] = format_selector
-                
-                with yt_dlp.YoutubeDL(current_ydl_opts) as ydl:
-                    # First, extract info to get the video title
-                    info = ydl.extract_info(url, download=False)
-                    video_title = info.get('title', 'Unknown')
-                    
-                    # Determine expected file extension
-                    expected_extension = '.mp3' if format_type == 'mp3' else '.mp4'
-                    
-                    # Get list of files before download
-                    files_before = set()
-                    if os.path.exists(downloads_dir):
-                        files_before = set(os.listdir(downloads_dir))
-                    
-                    # Update status to show we're starting the download
-                    download_progress[download_id]['status'] = 'downloading'
-                    download_progress[download_id]['speed_text'] = f"Trying format {attempt}/{len(fallback_formats)}..."
-                    
-                    # Download the video/audio
-                    ydl.download([url])
-                    
-                    # Check if download was successful by looking for a non-empty file
-                    files_after = set()
-                    if os.path.exists(downloads_dir):
-                        files_after = set(os.listdir(downloads_dir))
-                    
-                    new_files = files_after - files_before
-                    for new_file in new_files:
-                        if new_file.endswith(expected_extension):
-                            file_path = os.path.join(downloads_dir, new_file)
-                            if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
-                                print(f"Successfully downloaded with format '{format_selector}': {new_file}")
-                                successful_download = True
-                                break
-                    
-                    if successful_download:
-                        break
-                        
-            except Exception as e:
-                last_error = e
-                error_str = str(e).lower()
-                print(f"Format '{format_selector}' failed: {e}")
-                
-                # Continue trying other formats for these recoverable errors
-                if any(keyword in error_str for keyword in [
-                    "empty", "403", "forbidden", "not available", 
-                    "format not available", "requested format", "unavailable"
-                ]):
-                    print(f"Recoverable error, trying next format...")
-                    continue
-                else:
-                    # For other errors (network, parsing, etc.), stop trying
-                    print(f"Non-recoverable error, stopping attempts")
-                    break
-        
-        if not successful_download:
-            # Add more debugging info for format failures
-            print(f"All {len(fallback_formats)} format attempts failed")
-            print(f"Tried formats: {fallback_formats}")
-            print(f"Last error: {last_error}")
-            raise Exception(f"All format attempts failed. Last error: {last_error}")
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            # First, extract info to get the video title
+            info = ydl.extract_info(url, download=False)
+            video_title = info.get('title', 'Unknown')
+            
+            # Determine expected file extension
+            expected_extension = '.mp3' if format_type == 'mp3' else '.mp4'
+            
+            # Get list of files before download
+            files_before = set()
+            if os.path.exists(downloads_dir):
+                files_before = set(os.listdir(downloads_dir))
+            
+            # Update status to show we're starting the download
+            download_progress[download_id]['status'] = 'downloading'
+            download_progress[download_id]['speed_text'] = "Downloading selected format..."
+            
+            # Download the video/audio using exact format
+            ydl.download([url])
         
         # Wait longer for MP3 processing to complete
         if format_type == 'mp3':
@@ -446,8 +362,8 @@ def download_thread_func(url, ydl_opts, download_id):
             user_error = "YouTube is blocking this video download. This can happen due to regional restrictions, copyright protection, or rate limiting. Please try a different video or wait a few minutes before trying again."
         elif "empty" in error_str:
             user_error = "The video file couldn't be downloaded completely. This usually happens when YouTube blocks the download partway through. Please try again in a few minutes."
-        elif "unavailable" in error_str:
-            user_error = "This video is not available for download. It might be private, deleted, or restricted in your region."
+        elif "unavailable" in error_str or "not available" in error_str or "requested format" in error_str:
+            user_error = "The selected video quality/format is not available for this video. Please try selecting a different quality option from the dropdown."
         elif "network" in error_str or "connection" in error_str:
             user_error = "Network connection error. Please check your internet connection and try again."
         else:
