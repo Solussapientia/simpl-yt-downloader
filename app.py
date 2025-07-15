@@ -688,7 +688,7 @@ def extract_video_info(url):
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
-            'format': 'best[protocol^=http][protocol!=m3u8_native][protocol!=m3u8][protocol!=hls]',
+            'format': 'best[ext=mp4][protocol^=http][protocol!=m3u8_native][protocol!=m3u8][protocol!=hls]',
             'ignoreerrors': True,
             'no_playlist': True,
             'extractor_args': {
@@ -705,7 +705,7 @@ def extract_video_info(url):
             if not info:
                 return None
             
-            # Filter formats to get only direct download URLs
+            # Filter formats to get only MP4 direct download URLs
             formats = []
             seen_qualities = set()
             
@@ -717,27 +717,27 @@ def extract_video_info(url):
                 # Skip formats without direct URLs
                 if not fmt.get('url') or 'manifest' in fmt.get('url', ''):
                     continue
+                
+                # Only MP4 formats
+                if fmt.get('ext') != 'mp4':
+                    continue
                     
                 # Get quality info
                 height = fmt.get('height', 0)
                 width = fmt.get('width', 0)
-                ext = fmt.get('ext', 'mp4')
                 filesize = fmt.get('filesize', 0)
                 format_id = fmt.get('format_id', '')
                 
                 # Create quality label
                 if height:
                     quality = f"{height}p"
-                elif 'audio' in format_id.lower():
-                    quality = "Audio"
                 else:
-                    quality = "Video"
+                    quality = "Standard"
                 
                 # Avoid duplicates
-                quality_key = f"{quality}_{ext}"
-                if quality_key in seen_qualities:
+                if quality in seen_qualities:
                     continue
-                seen_qualities.add(quality_key)
+                seen_qualities.add(quality)
                 
                 # Format file size
                 if filesize:
@@ -748,12 +748,12 @@ def extract_video_info(url):
                 
                 formats.append({
                     'format_id': format_id,
-                    'ext': ext,
+                    'ext': 'mp4',
                     'quality': quality,
                     'filesize': filesize,
                     'size_text': size_text,
                     'url': fmt.get('url'),
-                    'display_name': f"{quality} ({ext.upper()}) - {size_text}"
+                    'display_name': f"{quality} MP4 - {size_text}"
                 })
             
             # Sort by quality (higher first)
@@ -766,7 +766,7 @@ def extract_video_info(url):
                 'thumbnail': info.get('thumbnail', ''),
                 'uploader': info.get('uploader', 'Unknown'),
                 'view_count': info.get('view_count', 0),
-                'formats': formats[:10],  # Limit to top 10 formats
+                'formats': formats[:8],  # Limit to top 8 MP4 formats
                 'original_url': url,
                 'extracted_at': time.time()
             }

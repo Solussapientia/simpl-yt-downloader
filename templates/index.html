@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simpl YT Downloader - Free YouTube Video Downloader</title>
-    <meta name="description" content="Download YouTube videos for free in MP4 and MP3 formats. Fast, secure, and easy to use.">
+    <title>Simpl YT Downloader - Free YouTube to MP4 Downloader</title>
+    <meta name="description" content="Download YouTube videos for free in MP4 format. Fast, secure, and easy to use.">
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
@@ -58,7 +58,7 @@
                 Simpl YT Downloader
             </h1>
             <p class="text-center text-lg mt-2 opacity-90">
-                Free YouTube Video Downloader - Fast & Easy
+                Free YouTube to MP4 Downloader - Fast & Easy
             </p>
         </div>
     </header>
@@ -121,7 +121,7 @@
             
             <!-- Download Options -->
             <div id="download-options" class="bg-white rounded-lg shadow-lg p-6 hidden">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Download Options</h3>
+                <h3 class="text-xl font-bold text-gray-800 mb-4">MP4 Download Options</h3>
                 
                 <div id="format-list" class="space-y-3">
                     <!-- Format options will be populated here -->
@@ -295,7 +295,7 @@
                         </div>
                         <div>
                             <div class="font-medium text-gray-800">${format.display_name}</div>
-                            <div class="text-sm text-gray-500">${format.quality} • ${format.ext.toUpperCase()}</div>
+                            <div class="text-sm text-gray-500">MP4 • High Quality</div>
                         </div>
                     </div>
                     <button onclick="downloadFormat('${video.id}', '${format.format_id}')" 
