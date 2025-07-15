@@ -245,20 +245,26 @@ def download_thread_func(url, ydl_opts, download_id):
         original_format = ydl_opts.get('format', 'best')
         format_type = 'mp3' if ydl_opts.get('postprocessors') else 'mp4'
         
-        # Define fallback formats based on type
+        # Define fallback formats based on type - prioritize quality selectors over exact IDs
         if format_type == 'mp4':
+            # Try quality-based selectors first, then exact format ID as fallback
             fallback_formats = [
-                original_format,
-                'best[height<=720]',
+                'best[height<=720]',  # Start with reliable quality selector
                 'best[height<=480]',
                 'best[height<=360]',
-                'worst',
-                'best'
+                original_format,  # Try exact format ID later in the sequence
+                'best[ext=mp4]',
+                'worst[ext=mp4]',
+                'best',
+                'worst'
             ]
         else:  # audio
             fallback_formats = [
-                original_format,
+                'bestaudio[ext=m4a]',  # Start with best audio quality
                 'bestaudio',
+                original_format,  # Try exact format ID later
+                'worst[acodec!=none]',
+                'best[acodec!=none]',
                 'worst'
             ]
         
@@ -318,16 +324,26 @@ def download_thread_func(url, ydl_opts, download_id):
                         
             except Exception as e:
                 last_error = e
+                error_str = str(e).lower()
                 print(f"Format '{format_selector}' failed: {e}")
                 
-                # If this is an empty file error or 403-related error, try next format
-                if "empty" in str(e).lower() or "403" in str(e) or "forbidden" in str(e).lower():
+                # Continue trying other formats for these recoverable errors
+                if any(keyword in error_str for keyword in [
+                    "empty", "403", "forbidden", "not available", 
+                    "format not available", "requested format", "unavailable"
+                ]):
+                    print(f"Recoverable error, trying next format...")
                     continue
                 else:
-                    # For other errors, stop trying
+                    # For other errors (network, parsing, etc.), stop trying
+                    print(f"Non-recoverable error, stopping attempts")
                     break
         
         if not successful_download:
+            # Add more debugging info for format failures
+            print(f"All {len(fallback_formats)} format attempts failed")
+            print(f"Tried formats: {fallback_formats}")
+            print(f"Last error: {last_error}")
             raise Exception(f"All format attempts failed. Last error: {last_error}")
         
         # Wait longer for MP3 processing to complete
@@ -493,8 +509,7 @@ def download_video():
         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
         'extractor_args': {
             'youtube': {
-                'skip': ['dash', 'hls'],  # Skip problematic formats first
-                'player_client': ['android', 'web']  # Try different clients
+                'player_client': ['android', 'web', 'ios']  # Try multiple clients
             }
         },
         'sleep_interval': 1,  # Wait 1 second between requests
