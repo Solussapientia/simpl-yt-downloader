@@ -818,11 +818,49 @@ def get_download_url(video_url, format_id):
 
 @app.route('/')
 def index():
-    try:
-        return render_template('index.html')
-    except Exception as e:
-        # Fallback in case of template error
-        return f"<h1>Template Error: {str(e)}</h1><p>Flask app is running but template failed to render.</p>"
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Simpl YT Downloader - TEST</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-900 text-white min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl font-bold mb-8">
+                    <span class="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                        🎉 WORKING! Simpl YT Downloader
+                    </span>
+                </h1>
+                
+                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                    <p class="text-xl mb-4">✅ Flask app is working on Railway!</p>
+                    <p class="text-gray-300">This page is served directly from Flask without templates.</p>
+                    
+                    <div class="mt-6">
+                        <input 
+                            type="text" 
+                            placeholder="Test input field"
+                            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                        >
+                        <button class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
+                            Test Button
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="text-sm text-gray-400">
+                    <p>If you see this page, the Flask app is working correctly!</p>
+                    <p>Next step: Fix the template system</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
 
 @app.route('/test')
 def test():
