@@ -708,11 +708,11 @@ def extract_video_info(url):
                 # Only MP4 formats
                 if fmt.get('ext') != 'mp4':
                     continue
-                    
+                
                 # Skip HLS/M3U8 formats
                 if 'hls' in fmt.get('protocol', '').lower() or 'm3u8' in fmt.get('protocol', '').lower():
                     continue
-                    
+                
                 # Get quality info
                 height = fmt.get('height', 0)
                 width = fmt.get('width', 0)
@@ -725,11 +725,10 @@ def extract_video_info(url):
                 else:
                     quality = "Standard"
                     
-                # Allow multiple formats of same quality (some may have audio, some may not)
-                quality_key = f"{quality}_{format_id}"
-                if quality_key in seen_qualities:
+                # Avoid duplicate qualities (only keep the best one for each resolution)
+                if quality in seen_qualities:
                     continue
-                seen_qualities.add(quality_key)
+                seen_qualities.add(quality)
                 
                 # Format file size
                 if filesize:
@@ -739,12 +738,12 @@ def extract_video_info(url):
                     size_text = "Unknown size"
                 
                 video_info['formats'].append({
-                    'format_id': format_id,
+                        'format_id': format_id,
                     'quality': quality,
                     'size': size_text,
-                    'height': height,
+                        'height': height,
                     'width': width
-                })
+                    })
             
             # Sort formats by quality (highest first)
             video_info['formats'].sort(key=lambda x: x['height'], reverse=True)

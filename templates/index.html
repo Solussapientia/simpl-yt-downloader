@@ -95,24 +95,24 @@
     
     <!-- Main Container -->
     <div class="relative min-h-screen">
-        <!-- Header -->
+    <!-- Header -->
         <header class="relative z-10 pt-8 pb-4">
             <div class="container mx-auto px-4">
-                <div class="text-center">
+            <div class="text-center">
                     <div class="inline-flex items-center gap-3 mb-4">
                         <div class="w-12 h-12 bg-gradient-to-br from-danger-500 to-danger-600 rounded-2xl flex items-center justify-center shadow-lg">
                             <i class="fas fa-download text-white text-xl"></i>
                         </div>
                         <h1 class="text-4xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
                             Simpl YT Downloader
-                        </h1>
+                </h1>
                     </div>
                     <p class="text-slate-400 text-lg max-w-2xl mx-auto">
-                        Beautiful, fast, and secure YouTube downloader with zero storage costs
+                        Download YouTube videos instantly - No registration, no ads, completely free forever!
                     </p>
-                </div>
             </div>
-        </header>
+        </div>
+    </header>
 
         <!-- Main Content -->
         <main class="relative z-10 container mx-auto px-4 py-8">
@@ -123,29 +123,29 @@
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
                             <span class="text-white font-bold text-sm">1</span>
-                        </div>
+                </div>
                         <h2 class="text-2xl font-semibold">Enter YouTube URL</h2>
-                    </div>
-                    
+    </div>
+
                     <div class="flex gap-4">
                         <div class="flex-1 relative">
-                            <input 
-                                type="text" 
+                <input 
+                    type="text" 
                                 id="url-input" 
                                 placeholder="Paste YouTube URL here..."
                                 class="w-full px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300"
                             >
                             <div class="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-danger-500/20 rounded-2xl opacity-0 transition-opacity duration-300 pointer-events-none" id="input-glow"></div>
-                        </div>
-                        <button 
+            </div>
+                <button 
                             id="extract-btn"
                             class="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
                         >
                             <i class="fas fa-search"></i>
                             Extract
-                        </button>
-                    </div>
-                </div>
+                </button>
+            </div>
+        </div>
 
                 <!-- Loading State -->
                 <div id="loading" class="hidden">
@@ -153,19 +153,19 @@
                         <div class="flex items-center justify-center gap-4">
                             <div class="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
                             <p class="text-lg font-medium">Extracting video information...</p>
-                        </div>
-                    </div>
                 </div>
-
+                    </div>
+                    </div>
+                    
                 <!-- Error Message -->
                 <div id="error-message" class="hidden">
                     <div class="bg-danger-500/10 backdrop-blur-xl rounded-3xl border border-danger-500/20 p-8 shadow-2xl">
                         <div class="flex items-center gap-3">
                             <i class="fas fa-exclamation-triangle text-danger-500 text-xl"></i>
                             <span id="error-text" class="text-danger-300 text-lg font-medium"></span>
-                        </div>
-                    </div>
                 </div>
+            </div>
+        </div>
 
                 <!-- Video Information Card -->
                 <div id="video-info" class="hidden animate-fade-in">
@@ -173,45 +173,45 @@
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-8 h-8 bg-gradient-to-br from-success-500 to-success-600 rounded-xl flex items-center justify-center">
                                 <span class="text-white font-bold text-sm">2</span>
-                            </div>
+                </div>
                             <h2 class="text-2xl font-semibold">Choose Quality & Download</h2>
-                        </div>
+                </div>
                         
                         <!-- Video Details -->
                         <div class="bg-white/5 rounded-2xl p-6 mb-8">
                             <div class="flex gap-6">
                                 <div class="flex-shrink-0">
                                     <img id="video-thumbnail" class="w-32 h-24 object-cover rounded-xl shadow-lg" alt="Video thumbnail">
-                                </div>
+            </div>
                                 <div class="flex-1">
                                     <h3 id="video-title" class="text-xl font-semibold mb-3 line-clamp-2"></h3>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                         <div class="flex items-center gap-2 text-slate-400">
                                             <i class="fas fa-user text-primary-500"></i>
                                             <span id="video-uploader"></span>
-                                        </div>
+        </div>
                                         <div class="flex items-center gap-2 text-slate-400">
                                             <i class="fas fa-clock text-success-500"></i>
                                             <span id="video-duration"></span>
-                                        </div>
+            </div>
                                         <div class="flex items-center gap-2 text-slate-400">
                                             <i class="fas fa-eye text-warning-500"></i>
                                             <span id="video-views"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        </div>
+                </div>
+            </div>
+        </div>
+            </div>
 
                         <!-- Download Options -->
                         <div class="space-y-4">
                             <div class="flex items-center gap-2 text-slate-400 text-sm mb-4">
                                 <i class="fas fa-info-circle text-primary-500"></i>
                                 <span>Click any option below to open in a new tab, then right-click to download</span>
-                            </div>
+                </div>
                             <div id="download-options" class="grid gap-4"></div>
-                        </div>
-                    </div>
+                </div>
+                </div>
                 </div>
 
                 <!-- Instructions Card -->
@@ -225,54 +225,54 @@
                             <div class="flex items-start gap-4">
                                 <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <span class="text-white font-bold text-sm">1</span>
-                                </div>
-                                <div>
+                </div>
+                    <div>
                                     <h4 class="font-semibold mb-1">Paste YouTube URL</h4>
                                     <p class="text-slate-400 text-sm">Enter any YouTube video URL in the input field</p>
-                                </div>
-                            </div>
+                    </div>
+                </div>
                             <div class="flex items-start gap-4">
                                 <div class="w-8 h-8 bg-gradient-to-br from-success-500 to-success-600 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <span class="text-white font-bold text-sm">2</span>
                                 </div>
-                                <div>
+                    <div>
                                     <h4 class="font-semibold mb-1">Extract Video Info</h4>
                                     <p class="text-slate-400 text-sm">Click Extract to get available qualities</p>
-                                </div>
-                            </div>
-                        </div>
+                    </div>
+                </div>
+            </div>
                         <div class="space-y-4">
                             <div class="flex items-start gap-4">
                                 <div class="w-8 h-8 bg-gradient-to-br from-warning-500 to-warning-600 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <span class="text-white font-bold text-sm">3</span>
-                                </div>
+                </div>
                                 <div>
                                     <h4 class="font-semibold mb-1">Choose Quality</h4>
                                     <p class="text-slate-400 text-sm">Select your preferred video quality</p>
-                                </div>
-                            </div>
+                </div>
+            </div>
                             <div class="flex items-start gap-4">
                                 <div class="w-8 h-8 bg-gradient-to-br from-danger-500 to-danger-600 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <span class="text-white font-bold text-sm">4</span>
-                                </div>
+                    </div>
                                 <div>
                                     <h4 class="font-semibold mb-1">Download</h4>
                                     <p class="text-slate-400 text-sm">Click to open in new tab, then save the video</p>
-                                </div>
-                            </div>
-                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
+                </div>
+                </div>
         </main>
 
         <!-- Footer -->
         <footer class="relative z-10 mt-16 py-8 border-t border-white/10">
             <div class="container mx-auto px-4 text-center">
                 <p class="text-slate-400">&copy; 2025 Simpl YT Downloader. Zero storage, direct downloads.</p>
-            </div>
+                </div>
         </footer>
-    </div>
+                </div>
 
     <script>
         const urlInput = document.getElementById('url-input');
@@ -373,7 +373,7 @@
                     <div class="text-center py-8 text-slate-400">
                         <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
                         <p>No download formats available for this video</p>
-                    </div>
+                </div>
                 `;
             } else {
                 video.formats.forEach(format => {
@@ -388,12 +388,12 @@
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 bg-gradient-to-br ${qualityColor} rounded-xl flex items-center justify-center shadow-lg">
                                     <i class="${qualityIcon} text-white text-lg"></i>
-                                </div>
+                </div>
                                 <div>
                                     <h4 class="font-semibold text-lg">${format.quality} MP4</h4>
                                     <p class="text-slate-400 text-sm">${format.size}</p>
-                                </div>
-                            </div>
+                </div>
+                </div>
                             <button 
                                 class="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
                                 onclick="openVideo('${video.id}', '${format.format_id}')"
@@ -401,7 +401,7 @@
                                 <i class="fas fa-external-link-alt"></i>
                                 Open Video
                             </button>
-                        </div>
+                </div>
                     `;
                     
                     downloadOptions.appendChild(option);
