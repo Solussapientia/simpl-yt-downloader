@@ -657,106 +657,6 @@ def download_thread_func(url, format_id, download_id):
             'file_size': "-- MB"
         }
 
-def download_video_direct(url, format_id, download_id):
-    """Extract direct download URL without downloading to server"""
-    try:
-        download_progress[download_id] = {
-            'status': 'extracting',
-            'percent': 0,
-            'message': 'Extracting download URL...'
-        }
-        
-        # Enhanced yt-dlp options for direct URL extraction
-        ydl_opts = {
-            'format': format_id,
-            'quiet': True,
-            'no_warnings': True,
-            'extract_flat': False,
-            'dump_single_json': True,
-            'no_download': True,  # Don't download, just extract info
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1',
-            },
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['ios', 'android'],
-                    'player_skip': ['webpage', 'configs'],
-                }
-            }
-        }
-        
-        # Try multiple configurations
-        configs = [
-            ydl_opts,
-            {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['ios']}}},
-            {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['android']}}},
-            {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['web']}}},
-        ]
-        
-        info = None
-        for config in configs:
-            try:
-                with yt_dlp.YoutubeDL(config) as ydl:
-                    info = ydl.extract_info(url, download=False)
-                    if info and 'url' in info:
-                        break
-            except Exception as e:
-                continue
-        
-        if not info:
-            raise Exception("Could not extract video information")
-        
-        # Get the direct URL
-        direct_url = info.get('url')
-        if not direct_url:
-            raise Exception("Could not extract direct download URL")
-        
-        # Get file info
-        title = info.get('title', 'video')
-        ext = info.get('ext', 'mp4')
-        filesize = info.get('filesize') or info.get('filesize_approx', 0)
-        
-        # Clean filename
-        filename = f"{title}.{ext}"
-        filename = re.sub(r'[<>:"/\\|?*]', '_', filename)
-        filename = filename[:200]  # Limit length
-        
-        # Determine content type
-        content_type_map = {
-            'mp4': 'video/mp4',
-            'webm': 'video/webm',
-            'mkv': 'video/x-matroska',
-            'mp3': 'audio/mpeg',
-            'aac': 'audio/aac',
-            'ogg': 'audio/ogg',
-            'm4a': 'audio/mp4',
-        }
-        content_type = content_type_map.get(ext, 'application/octet-stream')
-        
-        # Update progress
-        download_progress[download_id] = {
-            'status': 'ready_for_download',
-            'percent': 100,
-            'message': 'Ready for download',
-            'filename': filename,
-            'direct_url': direct_url,
-            'content_type': content_type,
-            'filesize': filesize,
-            'title': title
-        }
-        
-    except Exception as e:
-        download_progress[download_id] = {
-            'status': 'error',
-            'error': str(e),
-            'percent': 0
-        }
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -902,46 +802,64 @@ def direct_download(download_id):
         return jsonify({'error': 'Download not ready'}), 400
     
     try:
-        # Get the direct URL from the progress data
-        direct_url = progress.get('direct_url')
-        if not direct_url:
-            return jsonify({'error': 'Direct URL not available'}), 400
-        
-        # Get filename and content type
+        # Get the video URL and format info
+        url = progress.get('url')
+        format_id = progress.get('format_id')
         filename = progress.get('filename', 'download')
         content_type = progress.get('content_type', 'application/octet-stream')
+        
+        if not url or not format_id:
+            return jsonify({'error': 'Download information not available'}), 400
         
         # Update progress to downloading
         progress['status'] = 'downloading'
         progress['percent'] = 0
         
-        # Stream the file directly from the source
+        # Use yt-dlp to stream the file directly
         def generate():
             try:
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
-                    'Accept': '*/*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'identity',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1',
-                }
+                # Use subprocess to stream yt-dlp output
+                import subprocess
                 
-                response = requests.get(direct_url, headers=headers, stream=True)
-                response.raise_for_status()
+                cmd = [
+                    'yt-dlp',
+                    '-f', format_id,
+                    '--quiet',
+                    '--no-warnings',
+                    '-o', '-',
+                    '--user-agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
+                    url
+                ]
                 
-                total_size = int(response.headers.get('content-length', 0))
+                process = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    bufsize=0
+                )
+                
+                # Stream the output
                 downloaded = 0
+                total_size = progress.get('filesize', 0)
                 
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        downloaded += len(chunk)
-                        if total_size > 0:
-                            percent = (downloaded / total_size) * 100
-                            progress['percent'] = percent
-                            progress['downloaded'] = downloaded
-                            progress['total'] = total_size
-                        yield chunk
+                while True:
+                    chunk = process.stdout.read(8192)
+                    if not chunk:
+                        break
+                    
+                    downloaded += len(chunk)
+                    
+                    # Update progress
+                    if total_size > 0:
+                        percent = (downloaded / total_size) * 100
+                        progress['percent'] = min(percent, 100)
+                        progress['downloaded'] = downloaded
+                        progress['total'] = total_size
+                    
+                    yield chunk
+                
+                # Wait for process to complete
+                process.wait()
                 
                 # Mark as completed
                 progress['status'] = 'completed'
@@ -950,6 +868,8 @@ def direct_download(download_id):
             except Exception as e:
                 progress['status'] = 'error'
                 progress['error'] = str(e)
+                # Yield error message
+                yield f"Error: {str(e)}".encode()
         
         return Response(
             generate(),
@@ -957,6 +877,8 @@ def direct_download(download_id):
             headers={
                 'Content-Disposition': f'attachment; filename="{filename}"',
                 'Content-Type': content_type,
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive',
             }
         )
         
@@ -964,6 +886,102 @@ def direct_download(download_id):
         progress['status'] = 'error'
         progress['error'] = str(e)
         return jsonify({'error': str(e)}), 500
+
+def download_video_direct(url, format_id, download_id):
+    """Extract video info and prepare for streaming download"""
+    try:
+        download_progress[download_id] = {
+            'status': 'extracting',
+            'percent': 0,
+            'message': 'Extracting video information...'
+        }
+        
+        # Enhanced yt-dlp options for info extraction
+        ydl_opts = {
+            'format': format_id,
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': False,
+            'dump_single_json': True,
+            'no_download': True,  # Don't download, just extract info
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+            },
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['ios', 'android'],
+                    'player_skip': ['webpage', 'configs'],
+                }
+            }
+        }
+        
+        # Try multiple configurations
+        configs = [
+            ydl_opts,
+            {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['ios']}}},
+            {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['android']}}},
+            {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['web']}}},
+        ]
+        
+        info = None
+        for config in configs:
+            try:
+                with yt_dlp.YoutubeDL(config) as ydl:
+                    info = ydl.extract_info(url, download=False)
+                    if info:
+                        break
+            except Exception as e:
+                continue
+        
+        if not info:
+            raise Exception("Could not extract video information")
+        
+        # Get file info
+        title = info.get('title', 'video')
+        ext = info.get('ext', 'mp4')
+        filesize = info.get('filesize') or info.get('filesize_approx', 0)
+        
+        # Clean filename
+        filename = f"{title}.{ext}"
+        filename = re.sub(r'[<>:"/\\|?*]', '_', filename)
+        filename = filename[:200]  # Limit length
+        
+        # Determine content type
+        content_type_map = {
+            'mp4': 'video/mp4',
+            'webm': 'video/webm',
+            'mkv': 'video/x-matroska',
+            'mp3': 'audio/mpeg',
+            'aac': 'audio/aac',
+            'ogg': 'audio/ogg',
+            'm4a': 'audio/mp4',
+        }
+        content_type = content_type_map.get(ext, 'application/octet-stream')
+        
+        # Update progress - ready for streaming download
+        download_progress[download_id] = {
+            'status': 'ready_for_download',
+            'percent': 100,
+            'message': 'Ready for download',
+            'filename': filename,
+            'content_type': content_type,
+            'filesize': filesize,
+            'title': title,
+            'url': url,
+            'format_id': format_id
+        }
+        
+    except Exception as e:
+        download_progress[download_id] = {
+            'status': 'error',
+            'error': str(e),
+            'percent': 0
+        }
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
