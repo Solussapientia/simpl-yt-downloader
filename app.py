@@ -661,8 +661,5 @@ def download_file(download_id):
     else:
         return jsonify({'error': f'File not found: {filename}'}), 404
 
-if __name__ == '__main__':
-    # Railway provides PORT environment variable
-    port = int(os.environ.get('PORT', 8000))
-    print(f"Starting server on port {port}")
-    app.run(debug=False, host='0.0.0.0', port=port) 
+# WSGI entry point is handled by wsgi.py
+# This allows the app to be imported without running the server 
