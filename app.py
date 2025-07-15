@@ -778,6 +778,8 @@ def extract_video_info(url):
 def get_fresh_download_url(url, format_id):
     """Get a fresh download URL like Y2mate does"""
     try:
+        print(f"Getting fresh download URL for format: {format_id}")
+        
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
@@ -796,18 +798,38 @@ def get_fresh_download_url(url, format_id):
             info = ydl.extract_info(url, download=False)
             
             if not info:
+                print("No video info extracted")
                 return None
             
             # Find the requested format
             for fmt in info.get('formats', []):
                 if fmt.get('format_id') == format_id:
-                    return {
-                        'url': fmt.get('url'),
+                    download_url = fmt.get('url')
+                    if not download_url:
+                        print(f"No URL found for format {format_id}")
+                        continue
+                    
+                    # Test if URL is accessible
+                    try:
+                        test_response = requests.head(download_url, timeout=10)
+                        if test_response.status_code != 200:
+                            print(f"URL not accessible: {test_response.status_code}")
+                            continue
+                    except:
+                        print(f"URL test failed for format {format_id}")
+                        continue
+                    
+                    result = {
+                        'url': download_url,
                         'filename': f"{info.get('title', 'download')}.{fmt.get('ext', 'mp4')}",
                         'filesize': fmt.get('filesize', 0),
                         'ext': fmt.get('ext', 'mp4')
                     }
+                    
+                    print(f"Found working URL for {format_id}: {len(download_url)} chars")
+                    return result
             
+            print(f"Format {format_id} not found in available formats")
             return None
             
     except Exception as e:
@@ -871,6 +893,17 @@ def download_video(video_id, format_id):
         filename = re.sub(r'[^\w\s.-]', '', filename)
         filename = re.sub(r'\s+', ' ', filename).strip()
         
+        # Test the URL first
+        try:
+            test_response = requests.head(download_info['url'], timeout=10)
+            if test_response.status_code != 200:
+                return jsonify({'error': 'Video URL is not accessible'}), 400
+        except:
+            return jsonify({'error': 'Cannot access video URL'}), 400
+        
+        # Get file size for headers
+        file_size = download_info.get('filesize', 0)
+        
         # Stream the file with proper download headers
         def generate():
             try:
@@ -883,30 +916,36 @@ def download_video(video_id, format_id):
                     'Range': 'bytes=0-'
                 }
                 
-                with requests.get(download_info['url'], stream=True, headers=headers, timeout=30) as r:
+                print(f"Starting download stream for: {filename}")
+                
+                with requests.get(download_info['url'], stream=True, headers=headers, timeout=60) as r:
                     r.raise_for_status()
+                    
+                    # Check if we got content
+                    if r.status_code != 200:
+                        print(f"Bad response code: {r.status_code}")
+                        return
+                    
+                    total_bytes = 0
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:
+                            total_bytes += len(chunk)
                             yield chunk
+                    
+                    print(f"Download completed: {filename} ({total_bytes} bytes)")
                             
-            except Exception as e:
+            except requests.exceptions.RequestException as e:
                 print(f"Streaming error: {e}")
-                yield b"Error: Could not stream video"
+                error_msg = f"Error streaming video: {str(e)}"
+                yield error_msg.encode('utf-8')
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+                error_msg = f"Unexpected error: {str(e)}"
+                yield error_msg.encode('utf-8')
         
         # Determine content type
         ext = download_info.get('ext', 'mp4').lower()
-        content_type_map = {
-            'mp4': 'video/mp4',
-            'webm': 'video/webm',
-            'mkv': 'video/x-matroska',
-            'avi': 'video/x-msvideo',
-            'mov': 'video/quicktime',
-            'mp3': 'audio/mpeg',
-            'm4a': 'audio/mp4',
-            'wav': 'audio/wav',
-            'flac': 'audio/flac'
-        }
-        content_type = content_type_map.get(ext, 'application/octet-stream')
+        content_type = 'video/mp4'
         
         # Create response with proper download headers
         response = Response(
@@ -920,6 +959,10 @@ def download_video(video_id, format_id):
                 'Expires': '0'
             }
         )
+        
+        # Add content length if available
+        if file_size > 0:
+            response.headers['Content-Length'] = str(file_size)
         
         return response
         
