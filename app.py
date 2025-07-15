@@ -828,6 +828,29 @@ def index():
 def test():
     return "<h1>Flask app is working!</h1>"
 
+@app.route('/simple')
+def simple():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Simple Test</title>
+        <style>
+            body { background: #1a1a1a; color: white; font-family: Arial; padding: 20px; }
+            .container { max-width: 800px; margin: 0 auto; }
+            h1 { color: #0ea5e9; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🎉 Simpl YT Downloader - Simple Test Page</h1>
+            <p>This is a minimal test page to verify the Flask app is working.</p>
+            <p>If you see this, the Flask app is running correctly!</p>
+        </div>
+    </body>
+    </html>
+    """
+
 @app.route('/extract', methods=['POST'])
 def extract():
     """Extract video information"""
