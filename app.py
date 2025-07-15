@@ -384,37 +384,37 @@ def download_video():
     if not os.path.exists(downloads_dir):
         os.makedirs(downloads_dir)
     
-    # Configure format selector based on download type with direct format codes
+    # Configure format selector with ffmpeg-free fallbacks
     if format_type == 'mp3':
         # For MP3, extract audio only
         format_selector = 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best'
     else:
-        # For MP4, use specific format codes that work better
+        # For MP4, prefer single-file formats over merging
         quality_lower = quality.lower()
         
         if quality == 'best':
-            format_selector = 'best[ext=mp4]/best'
+            format_selector = 'best[ext=mp4][height<=1080]/best[ext=mp4]/best'
         elif '2160' in quality_lower or '4k' in quality_lower:
-            # 4K formats: 313 (webm), 271 (webm), 401 (mp4), 337 (webm)
-            format_selector = '401+140/313+140/271+140/337+140/best[height>=2160]/best'
+            # Try merged formats first, then fallback to single file
+            format_selector = 'best[height>=2160][ext=mp4]/best[height>=2160]/401+140/313+140/best[ext=mp4]/best'
         elif '1440' in quality_lower:
-            # 1440p formats: 271 (webm), 308 (webm), 264 (mp4)
-            format_selector = '264+140/271+140/308+140/best[height>=1440]/best'
+            # 1440p with fallbacks
+            format_selector = 'best[height>=1440][ext=mp4]/best[height>=1440]/264+140/271+140/best[ext=mp4]/best'
         elif '1080' in quality_lower:
-            # 1080p formats: 137 (mp4), 299 (mp4), 248 (webm), 303 (webm)
-            format_selector = '137+140/299+140/248+140/303+140/best[height>=1080]/best'
+            # 1080p with fallbacks
+            format_selector = 'best[height>=1080][ext=mp4]/best[height>=1080]/22/137+140/299+140/best[ext=mp4]/best'
         elif '720' in quality_lower:
-            # 720p formats: 136 (mp4), 298 (mp4), 247 (webm), 302 (webm)
-            format_selector = '136+140/298+140/247+140/302+140/best[height>=720]/best'
+            # 720p with fallbacks
+            format_selector = 'best[height>=720][ext=mp4]/best[height>=720]/136+140/298+140/best[ext=mp4]/best'
         elif '480' in quality_lower:
-            # 480p formats: 135 (mp4), 244 (webm)
-            format_selector = '135+140/244+140/best[height>=480]/best'
+            # 480p with fallbacks
+            format_selector = 'best[height>=480][ext=mp4]/best[height>=480]/135+140/244+140/best[ext=mp4]/best'
         elif '360' in quality_lower:
-            # 360p formats: 134 (mp4), 243 (webm), 18 (mp4)
-            format_selector = '134+140/243+140/18/best[height>=360]/best'
+            # 360p with fallbacks - format 18 is a pre-merged mp4
+            format_selector = 'best[height>=360][ext=mp4]/best[height>=360]/18/134+140/243+140/best[ext=mp4]/best'
         else:
-            # Default fallback
-            format_selector = 'best[ext=mp4]/best'
+            # Default fallback - prefer single file formats
+            format_selector = 'best[ext=mp4][height<=720]/best[ext=mp4]/best'
     
     # Initialize progress
     download_progress[download_id] = {
@@ -425,12 +425,11 @@ def download_video():
         'eta': 0
     }
     
-    # Simplified yt-dlp configuration to avoid errors
+    # Robust yt-dlp configuration with ffmpeg fallback
     ydl_opts = {
         'format': format_selector,
         'outtmpl': os.path.join(downloads_dir, '%(title)s.%(ext)s'),
         'no_warnings': True,
-        'merge_output_format': 'mp4' if format_type == 'mp4' else None,
         'overwrites': True,
         'ignoreerrors': False,
         'retries': 5,
@@ -438,6 +437,10 @@ def download_video():
         'skip_unavailable_fragments': True,
         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
     }
+    
+    # Only add merge_output_format if not extracting audio
+    if format_type == 'mp4':
+        ydl_opts['merge_output_format'] = 'mp4'
     
     # Debug output
     print(f"DEBUG: Quality selected: {quality}")
