@@ -64,18 +64,18 @@
                         }
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.6s ease-out',
-                        'slide-up': 'slideUp 0.5s ease-out',
-                        'scale-up': 'scaleUp 0.4s ease-out',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'scale-up': 'scaleUp 0.3s ease-out',
                         'glow': 'glow 2s ease-in-out infinite alternate',
                     },
                     keyframes: {
                         fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '0%': { opacity: '0', transform: 'translateY(15px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
                         slideUp: {
-                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
                         scaleUp: {
@@ -83,12 +83,9 @@
                             '100%': { opacity: '1', transform: 'scale(1)' },
                         },
                         glow: {
-                            '0%': { boxShadow: '0 0 20px rgba(14, 165, 233, 0.3)' },
-                            '100%': { boxShadow: '0 0 30px rgba(14, 165, 233, 0.5)' },
+                            '0%': { boxShadow: '0 0 15px rgba(14, 165, 233, 0.2)' },
+                            '100%': { boxShadow: '0 0 25px rgba(14, 165, 233, 0.4)' },
                         }
-                    },
-                    backdropBlur: {
-                        'xs': '2px',
                     }
                 }
             }
@@ -98,24 +95,24 @@
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen text-white overflow-x-hidden">
     <!-- Animated Background -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
-        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full opacity-20 blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500 rounded-full opacity-10 blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full opacity-15 blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full opacity-15 blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500 rounded-full opacity-8 blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
     </div>
     
     <!-- Main Container -->
     <div class="relative min-h-screen">
         <!-- Header -->
-        <header class="relative z-10 pt-12 pb-8">
+        <header class="relative z-10 pt-8 pb-6">
             <div class="container mx-auto px-4">
                 <div class="text-center animate-fade-in">
-                    <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl shadow-2xl mb-6 animate-glow">
-                        <i class="fas fa-download text-white text-2xl"></i>
+                    <div class="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg mb-4 animate-glow">
+                        <i class="fas fa-download text-white text-lg"></i>
                     </div>
-                    <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-4">
+                    <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-3">
                         Simpl YT Downloader
                     </h1>
-                    <p class="text-slate-400 text-xl max-w-2xl mx-auto leading-relaxed">
+                    <p class="text-slate-400 text-base max-w-xl mx-auto">
                         Download YouTube videos instantly - No registration, no ads, completely free forever!
                     </p>
                 </div>
@@ -123,33 +120,33 @@
         </header>
 
         <!-- Main Content -->
-        <main class="relative z-10 container mx-auto px-4 py-8">
-            <div class="max-w-4xl mx-auto space-y-8">
+        <main class="relative z-10 container mx-auto px-4 py-6">
+            <div class="max-w-3xl mx-auto space-y-6">
                 
                 <!-- Step 1: URL Input Card -->
-                <div class="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 animate-slide-up">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                            <span class="text-white font-bold text-lg">1</span>
+                <div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 shadow-xl hover:shadow-2xl transition-all duration-300 animate-slide-up">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+                            <span class="text-white font-bold text-sm">1</span>
                         </div>
-                        <h2 class="text-2xl font-bold text-white">Enter YouTube URL</h2>
+                        <h2 class="text-lg font-semibold text-white">Enter YouTube URL</h2>
                     </div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex flex-col sm:flex-row gap-3">
                         <div class="flex-1 relative group">
                             <input 
                                 type="text" 
                                 id="url-input" 
                                 placeholder="Paste YouTube URL here..."
-                                class="w-full px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:bg-white/15"
+                                class="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:bg-white/15 text-sm"
                             >
-                            <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                         </div>
                         <button 
                             id="extract-btn"
-                            class="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3 min-w-[140px] justify-center"
+                            class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-2 min-w-[120px] justify-center text-sm"
                         >
-                            <i class="fas fa-search"></i>
+                            <i class="fas fa-search text-sm"></i>
                             Extract
                         </button>
                     </div>
@@ -157,73 +154,73 @@
 
                 <!-- Loading State -->
                 <div id="loading" class="hidden animate-scale-up">
-                    <div class="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 shadow-2xl">
-                        <div class="flex items-center justify-center gap-4">
-                            <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                            <p class="text-lg font-medium text-white">Extracting video information...</p>
+                    <div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 shadow-xl">
+                        <div class="flex items-center justify-center gap-3">
+                            <div class="w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            <p class="text-sm font-medium text-white">Extracting video information...</p>
                         </div>
                     </div>
                 </div>
                     
                 <!-- Error Message -->
                 <div id="error-message" class="hidden animate-scale-up">
-                    <div class="bg-red-500/10 backdrop-blur-xl rounded-3xl border border-red-500/20 p-8 shadow-2xl">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center">
-                                <i class="fas fa-exclamation-triangle text-white"></i>
+                    <div class="bg-red-500/10 backdrop-blur-xl rounded-2xl border border-red-500/20 p-6 shadow-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-white text-sm"></i>
                             </div>
-                            <span id="error-text" class="text-red-300 text-lg font-medium"></span>
+                            <span id="error-text" class="text-red-300 text-sm font-medium"></span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Step 2: Video Information Card -->
                 <div id="video-info" class="hidden animate-fade-in">
-                    <div class="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 shadow-2xl">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                                <span class="text-white font-bold text-lg">2</span>
+                    <div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 shadow-xl">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-7 h-7 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
+                                <span class="text-white font-bold text-sm">2</span>
                             </div>
-                            <h2 class="text-2xl font-bold text-white">Choose Quality & Download</h2>
+                            <h2 class="text-lg font-semibold text-white">Choose Quality & Download</h2>
                         </div>
                         
                         <!-- Video Details -->
-                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-8 hover:bg-white/10 transition-all duration-300">
-                            <div class="flex flex-col md:flex-row gap-6">
-                                <div class="flex-shrink-0 mx-auto md:mx-0">
+                        <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 mb-6 hover:bg-white/10 transition-all duration-300">
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <div class="flex-shrink-0 mx-auto sm:mx-0">
                                     <div class="relative group">
-                                        <img id="video-thumbnail" class="w-48 h-36 object-cover rounded-2xl shadow-2xl" alt="Video thumbnail">
-                                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                        <div class="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded-lg text-sm font-medium">
+                                        <img id="video-thumbnail" class="w-32 h-24 object-cover rounded-lg shadow-lg" alt="Video thumbnail">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        <div class="absolute bottom-1 right-1 bg-black/70 text-white px-2 py-1 rounded text-xs font-medium">
                                             <i class="fas fa-play mr-1"></i>
                                             <span id="video-duration-overlay"></span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex-1">
-                                    <h3 id="video-title" class="text-xl font-bold mb-4 text-white leading-tight"></h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div class="flex items-center gap-3 text-slate-300">
-                                            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                                                <i class="fas fa-user text-white text-sm"></i>
+                                <div class="flex-1 min-w-0">
+                                    <h3 id="video-title" class="text-base font-semibold mb-3 text-white leading-tight"></h3>
+                                    <div class="grid grid-cols-2 gap-3 text-xs">
+                                        <div class="flex items-center gap-2 text-slate-300">
+                                            <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-user text-white text-xs"></i>
                                             </div>
-                                            <span id="video-uploader" class="font-medium"></span>
+                                            <span id="video-uploader" class="font-medium truncate"></span>
                                         </div>
-                                        <div class="flex items-center gap-3 text-slate-300">
-                                            <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
-                                                <i class="fas fa-clock text-white text-sm"></i>
+                                        <div class="flex items-center gap-2 text-slate-300">
+                                            <div class="w-6 h-6 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-clock text-white text-xs"></i>
                                             </div>
                                             <span id="video-duration" class="font-medium"></span>
                                         </div>
-                                        <div class="flex items-center gap-3 text-slate-300">
-                                            <div class="w-8 h-8 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center">
-                                                <i class="fas fa-eye text-white text-sm"></i>
+                                        <div class="flex items-center gap-2 text-slate-300">
+                                            <div class="w-6 h-6 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-eye text-white text-xs"></i>
                                             </div>
                                             <span id="video-views" class="font-medium"></span>
                                         </div>
-                                        <div class="flex items-center gap-3 text-slate-300">
-                                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                                                <i class="fas fa-calendar text-white text-sm"></i>
+                                        <div class="flex items-center gap-2 text-slate-300">
+                                            <div class="w-6 h-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-calendar text-white text-xs"></i>
                                             </div>
                                             <span id="video-upload-date" class="font-medium"></span>
                                         </div>
@@ -233,12 +230,12 @@
                         </div>
                         
                         <!-- Download Options -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                <i class="fas fa-download text-blue-500"></i>
+                        <div class="space-y-3">
+                            <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                                <i class="fas fa-download text-blue-500 text-sm"></i>
                                 Available Formats
                             </h3>
-                            <div id="download-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div id="download-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <!-- Download buttons will be inserted here -->
                             </div>
                         </div>
@@ -248,7 +245,7 @@
         </main>
 
         <!-- Footer -->
-        <footer class="relative z-10 text-center py-8 text-slate-400">
+        <footer class="relative z-10 text-center py-6 text-slate-400 text-sm">
             <p>&copy; 2024 Simpl YT Downloader. Built with ❤️ using HeroUI design principles.</p>
         </footer>
     </div>
@@ -289,6 +286,7 @@
         }
 
         function formatDuration(seconds) {
+            if (!seconds) return 'N/A';
             const hours = Math.floor(seconds / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
             const remainingSeconds = seconds % 60;
@@ -301,6 +299,7 @@
         }
 
         function formatViews(views) {
+            if (!views) return 'N/A';
             if (views >= 1000000) {
                 return (views / 1000000).toFixed(1) + 'M';
             } else if (views >= 1000) {
@@ -311,6 +310,7 @@
         }
 
         function formatDate(dateString) {
+            if (!dateString) return 'N/A';
             const date = new Date(dateString);
             return date.toLocaleDateString('en-US', { 
                 year: 'numeric', 
@@ -324,6 +324,7 @@
             if (quality.includes('720')) return 'fas fa-gem';
             if (quality.includes('480')) return 'fas fa-star';
             if (quality.includes('360')) return 'fas fa-circle';
+            if (quality.includes('Lowest')) return 'fas fa-compress';
             return 'fas fa-play';
         }
 
@@ -332,28 +333,29 @@
             if (quality.includes('720')) return 'from-purple-500 to-purple-600';
             if (quality.includes('480')) return 'from-blue-500 to-blue-600';
             if (quality.includes('360')) return 'from-green-500 to-green-600';
-            return 'from-gray-500 to-gray-600';
+            if (quality.includes('Lowest')) return 'from-gray-500 to-gray-600';
+            return 'from-slate-500 to-slate-600';
         }
 
-        function createDownloadButton(format) {
+        function createDownloadButton(format, videoId) {
             const qualityIcon = getQualityIcon(format.quality);
             const qualityColor = getQualityColor(format.quality);
             
             return `
-                <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/10 transition-all duration-300 group">
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-3 hover:bg-white/10 transition-all duration-300 group">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br ${qualityColor} rounded-2xl flex items-center justify-center shadow-lg">
-                                <i class="${qualityIcon} text-white text-sm"></i>
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 bg-gradient-to-br ${qualityColor} rounded-lg flex items-center justify-center shadow-md">
+                                <i class="${qualityIcon} text-white text-xs"></i>
                             </div>
                             <div>
-                                <div class="text-white font-semibold">${format.quality}</div>
-                                <div class="text-slate-400 text-sm">${format.ext.toUpperCase()} • ${format.filesize || 'Unknown size'}</div>
+                                <div class="text-white font-medium text-sm">${format.quality}</div>
+                                <div class="text-slate-400 text-xs">MP4 • ${format.size}</div>
                             </div>
                         </div>
-                        <a href="/download/${format.video_id}/${format.format_id}" 
-                           class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
-                            <i class="fas fa-download mr-2"></i>
+                        <a href="/download/${videoId}/${format.format_id}" 
+                           class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-md text-xs">
+                            <i class="fas fa-download mr-1"></i>
                             Download
                         </a>
                     </div>
@@ -385,21 +387,27 @@
 
                 const data = await response.json();
 
-                if (response.ok) {
+                if (response.ok && data.success) {
+                    const video = data.video;
+                    
                     // Update video information
-                    videoThumbnail.src = data.thumbnail;
-                    videoTitle.textContent = data.title;
-                    videoUploader.textContent = data.uploader || 'Unknown';
-                    videoDuration.textContent = formatDuration(data.duration);
-                    videoDurationOverlay.textContent = formatDuration(data.duration);
-                    videoViews.textContent = formatViews(data.view_count || 0) + ' views';
-                    videoUploadDate.textContent = data.upload_date ? formatDate(data.upload_date) : 'Unknown';
+                    videoThumbnail.src = video.thumbnail;
+                    videoTitle.textContent = video.title;
+                    videoUploader.textContent = video.uploader || 'Unknown';
+                    videoDuration.textContent = formatDuration(video.duration);
+                    videoDurationOverlay.textContent = formatDuration(video.duration);
+                    videoViews.textContent = formatViews(video.view_count) + ' views';
+                    videoUploadDate.textContent = formatDate(video.upload_date) || 'Unknown';
 
                     // Create download options
                     downloadOptions.innerHTML = '';
-                    data.formats.forEach(format => {
-                        downloadOptions.innerHTML += createDownloadButton(format);
-                    });
+                    if (video.formats && video.formats.length > 0) {
+                        video.formats.forEach(format => {
+                            downloadOptions.innerHTML += createDownloadButton(format, video.id);
+                        });
+                    } else {
+                        downloadOptions.innerHTML = '<p class="text-slate-400 text-sm text-center py-4">No formats available</p>';
+                    }
 
                     // Show video info
                     hideElement(loading);
