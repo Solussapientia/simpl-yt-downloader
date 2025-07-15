@@ -368,6 +368,10 @@ def download_thread_func(url, ydl_opts, download_id):
             user_error = "Network connection error. Please check your internet connection and try again."
         elif "sign in" in error_str or "confirm you're not a bot" in error_str:
             user_error = "YouTube is asking for sign-in verification. This happens when they detect automated downloads. Please wait 10-15 minutes and try again."
+        elif "failed to extract any player response" in error_str:
+            user_error = "YouTube is completely blocking video information extraction. This is a severe anti-bot measure. Try: 1) Wait 15-30 minutes before trying again, 2) Try a different video, 3) This server IP may be blacklisted by YouTube."
+        elif "only images are available" in error_str:
+            user_error = "YouTube has restricted this video and only thumbnail images are available. This usually means the video is heavily restricted or requires special authentication."
         else:
             user_error = f"Download failed: {str(e)}"
         
@@ -546,20 +550,22 @@ def get_video_info():
         return jsonify({'error': 'Please provide a valid YouTube URL'}), 400
     
     try:
-        # YouTube 403 error mitigation for info extraction
+        # Advanced YouTube anti-bot evasion for info extraction
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
             'ignoreerrors': False,
-            'retries': 5,  # Increased retries
+            'retries': 8,  # Increased retries for extraction issues
             'user_agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['mweb', 'android', 'ios', 'web'],  # Use mobile web client first
+                    'player_client': ['mweb', 'android', 'ios'],  # Skip 'web' client that's most likely to be blocked
+                    'player_skip': ['dash', 'hls'],  # Skip problematic players
                     'include_live_dash': False,
+                    'skip': ['dash', 'hls'],  # Additional skip for extraction
                 }
             },
-            'sleep_interval': 1,  # Add delay between requests
+            'sleep_interval': 2,  # More delay between requests
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
@@ -571,6 +577,7 @@ def get_video_info():
                 'Sec-Fetch-Site': 'none',
                 'Sec-Fetch-User': '?1',
                 'Upgrade-Insecure-Requests': '1',
+                'X-Forwarded-For': '203.0.113.1',  # Fake residential IP
             }
         }
         
@@ -676,7 +683,23 @@ def get_video_info():
             
     except Exception as e:
         print(f"Error in get_video_info: {e}")
-        return jsonify({'error': f'Failed to get video information: {str(e)}'}), 500
+        
+        # Provide user-friendly error messages for common extraction failures
+        error_str = str(e).lower()
+        if "failed to extract any player response" in error_str:
+            user_error = "YouTube is completely blocking video information extraction from this server. This is a severe anti-bot measure. Please try: 1) Wait 15-30 minutes before trying again, 2) Try a different video, 3) This server IP may be blacklisted by YouTube."
+        elif "sign in" in error_str or "confirm you're not a bot" in error_str:
+            user_error = "YouTube is asking for sign-in verification. This happens when they detect automated access. Please wait 10-15 minutes and try again."
+        elif "only images are available" in error_str:
+            user_error = "YouTube has restricted this video and only thumbnail images are available. This usually means the video is heavily restricted or requires special authentication."
+        elif "403" in error_str or "forbidden" in error_str:
+            user_error = "YouTube is blocking access to this video. This can happen due to regional restrictions or anti-bot measures. Please try a different video or wait before trying again."
+        elif "private" in error_str or "unavailable" in error_str:
+            user_error = "This video is private, unavailable, or has been deleted."
+        else:
+            user_error = f"Failed to get video information: {str(e)}"
+        
+        return jsonify({'error': user_error}), 500
 
 @app.route('/download_file/<download_id>')
 def download_file(download_id):
