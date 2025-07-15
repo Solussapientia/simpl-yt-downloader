@@ -224,7 +224,7 @@ def format_description(format_info):
     return quality
 
 def download_thread_func(url, ydl_opts, download_id):
-    """Function to handle download in a separate thread"""
+    """Function to handle download in a separate thread with fallback formats"""
     try:
         downloads_dir = 'downloads'
         
@@ -241,26 +241,94 @@ def download_thread_func(url, ydl_opts, download_id):
         progress_hook = ProgressHook(download_id)
         ydl_opts['progress_hooks'] = [progress_hook]
         
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # First, extract info to get the video title
-            info = ydl.extract_info(url, download=False)
-            video_title = info.get('title', 'Unknown')
-            
-            # Determine expected file extension based on format type
-            format_type = 'mp3' if ydl_opts.get('postprocessors') else 'mp4'
-            expected_extension = '.mp3' if format_type == 'mp3' else '.mp4'
-            
-            # Get list of files before download
-            files_before = set()
-            if os.path.exists(downloads_dir):
-                files_before = set(os.listdir(downloads_dir))
-            
-            # Update status to show we're starting the download
-            download_progress[download_id]['status'] = 'downloading'
-            download_progress[download_id]['speed_text'] = "Initializing..."
-            
-            # Download the video/audio
-            ydl.download([url])
+        # Get the original format and create fallback formats
+        original_format = ydl_opts.get('format', 'best')
+        format_type = 'mp3' if ydl_opts.get('postprocessors') else 'mp4'
+        
+        # Define fallback formats based on type
+        if format_type == 'mp4':
+            fallback_formats = [
+                original_format,
+                'best[height<=720]',
+                'best[height<=480]',
+                'best[height<=360]',
+                'worst',
+                'best'
+            ]
+        else:  # audio
+            fallback_formats = [
+                original_format,
+                'bestaudio',
+                'worst'
+            ]
+        
+        successful_download = False
+        last_error = None
+        
+        for attempt, format_selector in enumerate(fallback_formats, 1):
+            try:
+                print(f"Attempt {attempt}: Trying format '{format_selector}'")
+                
+                # Add delay between attempts to avoid rate limiting
+                if attempt > 1:
+                    delay = min(2 ** (attempt - 1), 10)  # Exponential backoff, max 10 seconds
+                    print(f"Waiting {delay} seconds before retry...")
+                    time.sleep(delay)
+                
+                # Update the format in ydl_opts
+                current_ydl_opts = ydl_opts.copy()
+                current_ydl_opts['format'] = format_selector
+                
+                with yt_dlp.YoutubeDL(current_ydl_opts) as ydl:
+                    # First, extract info to get the video title
+                    info = ydl.extract_info(url, download=False)
+                    video_title = info.get('title', 'Unknown')
+                    
+                    # Determine expected file extension
+                    expected_extension = '.mp3' if format_type == 'mp3' else '.mp4'
+                    
+                    # Get list of files before download
+                    files_before = set()
+                    if os.path.exists(downloads_dir):
+                        files_before = set(os.listdir(downloads_dir))
+                    
+                    # Update status to show we're starting the download
+                    download_progress[download_id]['status'] = 'downloading'
+                    download_progress[download_id]['speed_text'] = f"Trying format {attempt}/{len(fallback_formats)}..."
+                    
+                    # Download the video/audio
+                    ydl.download([url])
+                    
+                    # Check if download was successful by looking for a non-empty file
+                    files_after = set()
+                    if os.path.exists(downloads_dir):
+                        files_after = set(os.listdir(downloads_dir))
+                    
+                    new_files = files_after - files_before
+                    for new_file in new_files:
+                        if new_file.endswith(expected_extension):
+                            file_path = os.path.join(downloads_dir, new_file)
+                            if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                                print(f"Successfully downloaded with format '{format_selector}': {new_file}")
+                                successful_download = True
+                                break
+                    
+                    if successful_download:
+                        break
+                        
+            except Exception as e:
+                last_error = e
+                print(f"Format '{format_selector}' failed: {e}")
+                
+                # If this is an empty file error or 403-related error, try next format
+                if "empty" in str(e).lower() or "403" in str(e) or "forbidden" in str(e).lower():
+                    continue
+                else:
+                    # For other errors, stop trying
+                    break
+        
+        if not successful_download:
+            raise Exception(f"All format attempts failed. Last error: {last_error}")
         
         # Wait longer for MP3 processing to complete
         if format_type == 'mp3':
@@ -350,10 +418,24 @@ def download_thread_func(url, ydl_opts, download_id):
             
     except Exception as e:
         print(f"Error in download_thread_func: {e}")
+        
+        # Create user-friendly error messages
+        error_str = str(e).lower()
+        if "403" in error_str or "forbidden" in error_str:
+            user_error = "YouTube is blocking this video download. This can happen due to regional restrictions, copyright protection, or rate limiting. Please try a different video or wait a few minutes before trying again."
+        elif "empty" in error_str:
+            user_error = "The video file couldn't be downloaded completely. This usually happens when YouTube blocks the download partway through. Please try again in a few minutes."
+        elif "unavailable" in error_str:
+            user_error = "This video is not available for download. It might be private, deleted, or restricted in your region."
+        elif "network" in error_str or "connection" in error_str:
+            user_error = "Network connection error. Please check your internet connection and try again."
+        else:
+            user_error = f"Download failed: {str(e)}"
+        
         download_progress[download_id] = {
             'status': 'error',
             'percent': 0,
-            'error': str(e),
+            'error': user_error,
             'speed_text': "Error",
             'eta_text': "Failed",
             'file_size': "-- MB"
@@ -396,17 +478,35 @@ def download_video():
         'eta': 0
     }
     
-    # Configure yt-dlp to use exact format ID
+    # Configure yt-dlp with improved error handling and fallbacks
     ydl_opts = {
         'format': format_id,  # Use exact format ID - no guessing!
         'outtmpl': os.path.join(downloads_dir, '%(title)s.%(ext)s'),
         'no_warnings': True,
         'overwrites': True,
         'ignoreerrors': False,
-        'retries': 5,
-        'fragment_retries': 5,
+        'retries': 10,  # Increased retries
+        'fragment_retries': 10,  # Increased fragment retries
+        'retry_sleep': 2,  # Wait 2 seconds between retries
         'skip_unavailable_fragments': True,
+        'keep_fragments': False,  # Don't keep fragments after merging
         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'extractor_args': {
+            'youtube': {
+                'skip': ['dash', 'hls'],  # Skip problematic formats first
+                'player_client': ['android', 'web']  # Try different clients
+            }
+        },
+        'sleep_interval': 1,  # Wait 1 second between requests
+        'max_sleep_interval': 5,  # Maximum wait time
+        'http_headers': {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-us,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+        }
     }
     
     # Debug output
