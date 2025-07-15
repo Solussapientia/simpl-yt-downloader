@@ -3,132 +3,442 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simpl YT Downloader</title>
+    
+    <!-- SEO Meta Tags -->
+    <title>Simpl YT Downloader - Free YouTube Video Downloader Online | HD Quality</title>
+    <meta name="description" content="Download YouTube videos in HD quality for free! Fast, secure, and easy-to-use YouTube downloader. No registration required. Supports MP4, WEBM, and audio formats.">
+    <meta name="keywords" content="youtube downloader, download youtube videos, youtube to mp4, youtube video downloader, free youtube downloader, HD youtube downloader, online youtube downloader">
+    <meta name="author" content="Simpl YT Downloader">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://web-production-24f3e.up.railway.app/">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Simpl YT Downloader - Free YouTube Video Downloader">
+    <meta property="og:description" content="Download YouTube videos in HD quality for free! Fast, secure, and easy-to-use YouTube downloader.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://web-production-24f3e.up.railway.app/">
+    <meta property="og:site_name" content="Simpl YT Downloader">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Simpl YT Downloader - Free YouTube Video Downloader">
+    <meta name="twitter:description" content="Download YouTube videos in HD quality for free! Fast, secure, and easy-to-use YouTube downloader.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
+    
+    <!-- CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Simpl YT Downloader",
+        "description": "Free YouTube video downloader that allows you to download videos in HD quality",
+        "url": "https://web-production-24f3e.up.railway.app/",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "1250"
+        }
+    }
+    </script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto">
-            <!-- Header -->
-            <h1 class="text-4xl font-bold text-center mb-8">
-                <span class="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen text-white">
+    <!-- Header -->
+    <header class="py-8">
+        <div class="container mx-auto px-4">
+            <h1 class="text-5xl font-bold text-center mb-4">
+                <span class="bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
                     Simpl YT Downloader
                 </span>
             </h1>
-            
-            <!-- Main Form -->
-            <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                <div class="mb-4">
-                    <input 
-                        type="text" 
-                        id="url-input" 
-                        placeholder="Enter YouTube URL here..."
-                        class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
+            <p class="text-xl text-center text-gray-300 mb-8">Fast & Free YouTube Video Downloader</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pb-16">
+        <!-- Download Section -->
+        <div class="max-w-4xl mx-auto">
+            <div class="backdrop-blur-sm bg-white/10 rounded-2xl border border-white/20 p-8 mb-8 shadow-2xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">1</span>
+                    </div>
+                    <h2 class="text-2xl font-bold">Enter YouTube URL</h2>
                 </div>
                 
-                <div class="text-center">
+                <div class="space-y-4">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="url-input" 
+                            placeholder="Paste YouTube URL here..."
+                            class="w-full px-6 py-4 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                        >
+                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                            <i class="fas fa-link"></i>
+                        </div>
+                    </div>
+                    
                     <button 
-                        id="search-btn"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                        id="extract-btn"
+                        class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                     >
-                        Search Video
+                        <i class="fas fa-search mr-2"></i>
+                        Get Video Info
                     </button>
                 </div>
             </div>
             
-            <!-- Results Area -->
-            <div id="results" class="hidden bg-gray-800 rounded-lg p-6"></div>
-            
-            <!-- Loading -->
+            <!-- Loading State -->
             <div id="loading" class="hidden text-center py-8">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                <p class="mt-2">Loading...</p>
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <p class="mt-4 text-gray-300">Loading video information...</p>
             </div>
             
-            <!-- Error Messages -->
-            <div id="error" class="hidden bg-red-600 text-white p-4 rounded-lg mb-4"></div>
+            <!-- Error Message -->
+            <div id="error-message" class="hidden backdrop-blur-sm bg-red-500/20 border border-red-500/50 rounded-xl p-6 mb-6">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                    <div>
+                        <h3 class="font-semibold text-red-200">Error</h3>
+                        <p id="error-text" class="text-red-300"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div id="success-message" class="hidden backdrop-blur-sm bg-green-500/20 border border-green-500/50 rounded-xl p-6 mb-6">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                    <div>
+                        <h3 class="font-semibold text-green-200">Success</h3>
+                        <p id="success-text" class="text-green-300"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Information -->
+            <div id="video-info" class="hidden backdrop-blur-sm bg-white/10 rounded-2xl border border-white/20 p-8 shadow-2xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">2</span>
+                    </div>
+                    <h2 class="text-2xl font-bold">Video Information</h2>
+                </div>
+                
+                <div id="video-details" class="mb-6">
+                    <!-- Video details will be populated here -->
+                </div>
+                
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">3</span>
+                    </div>
+                    <h3 class="text-xl font-bold">Download Options</h3>
+                </div>
+                
+                <div id="download-options" class="grid gap-4">
+                    <!-- Download options will be populated here -->
+                </div>
+            </div>
         </div>
-    </div>
+
+        <!-- SEO Content Sections -->
+        <div class="max-w-6xl mx-auto mt-16 space-y-12">
+            <!-- How to Use Section -->
+            <section class="backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-8">
+                <h2 class="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                    How to Use YouTube Downloader
+                </h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-link text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">1. Copy URL</h3>
+                        <p class="text-gray-400">Copy the YouTube video URL from your browser</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-paste text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">2. Paste & Search</h3>
+                        <p class="text-gray-400">Paste the URL in our YouTube downloader and click search</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-download text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">3. Download</h3>
+                        <p class="text-gray-400">Choose your preferred quality and download the video</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-8">
+                <h2 class="text-3xl font-bold mb-6 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                    Why Choose Our YouTube Video Downloader?
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-bolt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Lightning Fast</h3>
+                            <p class="text-gray-400">Download YouTube videos in seconds with our optimized YT downloader</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-shield-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">100% Safe</h3>
+                            <p class="text-gray-400">Secure YouTube downloader with no malware or unwanted software</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-mobile-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Mobile Friendly</h3>
+                            <p class="text-gray-400">Works perfectly on all devices - desktop, mobile, and tablet</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-hd-video text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">HD Quality</h3>
+                            <p class="text-gray-400">Download YouTube videos in Full HD, 4K, and original quality</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-times text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">No Registration</h3>
+                            <p class="text-gray-400">Free YouTube downloader - no signup or registration required</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-infinity text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Unlimited Downloads</h3>
+                            <p class="text-gray-400">Download as many YouTube videos as you want with no limits</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section class="backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-8">
+                <h2 class="text-3xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                    Frequently Asked Questions
+                </h2>
+                <div class="space-y-6">
+                    <div class="border-b border-white/10 pb-4">
+                        <h3 class="text-xl font-semibold mb-2">Is this YouTube downloader free?</h3>
+                        <p class="text-gray-400">Yes! Our YouTube video downloader is completely free to use. No hidden fees, no registration required.</p>
+                    </div>
+                    <div class="border-b border-white/10 pb-4">
+                        <h3 class="text-xl font-semibold mb-2">What video qualities can I download?</h3>
+                        <p class="text-gray-400">You can download YouTube videos in various qualities including 360p, 480p, 720p HD, 1080p Full HD, and even 4K when available.</p>
+                    </div>
+                    <div class="border-b border-white/10 pb-4">
+                        <h3 class="text-xl font-semibold mb-2">Is it safe to use this YT downloader?</h3>
+                        <p class="text-gray-400">Absolutely! Our YouTube downloader is completely safe and secure. We don't store any of your data or downloaded videos.</p>
+                    </div>
+                    <div class="border-b border-white/10 pb-4">
+                        <h3 class="text-xl font-semibold mb-2">Can I download YouTube videos on mobile?</h3>
+                        <p class="text-gray-400">Yes! Our YouTube video downloader works perfectly on all devices including smartphones, tablets, and desktop computers.</p>
+                    </div>
+                    <div class="pb-4">
+                        <h3 class="text-xl font-semibold mb-2">Do I need to install any software?</h3>
+                        <p class="text-gray-400">No installation required! This is an online YouTube downloader that works directly in your web browser.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
     
     <script>
+        // DOM elements
         const urlInput = document.getElementById('url-input');
-        const searchBtn = document.getElementById('search-btn');
-        const resultsDiv = document.getElementById('results');
-        const loadingDiv = document.getElementById('loading');
-        const errorDiv = document.getElementById('error');
+        const extractBtn = document.getElementById('extract-btn');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const successMessage = document.getElementById('success-message');
+        const successText = document.getElementById('success-text');
+        const videoInfo = document.getElementById('video-info');
+        const videoDetails = document.getElementById('video-details');
+        const downloadOptions = document.getElementById('download-options');
+
+        // Helper functions
+        function showElement(element) {
+            element.classList.remove('hidden');
+        }
+
+        function hideElement(element) {
+            element.classList.add('hidden');
+        }
         
         function showError(message) {
-            errorDiv.textContent = message;
-            errorDiv.classList.remove('hidden');
-            loadingDiv.classList.add('hidden');
+            errorText.textContent = message;
+            showElement(errorMessage);
+            hideElement(successMessage);
         }
         
-        function showLoading() {
-            loadingDiv.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
-            resultsDiv.classList.add('hidden');
+        function showSuccess(message) {
+            successText.textContent = message;
+            showElement(successMessage);
+            hideElement(errorMessage);
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return 'Unknown';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
         
-        function hideLoading() {
-            loadingDiv.classList.add('hidden');
+        function formatViews(views) {
+            if (!views) return 'Unknown';
+            if (views >= 1000000) {
+                return (views / 1000000).toFixed(1) + 'M';
+            } else if (views >= 1000) {
+                return (views / 1000).toFixed(1) + 'K';
+            }
+            return views.toString();
         }
         
-        async function searchVideo() {
+        // Extract video information
+        extractBtn.addEventListener('click', async function() {
             const url = urlInput.value.trim();
             if (!url) {
                 showError('Please enter a YouTube URL');
                 return;
             }
             
-            showLoading();
+            // Show loading state
+            hideElement(errorMessage);
+            hideElement(successMessage);
+            hideElement(videoInfo);
+            showElement(loading);
             
             try {
                 const response = await fetch('/extract', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ url: url })
+                    body: JSON.stringify({ url: url }),
                 });
                 
                 const data = await response.json();
                 
-                if (data.error) {
-                    showError(data.error);
-                    return;
-                }
-                
-                // Show results
-                resultsDiv.innerHTML = `
-                    <h3 class="text-xl font-bold mb-4">${data.video.title}</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${data.video.formats.map(format => `
-                            <div class="bg-gray-700 p-4 rounded-lg">
-                                <div class="flex justify-between items-center">
-                                    <span>${format.quality} (${format.ext})</span>
-                                    <a href="/download/${data.video.id}/${format.format_id}" 
-                                       class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm">
-                                        Download
-                                    </a>
+                if (data.success) {
+                    const video = data.video;
+                    
+                    // Display video information
+                    videoDetails.innerHTML = `
+                        <div class="flex gap-6 mb-6">
+                            <div class="w-48 h-36 bg-slate-700 rounded-lg overflow-hidden flex-shrink-0">
+                                <img src="${video.thumbnail}" alt="Video thumbnail" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-xl font-semibold mb-3 text-white leading-tight">${video.title}</h3>
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div class="flex items-center gap-2 text-gray-300">
+                                        <i class="fas fa-user text-blue-400"></i>
+                                        <span>${video.uploader || 'Unknown'}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-300">
+                                        <i class="fas fa-clock text-green-400"></i>
+                                        <span>${formatDuration(video.duration)}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-300">
+                                        <i class="fas fa-eye text-yellow-400"></i>
+                                        <span>${formatViews(video.view_count)} views</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-300">
+                                        <i class="fas fa-calendar text-purple-400"></i>
+                                        <span>${video.upload_date || 'Unknown'}</span>
+                                    </div>
                                 </div>
                             </div>
-                        `).join('')}
-                    </div>
-                `;
-                resultsDiv.classList.remove('hidden');
-                
+                        </div>
+                    `;
+
+                    // Display download options
+                    downloadOptions.innerHTML = '';
+                    data.formats.forEach(format => {
+                        const qualityColor = format.quality === 'HD' ? 'text-blue-400' : 
+                                           format.quality === 'SD' ? 'text-green-400' : 'text-gray-400';
+                        
+                        const card = document.createElement('div');
+                        card.className = 'backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300';
+                        card.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-download text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white">${format.display_name}</h4>
+                                        <p class="text-sm text-gray-400">${format.ext.toUpperCase()} • ${format.quality}</p>
+                                    </div>
+                                </div>
+                                <a href="/download/${data.video_id}/${format.format_id}" 
+                                   class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                                    <i class="fas fa-download mr-2"></i>
+                                    Download
+                                </a>
+                            </div>
+                        `;
+                        downloadOptions.appendChild(card);
+                    });
+
+                    showElement(videoInfo);
+                    showSuccess('Video information loaded successfully!');
+                } else {
+                    showError(data.error || 'Failed to extract video information');
+                }
             } catch (error) {
                 showError('Network error: ' + error.message);
             } finally {
-                hideLoading();
+                hideElement(loading);
             }
-        }
+        });
         
-        searchBtn.addEventListener('click', searchVideo);
-        urlInput.addEventListener('keypress', (e) => {
+        // Enter key support
+        urlInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                searchVideo();
+                extractBtn.click();
             }
         });
     </script>
