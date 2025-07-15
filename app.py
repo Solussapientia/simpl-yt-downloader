@@ -68,8 +68,33 @@ class ProgressHook:
             except:
                 percent = 0
             
-            speed = d.get('_speed_str', '0 B/s') or '0 B/s'
-            eta = d.get('_eta_str', 'Unknown') or 'Unknown'
+            # Format speed properly
+            speed_raw = d.get('speed', 0)
+            if speed_raw:
+                if speed_raw > 1024 * 1024:  # MB/s
+                    speed_text = f"{speed_raw / (1024*1024):.1f} MB/s"
+                elif speed_raw > 1024:  # KB/s
+                    speed_text = f"{speed_raw / 1024:.1f} KB/s"
+                else:  # B/s
+                    speed_text = f"{speed_raw:.0f} B/s"
+            else:
+                speed_text = d.get('_speed_str', '0 B/s') or '0 B/s'
+            
+            # Format ETA
+            eta_raw = d.get('eta', 0)
+            if eta_raw:
+                if eta_raw > 3600:  # Hours
+                    hours = int(eta_raw // 3600)
+                    minutes = int((eta_raw % 3600) // 60)
+                    eta_text = f"{hours}h {minutes}m"
+                elif eta_raw > 60:  # Minutes
+                    minutes = int(eta_raw // 60)
+                    seconds = int(eta_raw % 60)
+                    eta_text = f"{minutes}m {seconds}s"
+                else:  # Seconds
+                    eta_text = f"{int(eta_raw)}s"
+            else:
+                eta_text = d.get('_eta_str', 'Unknown') or 'Unknown'
             
             # Handle file size
             total_bytes = d.get('total_bytes') or d.get('total_bytes_estimate', 0)
@@ -81,13 +106,13 @@ class ProgressHook:
             download_progress[self.download_id] = {
                 'status': 'downloading',
                 'percent': percent,
-                'speed_text': speed,
-                'eta_text': eta,
+                'speed_text': speed_text,
+                'eta_text': eta_text,
                 'file_size': file_size,
                 'downloaded': d.get('downloaded_bytes', 0),
                 'total': total_bytes,
-                'speed': d.get('speed', 0),
-                'eta': d.get('eta', 0)
+                'speed': speed_raw,
+                'eta': eta_raw
             }
         elif status == 'finished':
             download_progress[self.download_id] = {
@@ -101,57 +126,32 @@ class ProgressHook:
 def get_video_info_alternative(url):
     """Alternative method using different approaches to get video info"""
     
-    # Method 1: Try multiple yt-dlp configurations
+    # Method 1: Try fastest configuration first
     configs = [
-        # Configuration 1: Use different extractors
+        # Configuration 1: Android client - fastest and most reliable
         {
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
+            'socket_timeout': 10,  # Faster timeout
             'user_agent': random.choice(USER_AGENTS),
-            'headers': {
-                'User-Agent': random.choice(USER_AGENTS),
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'DNT': '1',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'none',
-                'Sec-Fetch-User': '?1',
-                'Cache-Control': 'max-age=0',
-            },
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['android', 'ios'],
-                    'player_skip': ['dash', 'hls'],
+                    'player_client': ['android'],
                     'include_live_dash': False,
                 }
             }
         },
-        # Configuration 2: Try web client
+        # Configuration 2: iOS client - backup
         {
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
+            'socket_timeout': 10,
             'user_agent': random.choice(USER_AGENTS),
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['web'],
-                }
-            }
-        },
-        # Configuration 3: Try with different approach
-        {
-            'quiet': True,
-            'no_warnings': True,
-            'extract_flat': False,
-            'user_agent': random.choice(USER_AGENTS),
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['mweb', 'android'],
+                    'player_client': ['ios'],
                 }
             }
         }
@@ -159,11 +159,11 @@ def get_video_info_alternative(url):
     
     for i, config in enumerate(configs):
         try:
-            print(f"Trying configuration {i+1}/3...")
+            print(f"Trying configuration {i+1}/2...")
             
-            # Add random delay to avoid rate limiting
+            # Add shorter delay
             if i > 0:
-                time.sleep(random.uniform(2, 5))
+                time.sleep(1)
             
             with yt_dlp.YoutubeDL(config) as ydl:
                 info = ydl.extract_info(url, download=False)
@@ -176,8 +176,9 @@ def get_video_info_alternative(url):
             print(f"Configuration {i+1} failed: {e}")
             continue
     
-    # Method 2: Try alternative approach using requests
+    # Method 2: Try page source as faster fallback
     try:
+        print("Trying page source method...")
         return get_video_info_from_page_source(url)
     except Exception as e:
         print(f"Page source method failed: {e}")
@@ -225,42 +226,39 @@ def get_video_info_from_page_source(url):
         title_match = re.search(r'"title":"([^"]+)"', html_content)
         title = title_match.group(1) if title_match else "Unknown Video"
         
-        # Create basic format list
-        formats = [
+        # Create basic format list with display names
+        video_formats = [
             {
                 'format_id': 'best',
                 'ext': 'mp4',
-                'format_note': 'Best Quality Available',
-                'resolution': 'Best',
-                'filesize': None,
-                'tbr': None,
-                'vcodec': 'unknown',
-                'acodec': 'unknown'
+                'display_name': 'Best Quality Available (MP4)',
+                'height': 1080,
+                'vcodec': 'h264',
+                'acodec': 'aac'
             },
             {
                 'format_id': 'worst',
                 'ext': 'mp4',
-                'format_note': 'Lowest Quality',
-                'resolution': 'Lowest',
-                'filesize': None,
-                'tbr': None,
-                'vcodec': 'unknown',
-                'acodec': 'unknown'
+                'display_name': 'Lowest Quality (MP4)',
+                'height': 360,
+                'vcodec': 'h264',
+                'acodec': 'aac'
+            }
+        ]
+        
+        audio_formats = [
+            {
+                'format_id': 'bestaudio',
+                'ext': 'mp3',
+                'display_name': 'Best Audio Quality (MP3)',
+                'abr': 192,
+                'acodec': 'mp3'
             }
         ]
         
         return {
-            'video_formats': formats,
-            'audio_formats': [
-                {
-                    'format_id': 'bestaudio',
-                    'ext': 'mp3',
-                    'format_note': 'Best Audio Quality',
-                    'abr': 'Best',
-                    'filesize': None,
-                    'acodec': 'mp3'
-                }
-            ],
+            'video_formats': video_formats,
+            'audio_formats': audio_formats,
             'title': title,
             'duration': None,
             'thumbnail': f'https://img.youtube.com/vi/{video_id}/maxresdefault.jpg'
@@ -298,30 +296,101 @@ def process_video_info(info):
     formats = info.get('formats', [])
     
     for fmt in formats:
+        format_id = fmt.get('format_id', 'unknown')
+        ext = fmt.get('ext', 'unknown')
+        height = fmt.get('height')
+        width = fmt.get('width')
+        fps = fmt.get('fps')
+        filesize = fmt.get('filesize')
+        tbr = fmt.get('tbr')
+        abr = fmt.get('abr')
+        vcodec = fmt.get('vcodec', 'none')
+        acodec = fmt.get('acodec', 'none')
+        
+        # Create format info structure
         format_info = {
-            'format_id': fmt.get('format_id', 'unknown'),
-            'ext': fmt.get('ext', 'unknown'),
+            'format_id': format_id,
+            'ext': ext,
             'format_note': fmt.get('format_note', ''),
-            'filesize': fmt.get('filesize'),
-            'tbr': fmt.get('tbr'),
-            'vcodec': fmt.get('vcodec', 'none'),
-            'acodec': fmt.get('acodec', 'none'),
+            'filesize': filesize,
+            'tbr': tbr,
+            'vcodec': vcodec,
+            'acodec': acodec,
             'resolution': fmt.get('resolution', 'unknown'),
-            'fps': fmt.get('fps'),
-            'abr': fmt.get('abr'),
-            'height': fmt.get('height'),
-            'width': fmt.get('width')
+            'fps': fps,
+            'abr': abr,
+            'height': height,
+            'width': width
         }
         
-        # Categorize formats
-        if fmt.get('vcodec') != 'none' and fmt.get('vcodec') != None:
+        # Categorize and create display names
+        if vcodec != 'none' and vcodec != None and height:
+            # Video format
+            display_name = f"{height}p"
+            if ext:
+                display_name += f" ({ext.upper()})"
+            if fps and fps > 30:
+                display_name += f" {int(fps)}fps"
+            if filesize:
+                size_mb = filesize / (1024 * 1024)
+                display_name += f" - {size_mb:.1f}MB"
+            elif tbr:
+                display_name += f" - {tbr:.0f}kbps"
+            
+            format_info['display_name'] = display_name
             video_formats.append(format_info)
-        elif fmt.get('acodec') != 'none' and fmt.get('acodec') != None:
+            
+        elif acodec != 'none' and acodec != None and vcodec == 'none':
+            # Audio format
+            display_name = "Audio Only"
+            if ext:
+                display_name += f" ({ext.upper()})"
+            if abr:
+                display_name += f" - {abr:.0f}kbps"
+            elif tbr:
+                display_name += f" - {tbr:.0f}kbps"
+            if filesize:
+                size_mb = filesize / (1024 * 1024)
+                display_name += f" - {size_mb:.1f}MB"
+            
+            format_info['display_name'] = display_name
             audio_formats.append(format_info)
     
     # Sort formats by quality
     video_formats.sort(key=lambda x: x.get('height', 0) or 0, reverse=True)
     audio_formats.sort(key=lambda x: x.get('abr', 0) or 0, reverse=True)
+    
+    # Add fallback formats if none found
+    if not video_formats:
+        video_formats = [
+            {
+                'format_id': 'best',
+                'ext': 'mp4',
+                'display_name': 'Best Quality Available',
+                'height': 1080,
+                'vcodec': 'h264',
+                'acodec': 'aac'
+            },
+            {
+                'format_id': 'worst',
+                'ext': 'mp4',
+                'display_name': 'Lowest Quality',
+                'height': 360,
+                'vcodec': 'h264',
+                'acodec': 'aac'
+            }
+        ]
+    
+    if not audio_formats:
+        audio_formats = [
+            {
+                'format_id': 'bestaudio',
+                'ext': 'mp3',
+                'display_name': 'Best Audio Quality',
+                'abr': 192,
+                'acodec': 'mp3'
+            }
+        ]
     
     return {
         'video_formats': video_formats,
