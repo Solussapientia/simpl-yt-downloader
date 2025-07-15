@@ -815,7 +815,58 @@ def direct_download(download_id):
         progress['status'] = 'downloading'
         progress['percent'] = 0
         
-        # Use yt-dlp to stream the file directly
+        # Try to get a fresh direct URL first
+        try:
+            # Get fresh URL with current configurations
+            ydl_opts = {
+                'format': format_id,
+                'quiet': True,
+                'no_warnings': True,
+                'extract_flat': False,
+                'no_download': True,
+                'http_headers': {
+                    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+                    'Accept': '*/*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'identity',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                },
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['ios', 'android'],
+                        'player_skip': ['webpage', 'configs'],
+                    }
+                }
+            }
+            
+            # Try to extract fresh URL
+            info = None
+            configs = [
+                ydl_opts,
+                {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['ios']}}},
+                {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['android']}}},
+                {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['web']}}},
+            ]
+            
+            for config in configs:
+                try:
+                    with yt_dlp.YoutubeDL(config) as ydl:
+                        info = ydl.extract_info(url, download=False)
+                        if info and 'url' in info:
+                            break
+                except Exception:
+                    continue
+            
+            if info and 'url' in info:
+                fresh_url = info['url']
+                # Redirect to fresh URL with proper headers
+                return redirect(fresh_url, code=302)
+            
+        except Exception:
+            pass
+        
+        # Fallback to streaming approach
         def generate():
             try:
                 # Use subprocess to stream yt-dlp output
@@ -837,6 +888,9 @@ def direct_download(download_id):
                     stderr=subprocess.PIPE,
                     bufsize=0
                 )
+                
+                if not process.stdout:
+                    raise Exception("Failed to start download process")
                 
                 # Stream the output
                 downloaded = 0
