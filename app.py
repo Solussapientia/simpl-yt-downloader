@@ -708,7 +708,7 @@ def download():
         download_id = str(int(time.time() * 1000))
         
         # Start extraction in background thread
-        thread = threading.Thread(target=download_video_direct, args=(url, format_id, download_id))
+        thread = threading.Thread(target=download_video_direct, args=(url, format_id))
         thread.daemon = True
         thread.start()
         
@@ -791,9 +791,224 @@ def download_file(download_id):
         print(f"Error in download_file: {e}")
         return jsonify({'error': f'Download failed: {str(e)}'}), 500
 
+def download_video_info(url, format_type='video'):
+    """Extract video information and formats, avoiding HLS/M3U8 playlist formats"""
+    try:
+        # Anti-bot configuration optimized for direct formats
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': False,
+            'writeinfojson': False,
+            'writethumbnail': False,
+            'writesubtitles': False,
+            'writeautomaticsub': False,
+            'ignoreerrors': True,
+            'extractaudio': False,
+            'format': 'best[protocol!=m3u8_native][protocol!=m3u8][protocol!=hls]',  # Avoid HLS formats
+            'prefer_free_formats': True,
+            # Use web client for better direct format support
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['web', 'android'],
+                    'player_skip': ['js'],
+                    'skip': ['hls', 'dash']
+                }
+            },
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'DNT': '1',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1'
+            }
+        }
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            
+            if not info:
+                return None
+            
+            # Filter formats to avoid HLS/M3U8 and prioritize direct downloads
+            formats = []
+            if 'formats' in info:
+                for f in info['formats']:
+                    # Skip HLS/M3U8 formats completely
+                    if f.get('protocol') in ['m3u8', 'm3u8_native', 'hls']:
+                        continue
+                    if f.get('ext') == 'm3u8':
+                        continue
+                    if 'manifest.googlevideo.com' in f.get('url', ''):
+                        continue
+                    
+                    # Prioritize direct HTTP formats
+                    if f.get('protocol') in ['http', 'https'] and f.get('ext') in ['mp4', 'webm', 'mkv', 'avi']:
+                        formats.append(f)
+                    elif f.get('protocol') in ['http', 'https'] and f.get('acodec') != 'none':
+                        formats.append(f)
+                
+                # Sort formats by quality (prefer higher quality)
+                formats.sort(key=lambda x: (
+                    x.get('height', 0),
+                    x.get('width', 0), 
+                    x.get('tbr', 0),
+                    x.get('filesize', 0)
+                ), reverse=True)
+            
+            # Process formats for frontend display
+            processed_formats = []
+            for f in formats[:10]:  # Limit to top 10 formats
+                format_info = {
+                    'format_id': f.get('format_id', 'unknown'),
+                    'ext': f.get('ext', 'unknown'),
+                    'resolution': f"{f.get('width', 0)}x{f.get('height', 0)}" if f.get('width') and f.get('height') else 'N/A',
+                    'filesize': f.get('filesize', 0),
+                    'tbr': f.get('tbr', 0),
+                    'vcodec': f.get('vcodec', 'none'),
+                    'acodec': f.get('acodec', 'none'),
+                    'fps': f.get('fps', 0),
+                    'protocol': f.get('protocol', 'unknown'),
+                    'url': f.get('url', ''),
+                    'display_name': get_format_display_name(f)
+                }
+                processed_formats.append(format_info)
+            
+            return {
+                'title': info.get('title', 'Unknown Title'),
+                'uploader': info.get('uploader', 'Unknown'),
+                'duration': info.get('duration', 0),
+                'view_count': info.get('view_count', 0),
+                'thumbnail': info.get('thumbnail', ''),
+                'description': info.get('description', ''),
+                'formats': processed_formats,
+                'webpage_url': info.get('webpage_url', url),
+                'id': info.get('id', 'unknown')
+            }
+            
+    except Exception as e:
+        print(f"Error extracting video info: {e}")
+        return None
+
+def download_video_direct(url, format_id):
+    """Download video using direct format, avoiding HLS/M3U8"""
+    download_id = str(int(time.time() * 1000))
+    
+    # Initialize progress tracking
+    download_progress[download_id] = {
+        'status': 'starting',
+        'percent': 0,
+        'speed': 0,
+        'eta': 0,
+        'url': url,
+        'format_id': format_id,
+        'filename': None,
+        'error': None
+    }
+    
+    def run_download():
+        try:
+            # Configuration for direct download (no HLS/M3U8)
+            ydl_opts = {
+                'format': f"{format_id}[protocol!=m3u8_native][protocol!=m3u8][protocol!=hls]",
+                'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
+                'quiet': True,
+                'no_warnings': True,
+                'extractaudio': False,
+                'writeinfojson': False,
+                'writethumbnail': False,
+                'writesubtitles': False,
+                'writeautomaticsub': False,
+                'ignoreerrors': False,
+                'prefer_free_formats': True,
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['web', 'android'],
+                        'player_skip': ['js'],
+                        'skip': ['hls', 'dash']
+                    }
+                },
+                'http_headers': {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'DNT': '1',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1'
+                },
+                'progress_hooks': [lambda d: update_progress(download_id, d)]
+            }
+            
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                # First, get the direct download URL
+                info = ydl.extract_info(url, download=False)
+                
+                if not info:
+                    raise Exception("Could not extract video information")
+                
+                # Find the requested format
+                selected_format = None
+                for f in info.get('formats', []):
+                    if f.get('format_id') == format_id:
+                        # Skip HLS/M3U8 formats
+                        if f.get('protocol') in ['m3u8', 'm3u8_native', 'hls']:
+                            continue
+                        if f.get('ext') == 'm3u8':
+                            continue
+                        if 'manifest.googlevideo.com' in f.get('url', ''):
+                            continue
+                        selected_format = f
+                        break
+                
+                if not selected_format:
+                    raise Exception("Selected format not available or is HLS format")
+                
+                # Update progress with direct download info
+                download_progress[download_id].update({
+                    'status': 'ready_for_download',
+                    'direct_url': selected_format.get('url'),
+                    'filename': f"{info.get('title', 'download')}.{selected_format.get('ext', 'mp4')}",
+                    'content_type': get_content_type(selected_format.get('ext', 'mp4')),
+                    'filesize': selected_format.get('filesize', 0)
+                })
+                
+                print(f"Direct download ready: {download_id}")
+                
+        except Exception as e:
+            print(f"Download error: {e}")
+            download_progress[download_id].update({
+                'status': 'error',
+                'error': str(e)
+            })
+    
+    # Start download in background thread
+    thread = threading.Thread(target=run_download)
+    thread.daemon = True
+    thread.start()
+    
+    return download_id
+
+def get_content_type(ext):
+    """Get content type for file extension"""
+    content_types = {
+        'mp4': 'video/mp4',
+        'webm': 'video/webm',
+        'mkv': 'video/x-matroska',
+        'avi': 'video/x-msvideo',
+        'mov': 'video/quicktime',
+        'mp3': 'audio/mpeg',
+        'm4a': 'audio/mp4',
+        'wav': 'audio/wav',
+        'flac': 'audio/flac'
+    }
+    return content_types.get(ext, 'application/octet-stream')
+
 @app.route('/direct_download/<download_id>')
 def direct_download(download_id):
-    """Stream download directly to user without storing on server"""
+    """Provide direct download link for the video"""
     progress = download_progress.get(download_id)
     if not progress:
         return jsonify({'error': 'Download not found'}), 404
@@ -802,240 +1017,130 @@ def direct_download(download_id):
         return jsonify({'error': 'Download not ready'}), 400
     
     try:
-        # Get the video URL and format info
-        url = progress.get('url')
-        format_id = progress.get('format_id')
-        filename = progress.get('filename', 'download')
-        content_type = progress.get('content_type', 'application/octet-stream')
+        direct_url = progress.get('direct_url')
+        filename = progress.get('filename', 'download.mp4')
         
-        if not url or not format_id:
-            return jsonify({'error': 'Download information not available'}), 400
+        if not direct_url:
+            return jsonify({'error': 'Direct URL not available'}), 400
         
-        # Update progress to downloading
-        progress['status'] = 'downloading'
-        progress['percent'] = 0
+        # Return redirect to the direct download URL
+        response = redirect(direct_url)
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
         
-        # Try to get a fresh direct URL first
-        try:
-            # Get fresh URL with current configurations
-            ydl_opts = {
-                'format': format_id,
-                'quiet': True,
-                'no_warnings': True,
-                'extract_flat': False,
-                'no_download': True,
-                'http_headers': {
-                    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
-                    'Accept': '*/*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'identity',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1',
-                },
-                'extractor_args': {
-                    'youtube': {
-                        'player_client': ['ios', 'android'],
-                        'player_skip': ['webpage', 'configs'],
-                    }
-                }
-            }
-            
-            # Try to extract fresh URL
-            info = None
-            configs = [
-                ydl_opts,
-                {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['ios']}}},
-                {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['android']}}},
-                {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['web']}}},
-            ]
-            
-            for config in configs:
-                try:
-                    with yt_dlp.YoutubeDL(config) as ydl:
-                        info = ydl.extract_info(url, download=False)
-                        if info and 'url' in info:
-                            break
-                except Exception:
-                    continue
-            
-            if info and 'url' in info:
-                fresh_url = info['url']
-                # Redirect to fresh URL with proper headers
-                return redirect(fresh_url, code=302)
-            
-        except Exception:
-            pass
-        
-        # Fallback to streaming approach
-        def generate():
-            try:
-                # Use subprocess to stream yt-dlp output
-                import subprocess
-                
-                cmd = [
-                    'yt-dlp',
-                    '-f', format_id,
-                    '--quiet',
-                    '--no-warnings',
-                    '-o', '-',
-                    '--user-agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
-                    url
-                ]
-                
-                process = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    bufsize=0
-                )
-                
-                if not process.stdout:
-                    raise Exception("Failed to start download process")
-                
-                # Stream the output
-                downloaded = 0
-                total_size = progress.get('filesize', 0)
-                
-                while True:
-                    chunk = process.stdout.read(8192)
-                    if not chunk:
-                        break
-                    
-                    downloaded += len(chunk)
-                    
-                    # Update progress
-                    if total_size > 0:
-                        percent = (downloaded / total_size) * 100
-                        progress['percent'] = min(percent, 100)
-                        progress['downloaded'] = downloaded
-                        progress['total'] = total_size
-                    
-                    yield chunk
-                
-                # Wait for process to complete
-                process.wait()
-                
-                # Mark as completed
-                progress['status'] = 'completed'
-                progress['percent'] = 100
-                
-            except Exception as e:
-                progress['status'] = 'error'
-                progress['error'] = str(e)
-                # Yield error message
-                yield f"Error: {str(e)}".encode()
-        
-        return Response(
-            generate(),
-            mimetype=content_type,
-            headers={
-                'Content-Disposition': f'attachment; filename="{filename}"',
-                'Content-Type': content_type,
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive',
-            }
-        )
+        return response
         
     except Exception as e:
-        progress['status'] = 'error'
-        progress['error'] = str(e)
+        print(f"Direct download error: {e}")
         return jsonify({'error': str(e)}), 500
 
-def download_video_direct(url, format_id, download_id):
-    """Extract video info and prepare for streaming download"""
+# Configure download directory
+DOWNLOAD_DIR = 'downloads'
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+
+def get_format_display_name(format_info):
+    """Generate display name for format"""
     try:
-        download_progress[download_id] = {
-            'status': 'extracting',
-            'percent': 0,
-            'message': 'Extracting video information...'
-        }
+        # Get basic info
+        height = format_info.get('height', 0)
+        width = format_info.get('width', 0)
+        ext = format_info.get('ext', 'unknown')
+        fps = format_info.get('fps', 0)
+        filesize = format_info.get('filesize', 0)
+        tbr = format_info.get('tbr', 0)
         
-        # Enhanced yt-dlp options for info extraction
-        ydl_opts = {
-            'format': format_id,
-            'quiet': True,
-            'no_warnings': True,
-            'extract_flat': False,
-            'dump_single_json': True,
-            'no_download': True,  # Don't download, just extract info
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1',
-            },
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['ios', 'android'],
-                    'player_skip': ['webpage', 'configs'],
-                }
-            }
-        }
+        # Build display name
+        display_parts = []
         
-        # Try multiple configurations
-        configs = [
-            ydl_opts,
-            {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['ios']}}},
-            {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['android']}}},
-            {**ydl_opts, 'extractor_args': {'youtube': {'player_client': ['web']}}},
-        ]
+        # Resolution
+        if height and width:
+            display_parts.append(f"{height}p")
+        elif height:
+            display_parts.append(f"{height}p")
         
-        info = None
-        for config in configs:
-            try:
-                with yt_dlp.YoutubeDL(config) as ydl:
-                    info = ydl.extract_info(url, download=False)
-                    if info:
-                        break
-            except Exception as e:
-                continue
+        # Format
+        if ext and ext != 'unknown':
+            display_parts.append(f"({ext.upper()})")
         
-        if not info:
-            raise Exception("Could not extract video information")
+        # FPS
+        if fps and fps > 30:
+            display_parts.append(f"{fps}fps")
         
-        # Get file info
-        title = info.get('title', 'video')
-        ext = info.get('ext', 'mp4')
-        filesize = info.get('filesize') or info.get('filesize_approx', 0)
+        # File size
+        if filesize:
+            size_mb = filesize / (1024 * 1024)
+            if size_mb >= 1024:
+                display_parts.append(f"{size_mb/1024:.1f}GB")
+            else:
+                display_parts.append(f"{size_mb:.1f}MB")
+        elif tbr:
+            display_parts.append(f"{tbr}kbps")
         
-        # Clean filename
-        filename = f"{title}.{ext}"
-        filename = re.sub(r'[<>:"/\\|?*]', '_', filename)
-        filename = filename[:200]  # Limit length
-        
-        # Determine content type
-        content_type_map = {
-            'mp4': 'video/mp4',
-            'webm': 'video/webm',
-            'mkv': 'video/x-matroska',
-            'mp3': 'audio/mpeg',
-            'aac': 'audio/aac',
-            'ogg': 'audio/ogg',
-            'm4a': 'audio/mp4',
-        }
-        content_type = content_type_map.get(ext, 'application/octet-stream')
-        
-        # Update progress - ready for streaming download
-        download_progress[download_id] = {
-            'status': 'ready_for_download',
-            'percent': 100,
-            'message': 'Ready for download',
-            'filename': filename,
-            'content_type': content_type,
-            'filesize': filesize,
-            'title': title,
-            'url': url,
-            'format_id': format_id
-        }
+        return " ".join(display_parts) if display_parts else f"Format {format_info.get('format_id', 'unknown')}"
         
     except Exception as e:
-        download_progress[download_id] = {
-            'status': 'error',
-            'error': str(e),
-            'percent': 0
-        }
+        return f"Format {format_info.get('format_id', 'unknown')}"
+
+def update_progress(download_id, progress_data):
+    """Update download progress"""
+    try:
+        if download_id not in download_progress:
+            download_progress[download_id] = {}
+        
+        # Update progress based on yt-dlp progress data
+        status = progress_data.get('status', 'unknown')
+        
+        if status == 'downloading':
+            downloaded = progress_data.get('downloaded_bytes', 0)
+            total = progress_data.get('total_bytes', 0) or progress_data.get('total_bytes_estimate', 0)
+            speed = progress_data.get('speed', 0) or 0
+            eta = progress_data.get('eta', 0) or 0
+            
+            percent = 0
+            if total > 0:
+                percent = (downloaded / total) * 100
+            
+            # Format speed
+            speed_text = "0 B/s"
+            if speed:
+                if speed >= 1024*1024:
+                    speed_text = f"{speed/(1024*1024):.1f} MB/s"
+                elif speed >= 1024:
+                    speed_text = f"{speed/1024:.1f} KB/s"
+                else:
+                    speed_text = f"{speed:.0f} B/s"
+            
+            # Format ETA
+            eta_text = "Unknown"
+            if eta:
+                if eta >= 3600:
+                    eta_text = f"{eta//3600:.0f}h {(eta%3600)//60:.0f}m"
+                elif eta >= 60:
+                    eta_text = f"{eta//60:.0f}m {eta%60:.0f}s"
+                else:
+                    eta_text = f"{eta:.0f}s"
+            
+            download_progress[download_id].update({
+                'status': 'downloading',
+                'percent': min(percent, 100),
+                'downloaded': downloaded,
+                'total': total,
+                'speed': speed,
+                'eta': eta,
+                'speed_text': speed_text,
+                'eta_text': eta_text,
+                'file_size': f"{total/(1024*1024):.1f} MB" if total else "Unknown"
+            })
+            
+        elif status == 'finished':
+            download_progress[download_id].update({
+                'status': 'completed',
+                'percent': 100,
+                'speed_text': 'Completed',
+                'eta_text': 'Done'
+            })
+            
+    except Exception as e:
+        print(f"Error updating progress: {e}")
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

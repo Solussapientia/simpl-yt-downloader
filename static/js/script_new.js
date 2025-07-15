@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('JavaScript loaded - Version 10 - Direct Download');
+    console.log('JavaScript loaded - Version 13 - No HLS Direct Download');
     
     try {
     
@@ -262,16 +262,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Trigger direct download
     function triggerDirectDownload(downloadId, filename) {
-        const downloadUrl = `/direct_download/${downloadId}`;
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = filename || 'download';
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        console.log('Direct download triggered:', filename);
+        try {
+            const downloadUrl = `/direct_download/${downloadId}`;
+            console.log('Direct download triggered:', downloadUrl);
+            
+            // Direct navigation to download URL (will trigger browser download)
+            window.location.href = downloadUrl;
+            
+        } catch (error) {
+            console.error('Error triggering direct download:', error);
+            showError('Failed to start download');
+        }
     }
 
     // Update progress UI
