@@ -384,37 +384,38 @@ def download_video():
     if not os.path.exists(downloads_dir):
         os.makedirs(downloads_dir)
     
-    # Configure format selector with ffmpeg-free fallbacks
+    # Configure format selector - NO FFMPEG MERGING ALLOWED
     if format_type == 'mp3':
-        # For MP3, extract audio only
+        # For MP3, extract audio only - this requires ffmpeg but for conversion, not merging
         format_selector = 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best'
     else:
-        # For MP4, prefer single-file formats over merging
+        # For MP4, ONLY use single-file formats that don't require merging
         quality_lower = quality.lower()
         
         if quality == 'best':
-            format_selector = 'best[ext=mp4][height<=1080]/best[ext=mp4]/best'
+            # Only pre-merged formats, no + combinations
+            format_selector = 'best[ext=mp4][height<=720]/18/22/best[ext=mp4]/best'
         elif '2160' in quality_lower or '4k' in quality_lower:
-            # Try merged formats first, then fallback to single file
-            format_selector = 'best[height>=2160][ext=mp4]/best[height>=2160]/401+140/313+140/best[ext=mp4]/best'
+            # 4K: very limited pre-merged options, fallback to lower quality
+            format_selector = 'best[height>=2160][ext=mp4]/best[height>=1080][ext=mp4]/22/18/best[ext=mp4]'
         elif '1440' in quality_lower:
-            # 1440p with fallbacks
-            format_selector = 'best[height>=1440][ext=mp4]/best[height>=1440]/264+140/271+140/best[ext=mp4]/best'
+            # 1440p: fallback to 1080p or 720p pre-merged
+            format_selector = 'best[height>=1440][ext=mp4]/best[height>=1080][ext=mp4]/22/18/best[ext=mp4]'
         elif '1080' in quality_lower:
-            # 1080p with fallbacks
-            format_selector = 'best[height>=1080][ext=mp4]/best[height>=1080]/22/137+140/299+140/best[ext=mp4]/best'
+            # 1080p: use format 22 (720p) as it's pre-merged, then try others
+            format_selector = 'best[height>=1080][ext=mp4]/22/18/best[ext=mp4][height<=720]/best[ext=mp4]'
         elif '720' in quality_lower:
-            # 720p with fallbacks
-            format_selector = 'best[height>=720][ext=mp4]/best[height>=720]/136+140/298+140/best[ext=mp4]/best'
+            # 720p: format 22 is perfect for this
+            format_selector = '22/best[height>=720][ext=mp4]/18/best[ext=mp4][height<=720]/best[ext=mp4]'
         elif '480' in quality_lower:
-            # 480p with fallbacks
-            format_selector = 'best[height>=480][ext=mp4]/best[height>=480]/135+140/244+140/best[ext=mp4]/best'
+            # 480p: use pre-merged formats
+            format_selector = 'best[height>=480][ext=mp4]/18/best[ext=mp4][height<=480]/best[ext=mp4]'
         elif '360' in quality_lower:
-            # 360p with fallbacks - format 18 is a pre-merged mp4
-            format_selector = 'best[height>=360][ext=mp4]/best[height>=360]/18/134+140/243+140/best[ext=mp4]/best'
+            # 360p: format 18 is perfect for this
+            format_selector = '18/best[height>=360][ext=mp4]/best[ext=mp4][height<=360]/best[ext=mp4]'
         else:
-            # Default fallback - prefer single file formats
-            format_selector = 'best[ext=mp4][height<=720]/best[ext=mp4]/best'
+            # Default fallback - only pre-merged formats
+            format_selector = '18/22/best[ext=mp4][height<=720]/best[ext=mp4]'
     
     # Initialize progress
     download_progress[download_id] = {
@@ -438,24 +439,29 @@ def download_video():
         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
     }
     
-    # Only add merge_output_format if not extracting audio
-    if format_type == 'mp4':
-        ydl_opts['merge_output_format'] = 'mp4'
+    # NEVER use merge_output_format to avoid ffmpeg requirement
+    # ydl_opts['merge_output_format'] = 'mp4'  # Disabled to prevent merging
     
     # Debug output
     print(f"DEBUG: Quality selected: {quality}")
     print(f"DEBUG: Format selector: {format_selector}")
     print(f"DEBUG: Format type: {format_type}")
     
-    # Add audio extraction options for MP3
+    # Add audio extraction options for MP3 - DISABLED until ffmpeg is available
     if format_type == 'mp3':
-        ydl_opts.update({
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-        })
+        # Temporarily return error for MP3 until ffmpeg is working
+        return jsonify({
+            'error': 'MP3 extraction temporarily disabled',
+            'message': 'MP3 extraction requires ffmpeg which is not available. Please use video download for now.'
+        }), 400
+        
+        # ydl_opts.update({
+        #     'postprocessors': [{
+        #         'key': 'FFmpegExtractAudio',
+        #         'preferredcodec': 'mp3',
+        #         'preferredquality': '192',
+        #     }],
+        # })
     
     # Start download in a separate thread
     download_thread = threading.Thread(target=download_thread_func, args=(url, ydl_opts, download_id))
