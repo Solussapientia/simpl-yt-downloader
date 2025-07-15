@@ -356,16 +356,18 @@ def download_thread_func(url, ydl_opts, download_id):
     except Exception as e:
         print(f"Error in download_thread_func: {e}")
         
-        # Create user-friendly error messages
+        # Create user-friendly error messages with specific solutions
         error_str = str(e).lower()
         if "403" in error_str or "forbidden" in error_str:
-            user_error = "YouTube is blocking this video download. This can happen due to regional restrictions, copyright protection, or rate limiting. Please try a different video or wait a few minutes before trying again."
+            user_error = "YouTube is blocking this video download due to anti-bot measures. This is a common issue in 2024-2025. Try: 1) Wait 5-10 minutes and try again, 2) Try a different video quality, or 3) The video may be region-restricted. We're using advanced techniques to bypass these blocks."
         elif "empty" in error_str:
-            user_error = "The video file couldn't be downloaded completely. This usually happens when YouTube blocks the download partway through. Please try again in a few minutes."
+            user_error = "The video file couldn't be downloaded completely. This usually happens when YouTube blocks the download partway through. Please try again in a few minutes with a different quality option."
         elif "unavailable" in error_str or "not available" in error_str or "requested format" in error_str:
             user_error = "The selected video quality/format is not available for this video. Please try selecting a different quality option from the dropdown."
         elif "network" in error_str or "connection" in error_str:
             user_error = "Network connection error. Please check your internet connection and try again."
+        elif "sign in" in error_str or "confirm you're not a bot" in error_str:
+            user_error = "YouTube is asking for sign-in verification. This happens when they detect automated downloads. Please wait 10-15 minutes and try again."
         else:
             user_error = f"Download failed: {str(e)}"
         
@@ -415,32 +417,38 @@ def download_video():
         'eta': 0
     }
     
-    # Configure yt-dlp with improved error handling and fallbacks
+    # Configure yt-dlp with YouTube 403 error mitigation strategies
     ydl_opts = {
         'format': format_id,  # Use exact format ID - no guessing!
         'outtmpl': os.path.join(downloads_dir, '%(title)s.%(ext)s'),
         'no_warnings': True,
         'overwrites': True,
         'ignoreerrors': False,
-        'retries': 10,  # Increased retries
-        'fragment_retries': 10,  # Increased fragment retries
-        'retry_sleep': 2,  # Wait 2 seconds between retries
+        'retries': 15,  # Increased retries for 403 errors
+        'fragment_retries': 15,  # Increased fragment retries
+        'retry_sleep': 3,  # Wait 3 seconds between retries
         'skip_unavailable_fragments': True,
         'keep_fragments': False,  # Don't keep fragments after merging
-        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'user_agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'web', 'ios']  # Try multiple clients
+                'player_client': ['mweb', 'android', 'ios', 'web'],  # Use mobile web client first (more reliable)
+                'player_skip': [],  # Don't skip any players
+                'include_live_dash': False,  # Disable live DASH
             }
         },
-        'sleep_interval': 1,  # Wait 1 second between requests
-        'max_sleep_interval': 5,  # Maximum wait time
+        'sleep_interval': 2,  # Wait 2 seconds between requests to avoid rate limiting
+        'max_sleep_interval': 10,  # Maximum wait time
         'http_headers': {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-us,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'DNT': '1',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
             'Upgrade-Insecure-Requests': '1',
         }
     }
@@ -538,13 +546,32 @@ def get_video_info():
         return jsonify({'error': 'Please provide a valid YouTube URL'}), 400
     
     try:
-        # Simple yt-dlp configuration to get video info and formats
+        # YouTube 403 error mitigation for info extraction
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
             'ignoreerrors': False,
-            'retries': 3,
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'retries': 5,  # Increased retries
+            'user_agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['mweb', 'android', 'ios', 'web'],  # Use mobile web client first
+                    'include_live_dash': False,
+                }
+            },
+            'sleep_interval': 1,  # Add delay between requests
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Upgrade-Insecure-Requests': '1',
+            }
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
