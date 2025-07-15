@@ -245,27 +245,32 @@ def download_thread_func(url, ydl_opts, download_id):
         original_format = ydl_opts.get('format', 'best')
         format_type = 'mp3' if ydl_opts.get('postprocessors') else 'mp4'
         
-        # Define fallback formats based on type - prioritize quality selectors over exact IDs
+        # Define fallback formats based on type - start from highest to lowest quality
         if format_type == 'mp4':
-            # Try quality-based selectors first, then exact format ID as fallback
+            # Try highest quality first, then work down to lower qualities
             fallback_formats = [
-                'best[height<=720]',  # Start with reliable quality selector
-                'best[height<=480]',
-                'best[height<=360]',
-                original_format,  # Try exact format ID later in the sequence
-                'best[ext=mp4]',
-                'worst[ext=mp4]',
-                'best',
-                'worst'
+                'best',  # Start with absolute best quality available
+                'best[ext=mp4]',  # Best MP4 format
+                'best[height<=2160]',  # 4K and below
+                'best[height<=1440]',  # 2K and below
+                'best[height<=1080]',  # 1080p and below
+                'best[height<=720]',   # 720p and below
+                'best[height<=480]',   # 480p and below
+                'best[height<=360]',   # 360p and below
+                original_format,       # Try exact format ID as fallback
+                'worst[ext=mp4]',      # Worst MP4 format (very reliable)
+                'worst'                # Absolute fallback
             ]
         else:  # audio
             fallback_formats = [
-                'bestaudio[ext=m4a]',  # Start with best audio quality
-                'bestaudio',
-                original_format,  # Try exact format ID later
-                'worst[acodec!=none]',
-                'best[acodec!=none]',
-                'worst'
+                'bestaudio',           # Start with best audio quality
+                'bestaudio[ext=m4a]',  # Best M4A audio
+                'bestaudio[ext=webm]', # Best WebM audio
+                'bestaudio[acodec!=none]',  # Any audio codec
+                original_format,       # Try exact format ID as fallback
+                'best[acodec!=none]',  # Any format with audio
+                'worst[acodec!=none]', # Worst with audio (reliable)
+                'worst'                # Absolute fallback
             ]
         
         successful_download = False
