@@ -384,13 +384,30 @@ def download_video():
     if not os.path.exists(downloads_dir):
         os.makedirs(downloads_dir)
     
-    # Configure format selector - ULTRA SIMPLE to work with any video
+    # Configure format selector - COMPREHENSIVE with FFmpeg support
     if format_type == 'mp3':
-        # This shouldn't be reached due to the check above, but just in case
-        format_selector = 'worst'
+        # For MP3, extract best audio quality
+        format_selector = 'bestaudio/best'
     else:
-        # For MP4, use the simplest possible format selector
-        format_selector = 'worst'
+        # For MP4, use quality-based selectors with good fallbacks
+        quality_lower = quality.lower()
+        
+        if quality == 'best':
+            format_selector = 'best[height<=1080]/best'
+        elif '2160' in quality_lower or '4k' in quality_lower:
+            format_selector = 'best[height>=2160]/best[height>=1080]/best'
+        elif '1440' in quality_lower:
+            format_selector = 'best[height>=1440]/best[height>=1080]/best'
+        elif '1080' in quality_lower:
+            format_selector = 'best[height>=1080]/best[height>=720]/best'
+        elif '720' in quality_lower:
+            format_selector = 'best[height>=720]/best[height>=480]/best'
+        elif '480' in quality_lower:
+            format_selector = 'best[height>=480]/best[height>=360]/best'
+        elif '360' in quality_lower:
+            format_selector = 'best[height>=360]/worst'
+        else:
+            format_selector = 'best[height<=720]/best'
     
     # Initialize progress
     download_progress[download_id] = {
@@ -422,20 +439,15 @@ def download_video():
     print(f"DEBUG: Format selector: {format_selector}")
     print(f"DEBUG: Format type: {format_type}")
     
-    # Add audio extraction options for MP3 - TEMPORARILY DISABLED
+    # Add audio extraction options for MP3 - NOW ENABLED WITH FFMPEG
     if format_type == 'mp3':
-        return jsonify({
-            'error': 'MP3 extraction temporarily disabled',
-            'message': 'MP3 extraction requires ffmpeg which is not available yet. Use video download for now.'
-        }), 400
-        
-        # ydl_opts.update({
-        #     'postprocessors': [{
-        #         'key': 'FFmpegExtractAudio',
-        #         'preferredcodec': 'mp3',
-        #         'preferredquality': '192',
-        #     }],
-        # })
+        ydl_opts.update({
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+        })
     
     # Start download in a separate thread
     download_thread = threading.Thread(target=download_thread_func, args=(url, ydl_opts, download_id))
