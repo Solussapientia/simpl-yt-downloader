@@ -433,6 +433,7 @@ def download_video():
 @app.route('/progress/<download_id>')
 def get_progress(download_id):
     progress = download_progress.get(download_id, {'status': 'not_found'})
+    print(f"Progress request for {download_id}: {progress}")  # Debug log
     
     # Format the progress data for frontend consumption
     if progress.get('status') == 'downloading':

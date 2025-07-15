@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Poll download progress
-    async function pollProgress(downloadId) {
+    async function pollProgress(downloadId, pollCount = 0) {
         try {
             const response = await fetch(`/progress/${downloadId}`);
             const data = await response.json();
@@ -236,13 +236,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update progress UI
             updateProgressUI(data);
             
-            // Continue polling if not finished
-            if (data.status === 'downloading' || data.status === 'processing') {
-                setTimeout(() => pollProgress(downloadId), 1000);
+            // Continue polling if not finished, or if we haven't received a final status yet
+            if (data.status === 'downloading' || data.status === 'processing' || 
+                (data.status === 'starting' && pollCount < 120)) { // Max 2 minutes
+                setTimeout(() => pollProgress(downloadId, pollCount + 1), 1000);
+            } else if (data.status === 'completed') {
+                // Download completed successfully
+                console.log('Download completed successfully');
+            } else if (data.status === 'error') {
+                // Download failed
+                console.log('Download failed:', data.error);
             }
             
         } catch (error) {
             console.error('Error polling progress:', error);
+            // Continue polling for network errors (up to 30 seconds)
+            if (pollCount < 30) {
+                setTimeout(() => pollProgress(downloadId, pollCount + 1), 1000);
+            }
         }
     }
 
