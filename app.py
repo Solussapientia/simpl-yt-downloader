@@ -866,6 +866,22 @@ def index():
 def test():
     return "<h1>Flask app is working!</h1>"
 
+@app.route('/debug')
+def debug():
+    import os
+    return f"""
+    <h1>Debug Info</h1>
+    <p>Flask app is running!</p>
+    <p>PORT: {os.environ.get('PORT', 'Not set')}</p>
+    <p>Python version: {os.environ.get('PYTHON_VERSION', 'Not set')}</p>
+    <p>Current directory: {os.getcwd()}</p>
+    <p>Templates directory exists: {os.path.exists('templates')}</p>
+    """
+
+@app.route('/minimal')
+def minimal():
+    return "<h1>MINIMAL TEST</h1><p>This is the simplest possible route.</p>"
+
 @app.route('/simple')
 def simple():
     return """
