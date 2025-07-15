@@ -664,4 +664,5 @@ def download_file(download_id):
 if __name__ == '__main__':
     # Railway provides PORT environment variable
     port = int(os.environ.get('PORT', 8000))
+    print(f"Starting server on port {port}")
     app.run(debug=False, host='0.0.0.0', port=port) 

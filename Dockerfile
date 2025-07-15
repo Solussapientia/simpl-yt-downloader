@@ -20,11 +20,8 @@ COPY . .
 # Create downloads directory
 RUN mkdir -p downloads
 
-# Make startup script executable
-RUN chmod +x start.sh
-
 # Expose port
 EXPOSE 8000
 
-# Start command
-CMD ["./start.sh"] 
+# Start command - Use Python directly
+CMD ["python", "app.py"] 
