@@ -653,21 +653,64 @@ def get_video_info():
 
 @app.route('/download_file/<download_id>')
 def download_file(download_id):
-    progress = download_progress.get(download_id)
-    if not progress or progress['status'] not in ['finished', 'completed']:
-        return jsonify({'error': 'Download not completed'}), 400
-    
-    filename = progress.get('filename')
-    if not filename:
-        return jsonify({'error': 'No filename available'}), 400
-    
-    downloads_dir = 'downloads'
-    full_path = os.path.join(downloads_dir, filename)
-    
-    if os.path.exists(full_path):
-        return send_file(full_path, as_attachment=True)
-    else:
-        return jsonify({'error': f'File not found: {filename}'}), 404
+    """Download file by download_id"""
+    try:
+        downloads_dir = 'downloads'
+        
+        # Debug: Print all available progress data
+        print(f"Download request for ID: {download_id}")
+        print(f"Available download IDs: {list(download_progress.keys())}")
+        
+        # Find the download progress data
+        progress = download_progress.get(download_id)
+        if not progress:
+            print(f"No progress found for download_id: {download_id}")
+            return jsonify({'error': 'Download not found'}), 404
+        
+        print(f"Progress status: {progress.get('status')}")
+        
+        # Check if download is completed
+        if progress.get('status') != 'completed':
+            print(f"Download not completed. Status: {progress.get('status')}")
+            return jsonify({'error': 'Download not completed'}), 400
+        
+        # Get filename from progress
+        filename = progress.get('filename')
+        if not filename:
+            print(f"No filename in progress data: {progress}")
+            return jsonify({'error': 'No filename available'}), 400
+        
+        # Build full file path
+        full_path = os.path.join(downloads_dir, filename)
+        
+        # Check if file exists
+        if not os.path.exists(full_path):
+            print(f"File not found at path: {full_path}")
+            # Try to find the file in the downloads directory
+            if os.path.exists(downloads_dir):
+                available_files = os.listdir(downloads_dir)
+                print(f"Available files in downloads dir: {available_files}")
+                # Try to find a file that matches the filename
+                for file in available_files:
+                    if file == filename:
+                        full_path = os.path.join(downloads_dir, file)
+                        break
+                    elif filename in file or file in filename:
+                        full_path = os.path.join(downloads_dir, file)
+                        filename = file
+                        break
+        
+        if not os.path.exists(full_path):
+            return jsonify({'error': f'File not found: {filename}'}), 404
+        
+        print(f"Sending file: {full_path}")
+        
+        # Send file as attachment
+        return send_file(full_path, as_attachment=True, download_name=filename)
+        
+    except Exception as e:
+        print(f"Error in download_file: {e}")
+        return jsonify({'error': f'Download failed: {str(e)}'}), 500
 
 # WSGI entry point is handled by wsgi.py
 # This allows the app to be imported without running the server 
