@@ -20,8 +20,11 @@ COPY . .
 # Create downloads directory
 RUN mkdir -p downloads
 
+# Make startup script executable
+RUN chmod +x start.sh
+
 # Expose port
 EXPOSE 8000
 
 # Start command
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:$PORT app:app"] 
+CMD ["./start.sh"] 
