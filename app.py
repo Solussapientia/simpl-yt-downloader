@@ -678,7 +678,6 @@ def extract_video_info(url):
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
-            'format': 'best[ext=mp4][protocol^=http][protocol!=m3u8_native][protocol!=m3u8][protocol!=hls]',
             'extractor_args': {
                 'youtube': {
                     'player_client': ['web', 'android', 'ios'],
@@ -701,8 +700,10 @@ def extract_video_info(url):
                 'formats': []
             }
             
-            # Process available formats (MP4 only)
+            # Process available formats - show multiple quality options
             seen_qualities = set()
+            
+            # Get various quality MP4 formats
             for fmt in info.get('formats', []):
                 # Only MP4 formats
                 if fmt.get('ext') != 'mp4':
@@ -724,10 +725,11 @@ def extract_video_info(url):
                 else:
                     quality = "Standard"
                     
-                # Avoid duplicates
-                if quality in seen_qualities:
+                # Allow multiple formats of same quality (some may have audio, some may not)
+                quality_key = f"{quality}_{format_id}"
+                if quality_key in seen_qualities:
                     continue
-                seen_qualities.add(quality)
+                seen_qualities.add(quality_key)
                 
                 # Format file size
                 if filesize:
@@ -746,6 +748,26 @@ def extract_video_info(url):
             
             # Sort formats by quality (highest first)
             video_info['formats'].sort(key=lambda x: x['height'], reverse=True)
+            
+            # If we don't have many formats, add some common ones
+            if len(video_info['formats']) < 3:
+                # Add some standard format options
+                standard_formats = [
+                    {'format_id': 'best[height<=1080]', 'quality': '1080p', 'size': 'Best available', 'height': 1080, 'width': 1920},
+                    {'format_id': 'best[height<=720]', 'quality': '720p', 'size': 'Good quality', 'height': 720, 'width': 1280},
+                    {'format_id': 'best[height<=480]', 'quality': '480p', 'size': 'Medium quality', 'height': 480, 'width': 854},
+                    {'format_id': 'best[height<=360]', 'quality': '360p', 'size': 'Standard quality', 'height': 360, 'width': 640},
+                    {'format_id': 'worst', 'quality': 'Lowest', 'size': 'Smallest size', 'height': 240, 'width': 426}
+                ]
+                
+                # Add formats that don't exist yet
+                existing_qualities = {f['quality'] for f in video_info['formats']}
+                for std_fmt in standard_formats:
+                    if std_fmt['quality'] not in existing_qualities:
+                        video_info['formats'].append(std_fmt)
+                
+                # Re-sort by quality
+                video_info['formats'].sort(key=lambda x: x['height'], reverse=True)
             
             return video_info
             
@@ -771,7 +793,18 @@ def get_download_url(video_url, format_id):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
             
-            # Find the specific format
+            # For format selectors like 'best[height<=720]', get the selected format
+            if 'requested_formats' in info and info['requested_formats']:
+                # Multiple formats selected (video + audio)
+                for fmt in info['requested_formats']:
+                    if fmt.get('url'):
+                        return fmt.get('url')
+            
+            # Single format selected
+            if 'url' in info:
+                return info['url']
+            
+            # Fallback: try to find by format_id for simple IDs like '18'
             for fmt in info.get('formats', []):
                 if fmt.get('format_id') == format_id:
                     return fmt.get('url')
@@ -805,9 +838,6 @@ def extract():
         
         if not video_info:
             return jsonify({'error': 'Could not extract video information'}), 500
-            
-        if not video_info['formats']:
-            return jsonify({'error': 'No MP4 formats available for this video'}), 400
             
         # Add extraction timestamp and original URL
         video_info['original_url'] = url

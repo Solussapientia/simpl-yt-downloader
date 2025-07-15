@@ -220,7 +220,7 @@
         }
 
         function openVideo(videoId, formatId) {
-            const downloadUrl = `/download/${videoId}/${formatId}`;
+            const downloadUrl = `/download/${videoId}/${encodeURIComponent(formatId)}`;
             window.open(downloadUrl, '_blank');
         }
 
