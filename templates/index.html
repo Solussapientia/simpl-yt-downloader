@@ -313,24 +313,47 @@
         // Download format
         function downloadFormat(videoId, formatId) {
             try {
-                // Direct download URL
+                // Show download feedback
+                const downloadBtn = event.target;
+                const originalText = downloadBtn.textContent;
+                downloadBtn.textContent = 'Downloading...';
+                downloadBtn.disabled = true;
+                downloadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                
+                // Create download URL
                 const downloadUrl = `/download/${videoId}/${formatId}`;
                 
-                // Create temporary link and click it
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                // Create invisible iframe to trigger download
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = downloadUrl;
+                document.body.appendChild(iframe);
                 
-                // Show success message
-                showSuccess('Download started! If it doesn\'t work, try the streaming option.');
+                // Show success message and restore button after a delay
+                setTimeout(() => {
+                    downloadBtn.textContent = originalText;
+                    downloadBtn.disabled = false;
+                    downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    
+                    showSuccess('Download started! The file should start downloading shortly.');
+                    
+                    // Remove iframe after download starts
+                    setTimeout(() => {
+                        if (iframe.parentNode) {
+                            iframe.parentNode.removeChild(iframe);
+                        }
+                    }, 5000);
+                }, 2000);
                 
             } catch (error) {
-                // If direct download fails, try streaming
-                const streamUrl = `/stream/${videoId}/${formatId}`;
-                window.location.href = streamUrl;
+                console.error('Download error:', error);
+                showError('Download failed. Please try again.');
+                
+                // Restore button state
+                const downloadBtn = event.target;
+                downloadBtn.textContent = 'Download';
+                downloadBtn.disabled = false;
+                downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
         

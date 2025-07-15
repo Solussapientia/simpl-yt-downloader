@@ -851,7 +851,7 @@ def extract_video():
 
 @app.route('/download/<video_id>/<format_id>')
 def download_video(video_id, format_id):
-    """Download video directly like Y2mate does"""
+    """Download video by streaming through server with proper headers"""
     try:
         # Get cached video info
         if video_id not in video_cache:
@@ -865,65 +865,67 @@ def download_video(video_id, format_id):
         if not download_info:
             return jsonify({'error': 'Failed to get download URL'}), 400
         
-        # Clean filename
-        filename = re.sub(r'[^\w\s-]', '', download_info['filename'])
-        filename = re.sub(r'[-\s]+', '-', filename)
+        # Clean filename for download
+        filename = download_info['filename']
+        # Remove special characters and clean up
+        filename = re.sub(r'[^\w\s.-]', '', filename)
+        filename = re.sub(r'\s+', ' ', filename).strip()
         
-        # Redirect to direct download URL with proper headers
-        response = redirect(download_info['url'])
-        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
-        
-        return response
-        
-    except Exception as e:
-        return jsonify({'error': f'Download error: {str(e)}'}), 500
-
-@app.route('/stream/<video_id>/<format_id>')
-def stream_video(video_id, format_id):
-    """Stream video through server if direct redirect fails"""
-    try:
-        # Get cached video info
-        if video_id not in video_cache:
-            return jsonify({'error': 'Video not found'}), 404
-        
-        video_info = video_cache[video_id]
-        
-        # Get fresh download URL
-        download_info = get_fresh_download_url(video_info['original_url'], format_id)
-        
-        if not download_info:
-            return jsonify({'error': 'Failed to get download URL'}), 400
-        
-        # Clean filename
-        filename = re.sub(r'[^\w\s-]', '', download_info['filename'])
-        filename = re.sub(r'[-\s]+', '-', filename)
-        
-        # Stream the file
+        # Stream the file with proper download headers
         def generate():
             try:
-                with requests.get(download_info['url'], stream=True, timeout=30) as r:
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': '*/*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'identity',
+                    'Connection': 'keep-alive',
+                    'Range': 'bytes=0-'
+                }
+                
+                with requests.get(download_info['url'], stream=True, headers=headers, timeout=30) as r:
                     r.raise_for_status()
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:
                             yield chunk
+                            
             except Exception as e:
                 print(f"Streaming error: {e}")
+                yield b"Error: Could not stream video"
         
         # Determine content type
-        ext = download_info.get('ext', 'mp4')
-        content_type = 'video/mp4' if ext == 'mp4' else 'application/octet-stream'
+        ext = download_info.get('ext', 'mp4').lower()
+        content_type_map = {
+            'mp4': 'video/mp4',
+            'webm': 'video/webm',
+            'mkv': 'video/x-matroska',
+            'avi': 'video/x-msvideo',
+            'mov': 'video/quicktime',
+            'mp3': 'audio/mpeg',
+            'm4a': 'audio/mp4',
+            'wav': 'audio/wav',
+            'flac': 'audio/flac'
+        }
+        content_type = content_type_map.get(ext, 'application/octet-stream')
         
-        return Response(
+        # Create response with proper download headers
+        response = Response(
             generate(),
             mimetype=content_type,
             headers={
                 'Content-Disposition': f'attachment; filename="{filename}"',
-                'Content-Type': content_type
+                'Content-Type': content_type,
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             }
         )
         
+        return response
+        
     except Exception as e:
-        return jsonify({'error': f'Streaming error: {str(e)}'}), 500
+        print(f"Download error: {e}")
+        return jsonify({'error': f'Download failed: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000) 
