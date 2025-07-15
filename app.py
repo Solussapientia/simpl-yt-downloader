@@ -18,7 +18,6 @@ from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_file, Response, redirect, url_for
 from werkzeug.utils import secure_filename
 from urllib.parse import urlparse, parse_qs
-from flask_cors import CORS
 
 # Import yt-dlp with fallback
 try:
