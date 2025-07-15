@@ -18,6 +18,8 @@ from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_file, Response, redirect, url_for
 from werkzeug.utils import secure_filename
 from urllib.parse import urlparse, parse_qs
+from xml.etree.ElementTree import Element, SubElement, tostring
+from xml.dom import minidom
 
 # Import yt-dlp with fallback
 try:
@@ -870,6 +872,237 @@ def download(video_id, format_id):
     except Exception as e:
         logger.error(f"Error in download endpoint: {str(e)}")
         return jsonify({'error': 'Server error occurred'}), 500
+
+# ================================
+# SEO and Marketing Routes
+# ================================
+
+@app.route('/sitemap.xml')
+def sitemap():
+    """Generate dynamic sitemap.xml for SEO"""
+    try:
+        # Create root element
+        urlset = Element('urlset')
+        urlset.set('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9')
+        
+        # Define base URL
+        base_url = request.host_url.rstrip('/')
+        
+        # Main pages
+        pages = [
+            {'loc': '/', 'priority': '1.0', 'changefreq': 'daily'},
+            {'loc': '/about', 'priority': '0.8', 'changefreq': 'weekly'},
+            {'loc': '/privacy', 'priority': '0.7', 'changefreq': 'monthly'},
+            {'loc': '/terms', 'priority': '0.7', 'changefreq': 'monthly'},
+        ]
+        
+        # Add URLs to sitemap
+        for page in pages:
+            url = SubElement(urlset, 'url')
+            
+            loc = SubElement(url, 'loc')
+            loc.text = f"{base_url}{page['loc']}"
+            
+            lastmod = SubElement(url, 'lastmod')
+            lastmod.text = datetime.now().strftime('%Y-%m-%d')
+            
+            changefreq = SubElement(url, 'changefreq')
+            changefreq.text = page['changefreq']
+            
+            priority = SubElement(url, 'priority')
+            priority.text = page['priority']
+        
+        # Convert to string and format
+        rough_string = tostring(urlset, 'utf-8')
+        reparsed = minidom.parseString(rough_string)
+        
+        response = Response(reparsed.toprettyxml(indent="  "), mimetype='application/xml')
+        response.headers['Content-Type'] = 'application/xml; charset=utf-8'
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error generating sitemap: {str(e)}")
+        return "Error generating sitemap", 500
+
+@app.route('/robots.txt')
+def robots_txt():
+    """Generate robots.txt for SEO"""
+    try:
+        base_url = request.host_url.rstrip('/')
+        
+        robots_content = f"""User-agent: *
+Allow: /
+Disallow: /downloads/
+Disallow: /static/
+Disallow: /progress/
+Disallow: /download/
+
+# Sitemap
+Sitemap: {base_url}/sitemap.xml
+
+# Crawl-delay for being respectful
+Crawl-delay: 1
+
+# Allow major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+"""
+        
+        response = Response(robots_content, mimetype='text/plain')
+        response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error generating robots.txt: {str(e)}")
+        return "Error generating robots.txt", 500
+
+@app.route('/about')
+def about():
+    """About page with SEO content"""
+    return render_template('about.html')
+
+@app.route('/privacy')
+def privacy():
+    """Privacy policy page"""
+    return render_template('privacy.html')
+
+@app.route('/terms')
+def terms():
+    """Terms of service page"""
+    return render_template('terms.html')
+
+@app.route('/humans.txt')
+def humans_txt():
+    """Humans.txt file for giving credit to developers"""
+    humans_content = """/* TEAM */
+    Developer: Simpl YT Downloader Team
+    Site: https://simpl-yt-downloader.up.railway.app/
+    Location: Global
+
+/* THANKS */
+    YouTube-dl community
+    yt-dlp developers
+    Flask framework
+    TailwindCSS
+    FontAwesome
+
+/* SITE */
+    Last update: 2024/01/15
+    Language: English
+    Doctype: HTML5
+    IDE: Visual Studio Code
+    
+/* TECHNOLOGY */
+    Python, Flask, yt-dlp, TailwindCSS, HTML5, JavaScript
+    Hosted on Railway
+    
+/* CONTACT */
+    Email: support@simpl-yt-downloader.com
+    Twitter: @SimplYTDownloader
+"""
+    
+    response = Response(humans_content, mimetype='text/plain')
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    return response
+
+@app.route('/ads.txt')
+def ads_txt():
+    """Ads.txt file for ad network verification"""
+    ads_content = """# ads.txt file for Simpl YT Downloader
+# This file is used to authorize digital ad sellers
+
+# Google AdSense (example - replace with actual if using)
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+
+# Currently no ads running - keeping file for future use
+# Add your ad network entries here when implementing monetization
+"""
+    
+    response = Response(ads_content, mimetype='text/plain')
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    return response
+
+@app.route('/manifest.json')
+def manifest():
+    """Progressive Web App manifest"""
+    manifest_data = {
+        "name": "Simpl YT Downloader",
+        "short_name": "YT Downloader",
+        "description": "Free YouTube video downloader with beautiful interface",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#111827",
+        "theme_color": "#0ea5e9",
+        "orientation": "portrait-primary",
+        "icons": [
+            {
+                "src": "/static/images/favicon-16x16.png",
+                "sizes": "16x16",
+                "type": "image/png"
+            },
+            {
+                "src": "/static/images/favicon-32x32.png",
+                "sizes": "32x32",
+                "type": "image/png"
+            },
+            {
+                "src": "/static/images/apple-touch-icon.png",
+                "sizes": "180x180",
+                "type": "image/png"
+            },
+            {
+                "src": "/static/images/android-chrome-192x192.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": "/static/images/android-chrome-512x512.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ],
+        "categories": ["utilities", "multimedia", "productivity"],
+        "lang": "en-US",
+        "dir": "ltr",
+        "scope": "/",
+        "prefer_related_applications": False
+    }
+    
+    response = Response(json.dumps(manifest_data, indent=2), mimetype='application/json')
+    response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    return response
+
+# Add security headers for SEO and security
+@app.after_request
+def after_request(response):
+    """Add security and SEO headers"""
+    # Security headers
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    
+    # Performance headers
+    response.headers['Cache-Control'] = 'public, max-age=3600'
+    
+    # Compression
+    if response.content_type.startswith('text/') or response.content_type.startswith('application/json'):
+        response.headers['Content-Encoding'] = 'gzip'
+    
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001) 
