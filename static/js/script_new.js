@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('JavaScript loaded - Version 8 - Dynamic Formats');
+    console.log('JavaScript loaded - Version 10 - Direct Download');
     
     try {
     
@@ -206,8 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     url: url,
-                    format_id: formatId,
-                    format_type: formatType
+                    format_id: formatId
                 })
             });
 
@@ -237,9 +236,13 @@ document.addEventListener('DOMContentLoaded', function() {
             updateProgressUI(data);
             
             // Continue polling if not finished, or if we haven't received a final status yet
-            if (data.status === 'downloading' || data.status === 'processing' || 
+            if (data.status === 'extracting' || data.status === 'downloading' || 
                 (data.status === 'starting' && pollCount < 120)) { // Max 2 minutes
                 setTimeout(() => pollProgress(downloadId, pollCount + 1), 1000);
+            } else if (data.status === 'ready_for_download') {
+                // Trigger direct download
+                triggerDirectDownload(downloadId, data.filename);
+                showDownloadComplete(data.filename);
             } else if (data.status === 'completed') {
                 // Download completed successfully
                 console.log('Download completed successfully');
@@ -257,19 +260,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Trigger direct download
+    function triggerDirectDownload(downloadId, filename) {
+        const downloadUrl = `/direct_download/${downloadId}`;
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = filename || 'download';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log('Direct download triggered:', filename);
+    }
+
     // Update progress UI
     function updateProgressUI(progressData) {
         if (downloadStatus) {
-            downloadStatus.textContent = progressData.status;
+            const statusText = progressData.status === 'extracting' ? 'Extracting download URL...' : 
+                               progressData.status === 'ready_for_download' ? 'Download ready!' :
+                               progressData.status === 'downloading' ? 'Downloading...' :
+                               progressData.status;
+            downloadStatus.textContent = statusText;
         }
         if (downloadSpeed) {
-            downloadSpeed.textContent = progressData.speed || '0 B/s';
+            downloadSpeed.textContent = progressData.speed_text || progressData.speed || '0 B/s';
         }
         
         // Update progress bar if it exists
         const progressBar = document.querySelector('.progress-bar');
         if (progressBar) {
-            progressBar.style.width = `${progressData.progress || 0}%`;
+            progressBar.style.width = `${progressData.percent || progressData.progress || 0}%`;
         }
         
         // Show completion
@@ -289,7 +310,8 @@ document.addEventListener('DOMContentLoaded', function() {
             downloadComplete.classList.remove('hidden');
         }
         if (finalDownloadBtn) {
-            finalDownloadBtn.href = `/download_file/${currentDownloadId}`;
+            finalDownloadBtn.setAttribute('data-download-id', currentDownloadId);
+            finalDownloadBtn.setAttribute('data-filename', filename);
             finalDownloadBtn.textContent = `Download ${filename}`;
         }
     }
@@ -401,6 +423,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 pollProgress(currentDownloadId);
             } catch (error) {
                 showError(error.message);
+            }
+        });
+    }
+
+    // Handle final download button click - for re-downloading
+    if (finalDownloadBtn) {
+        finalDownloadBtn.addEventListener('click', function() {
+            const filename = this.getAttribute('data-filename');
+            const downloadId = this.getAttribute('data-download-id');
+            
+            if (downloadId) {
+                // Trigger direct download again
+                triggerDirectDownload(downloadId, filename);
             }
         });
     }

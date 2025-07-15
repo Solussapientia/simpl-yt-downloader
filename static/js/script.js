@@ -185,17 +185,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (videoData.formats && videoData.formats.length > 0) {
                 videoData.formats.forEach(format => {
                     const option = document.createElement('option');
-                    // Use quality label as value instead of format_id
-                    option.value = format.format_note || format.format_id;
-                    option.textContent = format.format_note || format.format_id;
+                    // Store the actual format_id in a data attribute
+                    option.value = format.display_name || format.format_note || format.format_id;
+                    option.setAttribute('data-format-id', format.format_id);
+                    option.textContent = format.display_name || format.format_note || format.format_id;
                     qualitySelect.appendChild(option);
                 });
             }
             // If no formats available, add a default option
             if (qualitySelect.children.length === 0) {
                 const option = document.createElement('option');
-                option.value = 'mp4';
-                option.textContent = 'MP4 (Default)';
+                option.value = 'best';
+                option.setAttribute('data-format-id', 'best');
+                option.textContent = 'Best Quality (Auto)';
                 qualitySelect.appendChild(option);
             }
             if (qualitySelect.parentElement) {
@@ -322,14 +324,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             try {
-                let quality = 'mp4';
-                let format = 'mp4';
+                let format_id = 'best';
                 
                 if (currentDownloadType === 'video') {
-                    quality = qualitySelect ? (qualitySelect.value || 'mp4') : 'mp4';
-                    format = 'mp4';
+                    // For video downloads, use the selected format
+                    if (qualitySelect && qualitySelect.value) {
+                        // Get the actual format_id from the selected option
+                        const selectedOption = qualitySelect.options[qualitySelect.selectedIndex];
+                        format_id = selectedOption.getAttribute('data-format-id') || selectedOption.value;
+                    }
                 } else {
-                    format = 'mp3';
+                    // For MP3 downloads, use audio extraction
+                    format_id = 'bestaudio/best';
                 }
 
                 const response = await fetch('/download', {
@@ -339,8 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify({ 
                         url: url, 
-                        quality: quality,
-                        format: format
+                        format_id: format_id
                     })
                 });
 
@@ -368,20 +373,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
 
                 // Handle progress updates
-                if (data.status === 'downloading') {
-                    // Update progress stats
-                    updateProgressStats(data.speed, data.eta, data.total);
+                if (data.status === 'extracting') {
+                    // Show extracting status
+                    if (downloadSpeed) {
+                        downloadSpeed.textContent = 'Extracting...';
+                    }
+                    if (downloadStatus) {
+                        downloadStatus.textContent = 'Extracting download URL...';
+                    }
                     
                     // Continue polling
                     setTimeout(pollProgress, 1000);
-                } else if (data.status === 'processing') {
-                    // Show processing status
+                } else if (data.status === 'ready_for_download') {
+                    // Download URL is ready, start direct download
                     if (downloadSpeed) {
-                        downloadSpeed.textContent = 'Processing...';
+                        downloadSpeed.textContent = 'Ready';
                     }
                     if (downloadStatus) {
-                        downloadStatus.textContent = 'Processing...';
+                        downloadStatus.textContent = 'Starting download...';
                     }
+                    
+                    // Trigger direct download
+                    triggerDirectDownload(currentDownloadId, data.filename);
+                    
+                    // Show completion message
+                    setTimeout(() => {
+                        if (downloadProgress) {
+                            downloadProgress.classList.add('hidden');
+                        }
+                        if (downloadComplete) {
+                            downloadComplete.classList.remove('hidden');
+                        }
+                        
+                        // Update the final download button text
+                        if (finalDownloadBtn) {
+                            finalDownloadBtn.textContent = `Download completed: ${data.filename}`;
+                            finalDownloadBtn.setAttribute('data-filename', data.filename);
+                            finalDownloadBtn.setAttribute('data-download-id', currentDownloadId);
+                        }
+                    }, 1000);
+                    
+                } else if (data.status === 'downloading') {
+                    // Update progress stats during streaming
+                    updateProgressStats(data.speed_text, data.eta_text, data.file_size);
                     
                     // Continue polling
                     setTimeout(pollProgress, 1000);
@@ -391,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         downloadSpeed.textContent = 'Completed';
                     }
                     if (downloadStatus) {
-                        downloadStatus.textContent = 'Completed';
+                        downloadStatus.textContent = 'Download completed';
                     }
                     
                     // Show completion message
@@ -404,6 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Set download button data
                     if (finalDownloadBtn) {
+                        finalDownloadBtn.textContent = `Download completed: ${data.filename}`;
                         finalDownloadBtn.setAttribute('data-filename', data.filename);
                         finalDownloadBtn.setAttribute('data-download-id', currentDownloadId);
                     }
@@ -421,12 +456,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 console.error('Failed to get download progress:', error);
-                // Optionally show a temporary error message or re-attempt polling
+                // Re-attempt polling after a short delay
+                setTimeout(pollProgress, 2000);
             }
         };
 
         // Initial poll
         pollProgress();
+    }
+
+    // Trigger direct download
+    function triggerDirectDownload(downloadId, filename) {
+        const downloadUrl = `/direct_download/${downloadId}`;
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = filename || 'download';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log('Direct download triggered:', filename);
     }
 
     // Update progress display (simplified)
@@ -435,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
             downloadSpeed.textContent = speed || '--';
         }
         if (downloadStatus) {
-            downloadStatus.textContent = 'Downloading...';
+            downloadStatus.textContent = `Downloading... ${eta ? `ETA: ${eta}` : ''}`;
         }
     }
 
@@ -444,11 +494,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // This function is now handled by startProgressTracking's polling
     }
 
-    // Handle download file button click
+    // Handle download file button click - for re-downloading
     if (finalDownloadBtn) {
         finalDownloadBtn.addEventListener('click', function() {
-            if (currentDownloadId) {
-                window.location.href = `/download_file/${currentDownloadId}`;
+            const filename = this.getAttribute('data-filename');
+            const downloadId = this.getAttribute('data-download-id');
+            
+            if (downloadId) {
+                // Trigger direct download again
+                triggerDirectDownload(downloadId, filename);
             }
         });
     }
