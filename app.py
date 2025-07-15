@@ -5,229 +5,547 @@ import os
 # Add current directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from flask import Flask, render_template, request, jsonify, send_file, url_for, send_from_directory
-from datetime import datetime, timedelta
-import yt_dlp
-import tempfile
-import threading
+import json
 import time
-from urllib.parse import urlparse
+import random
+import requests
+import threading
+import uuid
 import re
-import glob
+import subprocess
+import tempfile
+from datetime import datetime
+from flask import Flask, render_template, request, jsonify, send_file
+from werkzeug.utils import secure_filename
+from urllib.parse import urlparse, parse_qs
+
+# Import yt-dlp with fallback
+try:
+    import yt_dlp
+except ImportError:
+    print("yt-dlp not found. Installing...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "yt-dlp"])
+    import yt_dlp
 
 app = Flask(__name__)
 
-# Performance and SEO Headers
-@app.after_request
-def after_request(response):
-    # Security headers
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
-    
-    # Performance headers
-    response.headers['Server'] = 'Simpl YT/1.0'
-    response.headers['X-Robots-Tag'] = 'index, follow'
-    
-    # Static file caching
-    if request.endpoint == 'static':
-        response.headers['Cache-Control'] = 'public, max-age=31536000'  # 1 year for static files
-        response.headers['Expires'] = (datetime.utcnow() + timedelta(days=365)).strftime('%a, %d %b %Y %H:%M:%S GMT')
-    elif request.endpoint in ['robots_txt', 'sitemap_xml', 'humans_txt', 'ads_txt']:
-        response.headers['Cache-Control'] = 'public, max-age=86400'  # 1 day for SEO files
-    elif request.endpoint == 'index':
-        response.headers['Cache-Control'] = 'public, max-age=3600'  # 1 hour for main page
-    
-    return response
-
 # Global variables
 download_progress = {}
+active_downloads = {}
 
-# SEO Routes
-@app.route('/robots.txt')
-def robots_txt():
-    response = send_from_directory('.', 'robots.txt')
-    response.headers['Content-Type'] = 'text/plain'
-    return response
+# Multiple proxy configurations for rotation
+PROXY_LIST = [
+    # You can add residential proxies here if available
+    # Format: "http://username:password@proxy-host:port"
+]
 
-@app.route('/sitemap.xml')
-def sitemap_xml():
-    response = send_from_directory('.', 'sitemap.xml')
-    response.headers['Content-Type'] = 'application/xml'
-    return response
-
-@app.route('/humans.txt')
-def humans_txt():
-    response = send_from_directory('.', 'humans.txt')
-    response.headers['Content-Type'] = 'text/plain'
-    return response
-
-@app.route('/ads.txt')
-def ads_txt():
-    response = send_from_directory('.', 'ads.txt')
-    response.headers['Content-Type'] = 'text/plain'
-    return response
-
-@app.route('/.well-known/security.txt')
-def security_txt():
-    response = send_from_directory('static/.well-known', 'security.txt')
-    response.headers['Content-Type'] = 'text/plain'
-    return response
-
-# Content Pages
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-@app.route('/privacy')
-def privacy():
-    return render_template('privacy.html')
-
-@app.route('/terms')
-def terms():
-    return render_template('terms.html')
-
-def format_bytes(bytes_value):
-    """Convert bytes to human readable format"""
-    if bytes_value is None or bytes_value == 0:
-        return "0 B"
-    
-    for unit in ['B', 'KB', 'MB', 'GB']:
-        if bytes_value < 1024.0:
-            return f"{bytes_value:.1f} {unit}"
-        bytes_value /= 1024.0
-    return f"{bytes_value:.1f} TB"
-
-def format_speed(speed):
-    """Convert speed to human readable format"""
-    if speed is None or speed == 0:
-        return "0 B/s"
-    return f"{format_bytes(speed)}/s"
-
-def format_eta(eta):
-    """Convert ETA to human readable format"""
-    if eta is None or eta == 0:
-        return "0s"
-    
-    if eta < 60:
-        return f"{int(eta)}s"
-    elif eta < 3600:
-        minutes = int(eta // 60)
-        seconds = int(eta % 60)
-        return f"{minutes}m {seconds}s"
-    else:
-        hours = int(eta // 3600)
-        minutes = int((eta % 3600) // 60)
-        return f"{hours}h {minutes}m"
+# User agents for rotation
+USER_AGENTS = [
+    'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1'
+]
 
 class ProgressHook:
     def __init__(self, download_id):
         self.download_id = download_id
         self.last_update = time.time()
-        
+
     def __call__(self, d):
         current_time = time.time()
-        
-        # Only update every 0.5 seconds to avoid too frequent updates
-        if current_time - self.last_update < 0.5:
+        # Update progress at most once per second
+        if current_time - self.last_update < 1.0:
             return
-            
         self.last_update = current_time
         
-        if d['status'] == 'downloading':
-            downloaded = d.get('downloaded_bytes', 0)
-            total = d.get('total_bytes') or d.get('total_bytes_estimate', 0)
-            speed = d.get('speed', 0)
-            eta = d.get('eta', 0)
-            
-            if total > 0:
-                percent = min(100, (downloaded / total) * 100)
-            else:
+        status = d.get('status', 'unknown')
+        
+        if status == 'downloading':
+            percent = d.get('_percent_str', '0%').replace('%', '')
+            try:
+                percent = float(percent)
+            except:
                 percent = 0
-                
-            # Update progress
+            
+            speed = d.get('_speed_str', '0 B/s') or '0 B/s'
+            eta = d.get('_eta_str', 'Unknown') or 'Unknown'
+            
+            # Handle file size
+            total_bytes = d.get('total_bytes') or d.get('total_bytes_estimate', 0)
+            if total_bytes:
+                file_size = f"{total_bytes / (1024*1024):.1f} MB"
+            else:
+                file_size = "-- MB"
+            
             download_progress[self.download_id] = {
                 'status': 'downloading',
-                'percent': round(percent, 1),
-                'downloaded': downloaded,
-                'total': total,
-                'speed': speed or 0,
-                'eta': eta or 0,
-                'speed_text': format_speed(speed),
-                'eta_text': format_eta(eta),
-                'file_size': format_bytes(total) if total > 0 else "-- MB"
+                'percent': percent,
+                'speed_text': speed,
+                'eta_text': eta,
+                'file_size': file_size,
+                'downloaded': d.get('downloaded_bytes', 0),
+                'total': total_bytes,
+                'speed': d.get('speed', 0),
+                'eta': d.get('eta', 0)
             }
-            
-        elif d['status'] == 'finished':
-            # Download finished, but might need processing (like merging)
+        elif status == 'finished':
             download_progress[self.download_id] = {
                 'status': 'processing',
-                'percent': 99,
-                'downloaded': d.get('downloaded_bytes', 0),
-                'total': d.get('total_bytes') or d.get('total_bytes_estimate', 0),
-                'speed': 0,
-                'eta': 0,
-                'speed_text': "Processing...",
-                'eta_text': "Almost done",
-                'file_size': format_bytes(d.get('total_bytes') or d.get('total_bytes_estimate', 0))
+                'percent': 100,
+                'speed_text': 'Processing...',
+                'eta_text': 'Almost done',
+                'file_size': 'Processing'
+            }
+
+def get_video_info_alternative(url):
+    """Alternative method using different approaches to get video info"""
+    
+    # Method 1: Try multiple yt-dlp configurations
+    configs = [
+        # Configuration 1: Use different extractors
+        {
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': False,
+            'user_agent': random.choice(USER_AGENTS),
+            'headers': {
+                'User-Agent': random.choice(USER_AGENTS),
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'DNT': '1',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Cache-Control': 'max-age=0',
+            },
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'ios'],
+                    'player_skip': ['dash', 'hls'],
+                    'include_live_dash': False,
+                }
+            }
+        },
+        # Configuration 2: Try web client
+        {
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': False,
+            'user_agent': random.choice(USER_AGENTS),
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['web'],
+                }
+            }
+        },
+        # Configuration 3: Try with different approach
+        {
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': False,
+            'user_agent': random.choice(USER_AGENTS),
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['mweb', 'android'],
+                }
+            }
+        }
+    ]
+    
+    for i, config in enumerate(configs):
+        try:
+            print(f"Trying configuration {i+1}/3...")
+            
+            # Add random delay to avoid rate limiting
+            if i > 0:
+                time.sleep(random.uniform(2, 5))
+            
+            with yt_dlp.YoutubeDL(config) as ydl:
+                info = ydl.extract_info(url, download=False)
+                
+                if info and 'formats' in info:
+                    print(f"Success with configuration {i+1}")
+                    return process_video_info(info)
+                    
+        except Exception as e:
+            print(f"Configuration {i+1} failed: {e}")
+            continue
+    
+    # Method 2: Try alternative approach using requests
+    try:
+        return get_video_info_from_page_source(url)
+    except Exception as e:
+        print(f"Page source method failed: {e}")
+    
+    # Method 3: Try with proxy if available
+    if PROXY_LIST:
+        try:
+            return get_video_info_with_proxy(url)
+        except Exception as e:
+            print(f"Proxy method failed: {e}")
+    
+    raise Exception("All video info extraction methods failed")
+
+def get_video_info_from_page_source(url):
+    """Extract video info from page source - alternative method"""
+    try:
+        headers = {
+            'User-Agent': random.choice(USER_AGENTS),
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+        }
+        
+        response = requests.get(url, headers=headers, timeout=15)
+        response.raise_for_status()
+        
+        # Extract video ID from URL
+        video_id = None
+        if 'youtube.com/watch' in url:
+            parsed_url = urlparse(url)
+            video_id = parse_qs(parsed_url.query).get('v', [None])[0]
+        elif 'youtu.be/' in url:
+            video_id = url.split('youtu.be/')[-1].split('?')[0]
+        
+        if not video_id:
+            raise Exception("Could not extract video ID")
+        
+        # Try to extract basic info from page source
+        html_content = response.text
+        
+        # Look for video title
+        title_match = re.search(r'"title":"([^"]+)"', html_content)
+        title = title_match.group(1) if title_match else "Unknown Video"
+        
+        # Create basic format list
+        formats = [
+            {
+                'format_id': 'best',
+                'ext': 'mp4',
+                'format_note': 'Best Quality Available',
+                'resolution': 'Best',
+                'filesize': None,
+                'tbr': None,
+                'vcodec': 'unknown',
+                'acodec': 'unknown'
+            },
+            {
+                'format_id': 'worst',
+                'ext': 'mp4',
+                'format_note': 'Lowest Quality',
+                'resolution': 'Lowest',
+                'filesize': None,
+                'tbr': None,
+                'vcodec': 'unknown',
+                'acodec': 'unknown'
+            }
+        ]
+        
+        return {
+            'video_formats': formats,
+            'audio_formats': [
+                {
+                    'format_id': 'bestaudio',
+                    'ext': 'mp3',
+                    'format_note': 'Best Audio Quality',
+                    'abr': 'Best',
+                    'filesize': None,
+                    'acodec': 'mp3'
+                }
+            ],
+            'title': title,
+            'duration': None,
+            'thumbnail': f'https://img.youtube.com/vi/{video_id}/maxresdefault.jpg'
+        }
+        
+    except Exception as e:
+        raise Exception(f"Page source extraction failed: {e}")
+
+def get_video_info_with_proxy(url):
+    """Try to get video info using proxy"""
+    proxy = random.choice(PROXY_LIST)
+    
+    config = {
+        'quiet': True,
+        'no_warnings': True,
+        'extract_flat': False,
+        'proxy': proxy,
+        'user_agent': random.choice(USER_AGENTS),
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'ios'],
+            }
+        }
+    }
+    
+    with yt_dlp.YoutubeDL(config) as ydl:
+        info = ydl.extract_info(url, download=False)
+        return process_video_info(info)
+
+def process_video_info(info):
+    """Process video info and return formatted data"""
+    video_formats = []
+    audio_formats = []
+    
+    formats = info.get('formats', [])
+    
+    for fmt in formats:
+        format_info = {
+            'format_id': fmt.get('format_id', 'unknown'),
+            'ext': fmt.get('ext', 'unknown'),
+            'format_note': fmt.get('format_note', ''),
+            'filesize': fmt.get('filesize'),
+            'tbr': fmt.get('tbr'),
+            'vcodec': fmt.get('vcodec', 'none'),
+            'acodec': fmt.get('acodec', 'none'),
+            'resolution': fmt.get('resolution', 'unknown'),
+            'fps': fmt.get('fps'),
+            'abr': fmt.get('abr'),
+            'height': fmt.get('height'),
+            'width': fmt.get('width')
+        }
+        
+        # Categorize formats
+        if fmt.get('vcodec') != 'none' and fmt.get('vcodec') != None:
+            video_formats.append(format_info)
+        elif fmt.get('acodec') != 'none' and fmt.get('acodec') != None:
+            audio_formats.append(format_info)
+    
+    # Sort formats by quality
+    video_formats.sort(key=lambda x: x.get('height', 0) or 0, reverse=True)
+    audio_formats.sort(key=lambda x: x.get('abr', 0) or 0, reverse=True)
+    
+    return {
+        'video_formats': video_formats,
+        'audio_formats': audio_formats,
+        'title': info.get('title', 'Unknown'),
+        'duration': info.get('duration'),
+        'thumbnail': info.get('thumbnail', '')
+    }
+
+def download_with_multiple_strategies(url, format_id, download_id):
+    """Try multiple download strategies"""
+    
+    downloads_dir = 'downloads'
+    os.makedirs(downloads_dir, exist_ok=True)
+    
+    # Strategy 1: Try with different yt-dlp configurations
+    strategies = [
+        # Strategy 1: Android client
+        {
+            'format': format_id,
+            'outtmpl': os.path.join(downloads_dir, '%(title)s.%(ext)s'),
+            'no_warnings': True,
+            'overwrites': True,
+            'user_agent': random.choice(USER_AGENTS),
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android'],
+                }
+            },
+            'http_headers': {
+                'User-Agent': random.choice(USER_AGENTS),
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate',
+                'DNT': '1',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+            },
+            'retries': 5,
+            'fragment_retries': 5,
+            'skip_unavailable_fragments': True,
+        },
+        # Strategy 2: iOS client
+        {
+            'format': format_id,
+            'outtmpl': os.path.join(downloads_dir, '%(title)s.%(ext)s'),
+            'no_warnings': True,
+            'overwrites': True,
+            'user_agent': random.choice(USER_AGENTS),
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['ios'],
+                }
+            },
+            'retries': 5,
+            'fragment_retries': 5,
+            'skip_unavailable_fragments': True,
+        },
+        # Strategy 3: Web client with different settings
+        {
+            'format': format_id,
+            'outtmpl': os.path.join(downloads_dir, '%(title)s.%(ext)s'),
+            'no_warnings': True,
+            'overwrites': True,
+            'user_agent': random.choice(USER_AGENTS),
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['web'],
+                }
+            },
+            'retries': 3,
+            'fragment_retries': 3,
+            'skip_unavailable_fragments': True,
+        }
+    ]
+    
+    # Try each strategy
+    for i, strategy in enumerate(strategies):
+        try:
+            print(f"Trying download strategy {i+1}/{len(strategies)}")
+            
+            # Add progress hook
+            progress_hook = ProgressHook(download_id)
+            strategy['progress_hooks'] = [progress_hook]
+            
+            # Add random delay between attempts
+            if i > 0:
+                time.sleep(random.uniform(3, 7))
+            
+            # Update progress
+            download_progress[download_id] = {
+                'status': 'downloading',
+                'percent': 0,
+                'speed_text': f'Trying method {i+1}...',
+                'eta_text': 'Calculating...',
+                'file_size': '-- MB'
             }
             
-        elif d['status'] == 'error':
-            download_progress[self.download_id] = {
-                'status': 'error',
-                'percent': 0,
-                'error': d.get('error', 'Unknown error'),
-                'speed_text': "Error",
-                'eta_text': "Failed",
-                'file_size': "-- MB"
-            }
-
-def is_valid_youtube_url(url):
-    youtube_regex = re.compile(
-        r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/'
-        r'(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})'
-    )
-    return youtube_regex.match(url) is not None
-
-def format_description(format_info):
-    """Create a simple resolution string for video format"""
-    height = format_info.get('height', 0)
-    width = format_info.get('width', 0)
-    fps = format_info.get('fps', 0)
+            with yt_dlp.YoutubeDL(strategy) as ydl:
+                info = ydl.extract_info(url, download=True)
+                
+                # Find the downloaded file
+                title = info.get('title', 'Unknown')
+                expected_filename = f"{title}.{info.get('ext', 'mp4')}"
+                
+                # Look for files that match the title
+                for filename in os.listdir(downloads_dir):
+                    if title.replace('/', '_').replace('\\', '_') in filename:
+                        file_path = os.path.join(downloads_dir, filename)
+                        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                            file_size = os.path.getsize(file_path)
+                            print(f"Download completed: {filename} ({file_size} bytes)")
+                            
+                            # Mark as completed
+                            download_progress[download_id] = {
+                                'status': 'completed',
+                                'percent': 100,
+                                'filename': filename,
+                                'total': file_size,
+                                'speed': 0,
+                                'eta': 0,
+                                'speed_text': 'Completed',
+                                'eta_text': 'Done',
+                                'file_size': f"{file_size / (1024*1024):.1f} MB"
+                            }
+                            return True
+                
+        except Exception as e:
+            print(f"Strategy {i+1} failed: {e}")
+            continue
     
-    if height >= 2160:
-        quality = "4K (2160p)"
-    elif height >= 1440:
-        quality = "2K (1440p)"
-    elif height >= 1080:
-        quality = "1080p"
-    elif height >= 720:
-        quality = "720p"
-    elif height >= 480:
-        quality = "480p"
-    elif height >= 360:
-        quality = "360p"
-    elif height >= 240:
-        quality = "240p"
-    elif height >= 144:
-        quality = "144p"
-    else:
-        quality = "Unknown Quality"
+    # Try with proxy if available
+    if PROXY_LIST:
+        try:
+            return download_with_proxy(url, format_id, download_id)
+        except Exception as e:
+            print(f"Proxy download failed: {e}")
     
-    # Add fps info if available and not standard
-    if fps and fps > 30:
-        quality += f" {int(fps)}fps"
-    
-    return quality
-
-def download_thread_func(url, ydl_opts, download_id):
-    """Function to handle download in a separate thread with fallback formats"""
+    # If all strategies fail, try alternative download method
     try:
-        downloads_dir = 'downloads'
+        return download_with_alternative_method(url, format_id, download_id)
+    except Exception as e:
+        print(f"Alternative download method failed: {e}")
+    
+    return False
+
+def download_with_proxy(url, format_id, download_id):
+    """Download using proxy"""
+    proxy = random.choice(PROXY_LIST)
+    
+    config = {
+        'format': format_id,
+        'outtmpl': os.path.join('downloads', '%(title)s.%(ext)s'),
+        'no_warnings': True,
+        'overwrites': True,
+        'proxy': proxy,
+        'user_agent': random.choice(USER_AGENTS),
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'ios'],
+            }
+        },
+        'progress_hooks': [ProgressHook(download_id)],
+        'retries': 5,
+        'fragment_retries': 5,
+        'skip_unavailable_fragments': True,
+    }
+    
+    with yt_dlp.YoutubeDL(config) as ydl:
+        info = ydl.extract_info(url, download=True)
+        return True
+
+def download_with_alternative_method(url, format_id, download_id):
+    """Alternative download method using different approach"""
+    try:
+        # Update progress
+        download_progress[download_id] = {
+            'status': 'downloading',
+            'percent': 0,
+            'speed_text': 'Using alternative method...',
+            'eta_text': 'Calculating...',
+            'file_size': '-- MB'
+        }
         
+        # Try using youtube-dl as fallback
+        cmd = [
+            'youtube-dl',
+            '--format', format_id,
+            '--output', os.path.join('downloads', '%(title)s.%(ext)s'),
+            '--user-agent', random.choice(USER_AGENTS),
+            url
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        
+        if result.returncode == 0:
+            # Find the downloaded file
+            for filename in os.listdir('downloads'):
+                file_path = os.path.join('downloads', filename)
+                if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                    file_size = os.path.getsize(file_path)
+                    
+                    download_progress[download_id] = {
+                        'status': 'completed',
+                        'percent': 100,
+                        'filename': filename,
+                        'total': file_size,
+                        'speed': 0,
+                        'eta': 0,
+                        'speed_text': 'Completed',
+                        'eta_text': 'Done',
+                        'file_size': f"{file_size / (1024*1024):.1f} MB"
+                    }
+                    return True
+        
+        return False
+        
+    except Exception as e:
+        print(f"Alternative method failed: {e}")
+        return False
+
+def download_thread_func(url, format_id, download_id):
+    """Main download thread function"""
+    try:
         # Initialize progress
         download_progress[download_id] = {
             'status': 'starting',
@@ -237,141 +555,27 @@ def download_thread_func(url, ydl_opts, download_id):
             'file_size': "-- MB"
         }
         
-        # Create a progress hook instance
-        progress_hook = ProgressHook(download_id)
-        ydl_opts['progress_hooks'] = [progress_hook]
+        # Try multiple download strategies
+        success = download_with_multiple_strategies(url, format_id, download_id)
         
-        # Use exact format selected by user - no fallbacks
-        selected_format = ydl_opts.get('format', 'best')
-        format_type = 'mp3' if ydl_opts.get('postprocessors') else 'mp4'
-        
-        print(f"Downloading exact format selected by user: '{selected_format}'")
-        
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # First, extract info to get the video title
-            info = ydl.extract_info(url, download=False)
-            video_title = info.get('title', 'Unknown')
-            
-            # Determine expected file extension
-            expected_extension = '.mp3' if format_type == 'mp3' else '.mp4'
-            
-            # Get list of files before download
-            files_before = set()
-            if os.path.exists(downloads_dir):
-                files_before = set(os.listdir(downloads_dir))
-            
-            # Update status to show we're starting the download
-            download_progress[download_id]['status'] = 'downloading'
-            download_progress[download_id]['speed_text'] = "Downloading selected format..."
-            
-            # Download the video/audio using exact format
-            ydl.download([url])
-        
-        # Wait longer for MP3 processing to complete
-        if format_type == 'mp3':
-            time.sleep(3)  # Extra time for audio conversion
-        else:
-            time.sleep(1)
-        
-        # Find the actual file that was created
-        final_filename = None
-        
-        if os.path.exists(downloads_dir):
-            files_after = set(os.listdir(downloads_dir))
-            
-            # First, look for new files with the correct extension
-            new_files = files_after - files_before
-            for new_file in new_files:
-                if new_file.endswith(expected_extension):
-                    final_filename = new_file
-                    print(f"Found new file with correct extension: {final_filename}")
-                    break
-            
-            # If no new file found, look for existing files that match the title
-            if not final_filename:
-                # Clean the title for basic matching
-                clean_title = re.sub(r'[<>:"/\\|?*？：]', '', video_title)
-                
-                # Look for files that contain parts of the title with correct extension
-                for filename in os.listdir(downloads_dir):
-                    if filename.endswith(expected_extension):
-                        # Check if the filename contains significant parts of the title
-                        filename_clean = re.sub(r'[<>:"/\\|?*？：]', '', filename)
-                        title_words = clean_title.split()
-                        
-                        # If at least 3 words from the title are in the filename, it's likely a match
-                        if len(title_words) >= 3:
-                            matches = sum(1 for word in title_words if len(word) > 2 and word.lower() in filename_clean.lower())
-                            if matches >= 3:
-                                final_filename = filename
-                                print(f"Found file by title matching: {final_filename}")
-                                break
-                        elif len(title_words) < 3:
-                            # For short titles, be more lenient
-                            if clean_title.lower() in filename_clean.lower():
-                                final_filename = filename
-                                print(f"Found file by title matching (short): {final_filename}")
-                                break
-        
-        # Update progress with completion status
-        if final_filename:
-            file_path = os.path.join(downloads_dir, final_filename)
-            if os.path.exists(file_path):
-                file_size = os.path.getsize(file_path)
-                
-                download_progress[download_id] = {
-                    'status': 'completed',
-                    'percent': 100,
-                    'filename': final_filename,
-                    'total': file_size,
-                    'speed': 0,
-                    'eta': 0,
-                    'speed_text': "Completed",
-                    'eta_text': "Done",
-                    'file_size': format_bytes(file_size)
-                }
-                
-                print(f"Download completed: {final_filename} ({file_size} bytes)")
-            else:
-                print(f"Error: Final file not found: {final_filename}")
-                download_progress[download_id] = {
-                    'status': 'error',
-                    'percent': 0,
-                    'error': f'Final file not found: {final_filename}',
-                    'speed_text': "Error",
-                    'eta_text': "Failed",
-                    'file_size': "-- MB"
-                }
-        else:
-            print(f"Error: No downloaded file found for download {download_id}")
-            download_progress[download_id] = {
-                'status': 'error',
-                'percent': 0,
-                'error': f'No downloaded file found for download {download_id}',
-                'speed_text': "Error",
-                'eta_text': "Failed",
-                'file_size': "-- MB"
-            }
+        if not success:
+            raise Exception("All download methods failed")
             
     except Exception as e:
-        print(f"Error in download_thread_func: {e}")
+        print(f"Download failed: {e}")
         
-        # Create user-friendly error messages with specific solutions
+        # Create user-friendly error message
         error_str = str(e).lower()
         if "403" in error_str or "forbidden" in error_str:
-            user_error = "YouTube is blocking this video download due to anti-bot measures. This is a common issue in 2024-2025. Try: 1) Wait 5-10 minutes and try again, 2) Try a different video quality, or 3) The video may be region-restricted. We're using advanced techniques to bypass these blocks."
-        elif "empty" in error_str:
-            user_error = "The video file couldn't be downloaded completely. This usually happens when YouTube blocks the download partway through. Please try again in a few minutes with a different quality option."
-        elif "unavailable" in error_str or "not available" in error_str or "requested format" in error_str:
-            user_error = "The selected video quality/format is not available for this video. Please try selecting a different quality option from the dropdown."
-        elif "network" in error_str or "connection" in error_str:
-            user_error = "Network connection error. Please check your internet connection and try again."
+            user_error = "YouTube is blocking downloads from this server. This is a common issue with hosting providers. Try: 1) Wait 15-30 minutes, 2) Try a different video, 3) The server IP may be blacklisted by YouTube."
+        elif "failed to extract any player response" in error_str:
+            user_error = "YouTube is completely blocking video information extraction from this server. This is a severe anti-bot measure. Try: 1) Wait 15-30 minutes, 2) Try a different video, 3) This server IP may be blacklisted by YouTube."
         elif "sign in" in error_str or "confirm you're not a bot" in error_str:
             user_error = "YouTube is asking for sign-in verification. This happens when they detect automated downloads. Please wait 10-15 minutes and try again."
-        elif "failed to extract any player response" in error_str:
-            user_error = "YouTube is completely blocking video information extraction. This is a severe anti-bot measure. Try: 1) Wait 15-30 minutes before trying again, 2) Try a different video, 3) This server IP may be blacklisted by YouTube."
-        elif "only images are available" in error_str:
-            user_error = "YouTube has restricted this video and only thumbnail images are available. This usually means the video is heavily restricted or requires special authentication."
+        elif "unavailable" in error_str or "not available" in error_str:
+            user_error = "This video is not available for download. It might be private, deleted, or restricted in your region."
+        elif "network" in error_str or "connection" in error_str:
+            user_error = "Network connection error. Please check your internet connection and try again."
         else:
             user_error = f"Download failed: {str(e)}"
         
@@ -388,299 +592,19 @@ def download_thread_func(url, ydl_opts, download_id):
 def index():
     return render_template('index.html')
 
-@app.route('/download', methods=['POST'])
-def download_video():
-    data = request.get_json()
-    url = data.get('url', '').strip()
-    format_id = data.get('format_id', 'best')  # Use exact format ID from get_video_info
-    format_type = data.get('format_type', 'video')  # 'video' or 'audio'
-    
-    if not url:
-        return jsonify({'error': 'Please provide a YouTube URL'}), 400
-    
-    if not is_valid_youtube_url(url):
-        return jsonify({'error': 'Please provide a valid YouTube URL'}), 400
-    
-    if not format_id:
-        return jsonify({'error': 'Please provide a format ID'}), 400
-    
-    # Generate unique download ID
-    download_id = str(int(time.time() * 1000))
-    
-    # Create downloads directory if it doesn't exist
-    downloads_dir = 'downloads'
-    if not os.path.exists(downloads_dir):
-        os.makedirs(downloads_dir)
-    
-    # Initialize progress
-    download_progress[download_id] = {
-        'status': 'starting',
-        'percent': 0,
-        'total': 0,
-        'speed': 0,
-        'eta': 0
-    }
-    
-    # Configure yt-dlp with YouTube 403 error mitigation strategies
-    ydl_opts = {
-        'format': format_id,  # Use exact format ID - no guessing!
-        'outtmpl': os.path.join(downloads_dir, '%(title)s.%(ext)s'),
-        'no_warnings': True,
-        'overwrites': True,
-        'ignoreerrors': False,
-        'retries': 15,  # Increased retries for 403 errors
-        'fragment_retries': 15,  # Increased fragment retries
-        'retry_sleep': 3,  # Wait 3 seconds between retries
-        'skip_unavailable_fragments': True,
-        'keep_fragments': False,  # Don't keep fragments after merging
-        'user_agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['mweb', 'android', 'ios', 'web'],  # Use mobile web client first (more reliable)
-                'player_skip': [],  # Don't skip any players
-                'include_live_dash': False,  # Disable live DASH
-            }
-        },
-        'sleep_interval': 2,  # Wait 2 seconds between requests to avoid rate limiting
-        'max_sleep_interval': 10,  # Maximum wait time
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'Upgrade-Insecure-Requests': '1',
-        }
-    }
-    
-    # Debug output
-    print(f"DEBUG: Format ID: {format_id}")
-    print(f"DEBUG: Format type: {format_type}")
-    
-    # Add MP3 conversion if requested
-    if format_type == 'audio':
-        ydl_opts.update({
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-        })
-    
-    # Start download in a separate thread
-    download_thread = threading.Thread(target=download_thread_func, args=(url, ydl_opts, download_id))
-    download_thread.daemon = True
-    download_thread.start()
-    
-    return jsonify({'download_id': download_id, 'status': 'started'})
-
-@app.route('/progress/<download_id>')
-def get_progress(download_id):
-    progress = download_progress.get(download_id, {'status': 'not_found'})
-    print(f"Progress request for {download_id}: {progress}")  # Debug log
-    
-    # Format the progress data for frontend consumption
-    if progress.get('status') == 'downloading':
-        formatted_progress = {
-            'status': 'downloading',
-            'progress': progress.get('percent', 0),
-            'speed': progress.get('speed_text', '0 B/s'),
-            'eta': progress.get('eta_text', '0s'),
-            'file_size': progress.get('file_size', '-- MB')
-        }
-    elif progress.get('status') == 'processing':
-        formatted_progress = {
-            'status': 'processing',
-            'progress': 99,
-            'speed': progress.get('speed_text', '0 B/s'),
-            'eta': progress.get('eta_text', '0s'),
-            'file_size': progress.get('file_size', '-- MB')
-        }
-    elif progress.get('status') == 'completed':
-        formatted_progress = {
-            'status': 'completed',
-            'progress': 100,
-            'speed': progress.get('speed_text', '0 B/s'),
-            'eta': progress.get('eta_text', '0s'),
-            'file_size': progress.get('file_size', '-- MB'),
-            'filename': progress.get('filename', '')
-        }
-    elif progress.get('status') == 'finished':
-        formatted_progress = {
-            'status': 'completed',
-            'progress': 100,
-            'speed': progress.get('speed_text', '0 B/s'),
-            'eta': progress.get('eta_text', '0s'),
-            'file_size': progress.get('file_size', '-- MB'),
-            'filename': progress.get('filename', '')
-        }
-    elif progress.get('status') == 'error':
-        formatted_progress = {
-            'status': 'error',
-            'progress': 0,
-            'error': progress.get('error', 'Unknown error'),
-            'speed': progress.get('speed_text', '0 B/s'),
-            'eta': progress.get('eta_text', '0s'),
-            'file_size': progress.get('file_size', '-- MB')
-        }
-    else:
-        formatted_progress = {
-            'status': progress.get('status', 'unknown'),
-            'progress': progress.get('percent', 0),
-            'speed': '--',
-            'eta': '--',
-            'file_size': '--'
-        }
-    
-    return jsonify(formatted_progress)
-
 @app.route('/get_video_info', methods=['POST'])
 def get_video_info():
-    data = request.get_json()
-    url = data.get('url', '').strip()
-    
-    if not url:
-        return jsonify({'error': 'Please provide a YouTube URL'}), 400
-    
-    if not is_valid_youtube_url(url):
-        return jsonify({'error': 'Please provide a valid YouTube URL'}), 400
-    
     try:
-        # Advanced YouTube anti-bot evasion for info extraction
-        ydl_opts = {
-            'quiet': True,
-            'no_warnings': True,
-            'ignoreerrors': False,
-            'retries': 8,  # Increased retries for extraction issues
-            'user_agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['mweb', 'android', 'ios'],  # Skip 'web' client that's most likely to be blocked
-                    'player_skip': ['dash', 'hls'],  # Skip problematic players
-                    'include_live_dash': False,
-                    'skip': ['dash', 'hls'],  # Additional skip for extraction
-                }
-            },
-            'sleep_interval': 2,  # More delay between requests
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Connection': 'keep-alive',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'none',
-                'Sec-Fetch-User': '?1',
-                'Upgrade-Insecure-Requests': '1',
-                'X-Forwarded-For': '203.0.113.1',  # Fake residential IP
-            }
-        }
+        data = request.get_json()
+        url = data.get('url')
         
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            
-            if not info:
-                return jsonify({'error': 'Failed to extract video information'}), 500
-            
-            # Get all available formats
-            raw_formats = info.get('formats', [])
-            video_formats = []
-            audio_formats = []
-            
-            # Process each format
-            for f in raw_formats:
-                if not isinstance(f, dict):
-                    continue
-                
-                format_id = f.get('format_id', '')
-                height = f.get('height')
-                vcodec = f.get('vcodec', '')
-                acodec = f.get('acodec', '')
-                ext = f.get('ext', '')
-                filesize = f.get('filesize')
-                
-                if not format_id:
-                    continue
-                
-                # Video formats (has video and height)
-                if vcodec and vcodec != 'none' and height:
-                    quality_label = f"{height}p"
-                    if ext:
-                        quality_label += f" ({ext.upper()})"
-                    
-                    # Add file size if available
-                    if filesize:
-                        size_mb = filesize / (1024 * 1024)
-                        quality_label += f" - {size_mb:.1f}MB"
-                    
-                    video_formats.append({
-                        'format_id': format_id,
-                        'display_name': quality_label,
-                        'height': height,
-                        'ext': ext,
-                        'has_audio': acodec and acodec != 'none'
-                    })
-                
-                # Audio formats (audio-only)
-                elif vcodec == 'none' and acodec and acodec != 'none':
-                    quality_label = f"Audio Only"
-                    if ext:
-                        quality_label += f" ({ext.upper()})"
-                    if f.get('abr'):  # audio bitrate
-                        quality_label += f" - {f.get('abr')}kbps"
-                    
-                    if filesize:
-                        size_mb = filesize / (1024 * 1024)
-                        quality_label += f" - {size_mb:.1f}MB"
-                    
-                    audio_formats.append({
-                        'format_id': format_id,
-                        'display_name': quality_label,
-                        'ext': ext,
-                        'abr': f.get('abr', 0)
-                    })
-            
-            # Sort video formats by quality (highest first)
-            video_formats.sort(key=lambda x: x['height'], reverse=True)
-            
-            # Sort audio formats by bitrate (highest first)
-            audio_formats.sort(key=lambda x: x['abr'], reverse=True)
-            
-            # Remove duplicate video qualities (keep highest quality for each resolution)
-            seen_heights = set()
-            unique_video_formats = []
-            for fmt in video_formats:
-                if fmt['height'] not in seen_heights:
-                    unique_video_formats.append(fmt)
-                    seen_heights.add(fmt['height'])
-            
-            # Add fallback formats if nothing found
-            if not unique_video_formats:
-                unique_video_formats = [
-                    {'format_id': 'best', 'display_name': 'Best Available', 'height': 1080, 'ext': 'mp4', 'has_audio': True},
-                    {'format_id': 'worst', 'display_name': 'Lowest Quality', 'height': 360, 'ext': 'mp4', 'has_audio': True}
-                ]
-            
-            if not audio_formats:
-                audio_formats = [
-                    {'format_id': 'bestaudio', 'display_name': 'Best Audio (M4A)', 'ext': 'm4a', 'abr': 128}
-                ]
-            
-            return jsonify({
-                'title': info.get('title', 'Unknown Title'),
-                'uploader': info.get('uploader', 'Unknown'),
-                'duration': info.get('duration', 0),
-                'thumbnail': info.get('thumbnail', ''),
-                'view_count': info.get('view_count', 0),
-                'video_formats': unique_video_formats,
-                'audio_formats': audio_formats
-            })
-            
+        if not url:
+            return jsonify({'error': 'URL is required'}), 400
+        
+        # Try alternative video info extraction
+        result = get_video_info_alternative(url)
+        return jsonify(result)
+        
     except Exception as e:
         print(f"Error in get_video_info: {e}")
         
@@ -690,16 +614,65 @@ def get_video_info():
             user_error = "YouTube is completely blocking video information extraction from this server. This is a severe anti-bot measure. Please try: 1) Wait 15-30 minutes before trying again, 2) Try a different video, 3) This server IP may be blacklisted by YouTube."
         elif "sign in" in error_str or "confirm you're not a bot" in error_str:
             user_error = "YouTube is asking for sign-in verification. This happens when they detect automated access. Please wait 10-15 minutes and try again."
-        elif "only images are available" in error_str:
-            user_error = "YouTube has restricted this video and only thumbnail images are available. This usually means the video is heavily restricted or requires special authentication."
-        elif "403" in error_str or "forbidden" in error_str:
-            user_error = "YouTube is blocking access to this video. This can happen due to regional restrictions or anti-bot measures. Please try a different video or wait before trying again."
-        elif "private" in error_str or "unavailable" in error_str:
-            user_error = "This video is private, unavailable, or has been deleted."
+        elif "unavailable" in error_str or "not available" in error_str:
+            user_error = "This video is not available for extraction. It might be private, deleted, or restricted in your region."
+        elif "network" in error_str or "connection" in error_str:
+            user_error = "Network connection error. Please check your connection and try again."
         else:
-            user_error = f"Failed to get video information: {str(e)}"
+            user_error = f"Could not extract video information: {str(e)}"
         
         return jsonify({'error': user_error}), 500
+
+@app.route('/download', methods=['POST'])
+def download():
+    try:
+        data = request.get_json()
+        url = data.get('url')
+        format_id = data.get('format_id')
+        
+        if not url or not format_id:
+            return jsonify({'error': 'URL and format_id are required'}), 400
+        
+        # Generate unique download ID
+        download_id = str(int(time.time() * 1000))
+        
+        # Start download in separate thread
+        thread = threading.Thread(
+            target=download_thread_func,
+            args=(url, format_id, download_id)
+        )
+        thread.daemon = True
+        thread.start()
+        
+        active_downloads[download_id] = thread
+        
+        return jsonify({
+            'download_id': download_id,
+            'message': 'Download started'
+        })
+        
+    except Exception as e:
+        print(f"Error in download: {e}")
+        return jsonify({'error': f'Download failed: {str(e)}'}), 500
+
+@app.route('/progress/<download_id>')
+def get_progress(download_id):
+    progress = download_progress.get(download_id, {'status': 'not_found'})
+    print(f"Progress request for {download_id}: {progress}")  # Debug log
+    
+    # Format the progress data for frontend consumption
+    if progress['status'] in ['downloading', 'processing']:
+        # Ensure all required fields are present
+        progress.setdefault('percent', 0)
+        progress.setdefault('speed_text', 'Calculating...')
+        progress.setdefault('eta_text', 'Calculating...')
+        progress.setdefault('file_size', '-- MB')
+        progress.setdefault('downloaded', 0)
+        progress.setdefault('total', 0)
+        progress.setdefault('speed', 0)
+        progress.setdefault('eta', 0)
+    
+    return jsonify(progress)
 
 @app.route('/download_file/<download_id>')
 def download_file(download_id):
@@ -709,9 +682,8 @@ def download_file(download_id):
         
         # Debug: Print all available progress data
         print(f"Download request for ID: {download_id}")
-        print(f"Available download IDs: {list(download_progress.keys())}")
+        print(f"Available progress entries: {list(download_progress.keys())}")
         
-        # Find the download progress data
         progress = download_progress.get(download_id)
         if not progress:
             print(f"No progress found for download_id: {download_id}")
@@ -719,48 +691,41 @@ def download_file(download_id):
         
         print(f"Progress status: {progress.get('status')}")
         
-        # Check if download is completed
-        if progress.get('status') != 'completed':
-            print(f"Download not completed. Status: {progress.get('status')}")
+        if progress['status'] not in ['finished', 'completed']:
+            print(f"Download not completed, status: {progress['status']}")
             return jsonify({'error': 'Download not completed'}), 400
         
-        # Get filename from progress
         filename = progress.get('filename')
         if not filename:
-            print(f"No filename in progress data: {progress}")
+            print("No filename in progress data")
             return jsonify({'error': 'No filename available'}), 400
         
-        # Build full file path
         full_path = os.path.join(downloads_dir, filename)
+        print(f"Looking for file: {full_path}")
         
-        # Check if file exists
-        if not os.path.exists(full_path):
-            print(f"File not found at path: {full_path}")
-            # Try to find the file in the downloads directory
+        if os.path.exists(full_path):
+            print(f"File found, sending: {full_path}")
+            return send_file(full_path, as_attachment=True)
+        else:
+            print(f"File not found: {full_path}")
+            # Try to find file by partial matching
             if os.path.exists(downloads_dir):
-                available_files = os.listdir(downloads_dir)
-                print(f"Available files in downloads dir: {available_files}")
-                # Try to find a file that matches the filename
-                for file in available_files:
-                    if file == filename:
-                        full_path = os.path.join(downloads_dir, file)
-                        break
-                    elif filename in file or file in filename:
-                        full_path = os.path.join(downloads_dir, file)
-                        filename = file
-                        break
-        
-        if not os.path.exists(full_path):
+                files = os.listdir(downloads_dir)
+                print(f"Available files: {files}")
+                
+                # Try fuzzy matching
+                for file in files:
+                    if filename.lower() in file.lower() or file.lower() in filename.lower():
+                        fuzzy_path = os.path.join(downloads_dir, file)
+                        print(f"Found fuzzy match: {fuzzy_path}")
+                        return send_file(fuzzy_path, as_attachment=True)
+            
             return jsonify({'error': f'File not found: {filename}'}), 404
-        
-        print(f"Sending file: {full_path}")
-        
-        # Send file as attachment
-        return send_file(full_path, as_attachment=True, download_name=filename)
-        
+            
     except Exception as e:
         print(f"Error in download_file: {e}")
         return jsonify({'error': f'Download failed: {str(e)}'}), 500
 
-# WSGI entry point is handled by wsgi.py
-# This allows the app to be imported without running the server 
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True) 
