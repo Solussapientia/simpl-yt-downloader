@@ -1,0 +1,60 @@
+/* TEAM */
+Developer: Simpl YT Team
+Contact: hello@simplyt.com
+Twitter: @SimplYT
+From: Global
+
+/* THANKS */
+YouTube: For providing the amazing video platform
+yt-dlp: For the excellent video downloading library
+TailwindCSS: For the beautiful styling framework
+Flask: For the lightweight web framework
+Open Source Community: For making this possible
+
+/* SITE */
+Last update: 2024/01/15
+Language: English
+Doctype: HTML5
+IDE: VS Code
+Standards: HTML5, CSS3, JavaScript ES6
+Components: Flask, Python, TailwindCSS, yt-dlp
+Software: Python 3.9+, Flask 2.0+
+
+/* STATS */
+Launched: 2024
+Users: Growing daily
+Downloads: Unlimited
+Quality: Up to 4K
+Formats: MP4, MP3, WebM, and more
+
+/* MISSION */
+To provide free, fast, and secure YouTube video downloads
+for everyone around the world. No ads, no tracking, no limits.
+Just simple, reliable downloads when you need them.
+
+/* FEATURES */
+- Free YouTube video downloads
+- MP3 audio extraction
+- HD quality support (360p to 4K)
+- No software installation required
+- Mobile device compatibility
+- Fast download speeds
+- Secure and private
+- No registration needed
+
+/* LEGAL */
+Educational use only. Please respect copyright laws
+and YouTube's Terms of Service. Use responsibly.
+
+                            .---.
+                           /     \
+                          / () () \
+                         \   <>   /
+                          \  __  /
+                           \'---'/
+                    _____ _| |_| |_ _____
+                   |     | | | | | |     |
+                   |  |  | | | | | |  |  |
+                   |_____|_|_|_|_|_|_____|
+                          
+                       Made with ❤️ for the internet 

@@ -1,0 +1,25 @@
+Contact: security@simplyt.com
+Expires: 2024-12-31T23:59:59.000Z
+Encryption: https://simplyt.com/pgp-key.txt
+Acknowledgments: https://simplyt.com/security-acknowledgments
+Preferred-Languages: en
+Canonical: https://simplyt.com/.well-known/security.txt
+Policy: https://simplyt.com/security-policy
+
+# Security Policy
+# We take security seriously. Please report any security vulnerabilities
+# to security@simplyt.com. We will respond within 24 hours.
+
+# Scope
+# This security policy applies to:
+# - Main application: https://simplyt.com
+# - API endpoints: https://simplyt.com/api/*
+# - Static assets: https://simplyt.com/static/*
+
+# Bug Bounty
+# We currently do not offer monetary rewards, but we will acknowledge
+# security researchers who responsibly disclose vulnerabilities.
+
+# Safe Harbor
+# We support responsible disclosure and will not pursue legal action
+# against security researchers who follow our guidelines. 

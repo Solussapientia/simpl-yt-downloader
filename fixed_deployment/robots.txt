@@ -1,0 +1,30 @@
+User-agent: *
+Allow: /
+Allow: /static/
+Disallow: /downloads/
+Disallow: /progress/
+Disallow: /download_file/
+Disallow: /get_video_info
+Disallow: /download
+
+# Sitemap location
+Sitemap: https://simplytdownloader.com/sitemap.xml
+
+# Crawl delay (be respectful to search engines)
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Disallow: /downloads/
+Disallow: /api/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /downloads/
+Disallow: /api/
+
+User-agent: Slurp
+Allow: /
+Disallow: /downloads/
+Disallow: /api/ 
