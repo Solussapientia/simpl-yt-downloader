@@ -873,7 +873,7 @@ def extract_video():
 
 @app.route('/download/<video_id>/<format_id>')
 def download_video(video_id, format_id):
-    """Download video by streaming through server with proper headers"""
+    """Redirect to direct video URL for user to download"""
     try:
         # Get cached video info
         if video_id not in video_cache:
@@ -887,84 +887,8 @@ def download_video(video_id, format_id):
         if not download_info:
             return jsonify({'error': 'Failed to get download URL'}), 400
         
-        # Clean filename for download
-        filename = download_info['filename']
-        # Remove special characters and clean up
-        filename = re.sub(r'[^\w\s.-]', '', filename)
-        filename = re.sub(r'\s+', ' ', filename).strip()
-        
-        # Test the URL first
-        try:
-            test_response = requests.head(download_info['url'], timeout=10)
-            if test_response.status_code != 200:
-                return jsonify({'error': 'Video URL is not accessible'}), 400
-        except:
-            return jsonify({'error': 'Cannot access video URL'}), 400
-        
-        # Get file size for headers
-        file_size = download_info.get('filesize', 0)
-        
-        # Stream the file with proper download headers
-        def generate():
-            try:
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Accept': '*/*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'identity',
-                    'Connection': 'keep-alive',
-                    'Range': 'bytes=0-'
-                }
-                
-                print(f"Starting download stream for: {filename}")
-                
-                with requests.get(download_info['url'], stream=True, headers=headers, timeout=60) as r:
-                    r.raise_for_status()
-                    
-                    # Check if we got content
-                    if r.status_code != 200:
-                        print(f"Bad response code: {r.status_code}")
-                        return
-                    
-                    total_bytes = 0
-                    for chunk in r.iter_content(chunk_size=8192):
-                        if chunk:
-                            total_bytes += len(chunk)
-                            yield chunk
-                    
-                    print(f"Download completed: {filename} ({total_bytes} bytes)")
-                            
-            except requests.exceptions.RequestException as e:
-                print(f"Streaming error: {e}")
-                error_msg = f"Error streaming video: {str(e)}"
-                yield error_msg.encode('utf-8')
-            except Exception as e:
-                print(f"Unexpected error: {e}")
-                error_msg = f"Unexpected error: {str(e)}"
-                yield error_msg.encode('utf-8')
-        
-        # Determine content type
-        ext = download_info.get('ext', 'mp4').lower()
-        content_type = 'video/mp4'
-        
-        # Create response with proper download headers
-        response = Response(
-            generate(),
-            mimetype=content_type,
-            headers={
-                'Content-Disposition': f'attachment; filename="{filename}"',
-                'Content-Type': content_type,
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            }
-        )
-        
-        # Add content length if available
-        if file_size > 0:
-            response.headers['Content-Length'] = str(file_size)
-        
-        return response
+        # Simply redirect to the video URL - it will open in new tab
+        return redirect(download_info['url'])
         
     except Exception as e:
         print(f"Download error: {e}")
