@@ -818,7 +818,15 @@ def get_download_url(video_url, format_id):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        # Fallback in case of template error
+        return f"<h1>Template Error: {str(e)}</h1><p>Flask app is running but template failed to render.</p>"
+
+@app.route('/test')
+def test():
+    return "<h1>Flask app is working!</h1>"
 
 @app.route('/extract', methods=['POST'])
 def extract():
