@@ -64,217 +64,197 @@
                         }
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.5s ease-in-out',
-                        'slide-up': 'slideUp 0.4s ease-out',
-                        'pulse-slow': 'pulse 3s infinite',
-                        'bounce-gentle': 'bounceGentle 2s infinite',
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'scale-up': 'scaleUp 0.4s ease-out',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
                     },
                     keyframes: {
                         fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        slideUp: {
                             '0%': { opacity: '0', transform: 'translateY(20px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
-                        bounceGentle: {
-                            '0%, 20%, 50%, 80%, 100%': { transform: 'translateY(0)' },
-                            '40%': { transform: 'translateY(-10px)' },
-                            '60%': { transform: 'translateY(-5px)' },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        scaleUp: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 20px rgba(14, 165, 233, 0.3)' },
+                            '100%': { boxShadow: '0 0 30px rgba(14, 165, 233, 0.5)' },
                         }
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen text-white">
-    <!-- Background Pattern -->
-    <div class="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-slate-900"></div>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen text-white overflow-x-hidden">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full opacity-20 blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500 rounded-full opacity-10 blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
     
     <!-- Main Container -->
     <div class="relative min-h-screen">
-    <!-- Header -->
-        <header class="relative z-10 pt-8 pb-4">
+        <!-- Header -->
+        <header class="relative z-10 pt-12 pb-8">
             <div class="container mx-auto px-4">
-            <div class="text-center">
-                    <div class="inline-flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-danger-500 to-danger-600 rounded-2xl flex items-center justify-center shadow-lg">
-                            <i class="fas fa-download text-white text-xl"></i>
-                        </div>
-                        <h1 class="text-4xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                            Simpl YT Downloader
-                </h1>
+                <div class="text-center animate-fade-in">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl shadow-2xl mb-6 animate-glow">
+                        <i class="fas fa-download text-white text-2xl"></i>
                     </div>
-                    <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+                    <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-4">
+                        Simpl YT Downloader
+                    </h1>
+                    <p class="text-slate-400 text-xl max-w-2xl mx-auto leading-relaxed">
                         Download YouTube videos instantly - No registration, no ads, completely free forever!
                     </p>
+                </div>
             </div>
-        </div>
-    </header>
+        </header>
 
         <!-- Main Content -->
         <main class="relative z-10 container mx-auto px-4 py-8">
             <div class="max-w-4xl mx-auto space-y-8">
                 
-                <!-- URL Input Card -->
-                <div class="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 shadow-2xl">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
-                            <span class="text-white font-bold text-sm">1</span>
-                </div>
-                        <h2 class="text-2xl font-semibold">Enter YouTube URL</h2>
-    </div>
+                <!-- Step 1: URL Input Card -->
+                <div class="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 animate-slide-up">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                            <span class="text-white font-bold text-lg">1</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-white">Enter YouTube URL</h2>
+                    </div>
 
-                    <div class="flex gap-4">
-                        <div class="flex-1 relative">
-                <input 
-                    type="text" 
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 relative group">
+                            <input 
+                                type="text" 
                                 id="url-input" 
                                 placeholder="Paste YouTube URL here..."
-                                class="w-full px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300"
+                                class="w-full px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:bg-white/15"
                             >
-                            <div class="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-danger-500/20 rounded-2xl opacity-0 transition-opacity duration-300 pointer-events-none" id="input-glow"></div>
-            </div>
-                <button 
+                            <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                        </div>
+                        <button 
                             id="extract-btn"
-                            class="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
+                            class="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-3 min-w-[140px] justify-center"
                         >
                             <i class="fas fa-search"></i>
                             Extract
-                </button>
-            </div>
-        </div>
+                        </button>
+                    </div>
+                </div>
 
                 <!-- Loading State -->
-                <div id="loading" class="hidden">
+                <div id="loading" class="hidden animate-scale-up">
                     <div class="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 shadow-2xl">
                         <div class="flex items-center justify-center gap-4">
-                            <div class="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                            <p class="text-lg font-medium">Extracting video information...</p>
+                            <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            <p class="text-lg font-medium text-white">Extracting video information...</p>
+                        </div>
+                    </div>
                 </div>
-                    </div>
-                    </div>
                     
                 <!-- Error Message -->
-                <div id="error-message" class="hidden">
-                    <div class="bg-danger-500/10 backdrop-blur-xl rounded-3xl border border-danger-500/20 p-8 shadow-2xl">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-exclamation-triangle text-danger-500 text-xl"></i>
-                            <span id="error-text" class="text-danger-300 text-lg font-medium"></span>
+                <div id="error-message" class="hidden animate-scale-up">
+                    <div class="bg-red-500/10 backdrop-blur-xl rounded-3xl border border-red-500/20 p-8 shadow-2xl">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-white"></i>
+                            </div>
+                            <span id="error-text" class="text-red-300 text-lg font-medium"></span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-                <!-- Video Information Card -->
+                <!-- Step 2: Video Information Card -->
                 <div id="video-info" class="hidden animate-fade-in">
                     <div class="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 shadow-2xl">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-8 h-8 bg-gradient-to-br from-success-500 to-success-600 rounded-xl flex items-center justify-center">
-                                <span class="text-white font-bold text-sm">2</span>
-                </div>
-                            <h2 class="text-2xl font-semibold">Choose Quality & Download</h2>
-                </div>
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                <span class="text-white font-bold text-lg">2</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-white">Choose Quality & Download</h2>
+                        </div>
                         
                         <!-- Video Details -->
-                        <div class="bg-white/5 rounded-2xl p-6 mb-8">
-                            <div class="flex gap-6">
-                                <div class="flex-shrink-0">
-                                    <img id="video-thumbnail" class="w-32 h-24 object-cover rounded-xl shadow-lg" alt="Video thumbnail">
-            </div>
+                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-8 hover:bg-white/10 transition-all duration-300">
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex-shrink-0 mx-auto md:mx-0">
+                                    <div class="relative group">
+                                        <img id="video-thumbnail" class="w-48 h-36 object-cover rounded-2xl shadow-2xl" alt="Video thumbnail">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        <div class="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded-lg text-sm font-medium">
+                                            <i class="fas fa-play mr-1"></i>
+                                            <span id="video-duration-overlay"></span>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="flex-1">
-                                    <h3 id="video-title" class="text-xl font-semibold mb-3 line-clamp-2"></h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                        <div class="flex items-center gap-2 text-slate-400">
-                                            <i class="fas fa-user text-primary-500"></i>
-                                            <span id="video-uploader"></span>
-        </div>
-                                        <div class="flex items-center gap-2 text-slate-400">
-                                            <i class="fas fa-clock text-success-500"></i>
-                                            <span id="video-duration"></span>
-            </div>
-                                        <div class="flex items-center gap-2 text-slate-400">
-                                            <i class="fas fa-eye text-warning-500"></i>
-                                            <span id="video-views"></span>
-        </div>
-                </div>
-            </div>
-        </div>
-            </div>
-
+                                    <h3 id="video-title" class="text-xl font-bold mb-4 text-white leading-tight"></h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="flex items-center gap-3 text-slate-300">
+                                            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                                                <i class="fas fa-user text-white text-sm"></i>
+                                            </div>
+                                            <span id="video-uploader" class="font-medium"></span>
+                                        </div>
+                                        <div class="flex items-center gap-3 text-slate-300">
+                                            <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                                                <i class="fas fa-clock text-white text-sm"></i>
+                                            </div>
+                                            <span id="video-duration" class="font-medium"></span>
+                                        </div>
+                                        <div class="flex items-center gap-3 text-slate-300">
+                                            <div class="w-8 h-8 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center">
+                                                <i class="fas fa-eye text-white text-sm"></i>
+                                            </div>
+                                            <span id="video-views" class="font-medium"></span>
+                                        </div>
+                                        <div class="flex items-center gap-3 text-slate-300">
+                                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                                <i class="fas fa-calendar text-white text-sm"></i>
+                                            </div>
+                                            <span id="video-upload-date" class="font-medium"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Download Options -->
                         <div class="space-y-4">
-                            <div class="flex items-center gap-2 text-slate-400 text-sm mb-4">
-                                <i class="fas fa-info-circle text-primary-500"></i>
-                                <span>Click any option below to open in a new tab, then right-click to download</span>
-                </div>
-                            <div id="download-options" class="grid gap-4"></div>
-                </div>
-                </div>
-                </div>
-
-                <!-- Instructions Card -->
-                <div class="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 shadow-2xl">
-                    <div class="flex items-center gap-3 mb-6">
-                        <i class="fas fa-question-circle text-primary-500 text-2xl"></i>
-                        <h3 class="text-2xl font-semibold">How to Use</h3>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
-                            <div class="flex items-start gap-4">
-                                <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <span class="text-white font-bold text-sm">1</span>
-                </div>
-                    <div>
-                                    <h4 class="font-semibold mb-1">Paste YouTube URL</h4>
-                                    <p class="text-slate-400 text-sm">Enter any YouTube video URL in the input field</p>
-                    </div>
-                </div>
-                            <div class="flex items-start gap-4">
-                                <div class="w-8 h-8 bg-gradient-to-br from-success-500 to-success-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <span class="text-white font-bold text-sm">2</span>
-                                </div>
-                    <div>
-                                    <h4 class="font-semibold mb-1">Extract Video Info</h4>
-                                    <p class="text-slate-400 text-sm">Click Extract to get available qualities</p>
+                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <i class="fas fa-download text-blue-500"></i>
+                                Available Formats
+                            </h3>
+                            <div id="download-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Download buttons will be inserted here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-                        <div class="space-y-4">
-                            <div class="flex items-start gap-4">
-                                <div class="w-8 h-8 bg-gradient-to-br from-warning-500 to-warning-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <span class="text-white font-bold text-sm">3</span>
-                </div>
-                                <div>
-                                    <h4 class="font-semibold mb-1">Choose Quality</h4>
-                                    <p class="text-slate-400 text-sm">Select your preferred video quality</p>
-                </div>
-            </div>
-                            <div class="flex items-start gap-4">
-                                <div class="w-8 h-8 bg-gradient-to-br from-danger-500 to-danger-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <span class="text-white font-bold text-sm">4</span>
-                    </div>
-                                <div>
-                                    <h4 class="font-semibold mb-1">Download</h4>
-                                    <p class="text-slate-400 text-sm">Click to open in new tab, then save the video</p>
-                    </div>
-                    </div>
-                </div>
-            </div>
-                </div>
-                </div>
         </main>
 
         <!-- Footer -->
-        <footer class="relative z-10 mt-16 py-8 border-t border-white/10">
-            <div class="container mx-auto px-4 text-center">
-                <p class="text-slate-400">&copy; 2025 Simpl YT Downloader. Zero storage, direct downloads.</p>
-                </div>
+        <footer class="relative z-10 text-center py-8 text-slate-400">
+            <p>&copy; 2024 Simpl YT Downloader. Built with ❤️ using HeroUI design principles.</p>
         </footer>
-                </div>
+    </div>
 
     <script>
+        // Get DOM elements
         const urlInput = document.getElementById('url-input');
         const extractBtn = document.getElementById('extract-btn');
         const loading = document.getElementById('loading');
@@ -285,147 +265,114 @@
         const videoTitle = document.getElementById('video-title');
         const videoUploader = document.getElementById('video-uploader');
         const videoDuration = document.getElementById('video-duration');
+        const videoDurationOverlay = document.getElementById('video-duration-overlay');
         const videoViews = document.getElementById('video-views');
+        const videoUploadDate = document.getElementById('video-upload-date');
         const downloadOptions = document.getElementById('download-options');
-        const inputGlow = document.getElementById('input-glow');
 
-        // Input focus effects
-        urlInput.addEventListener('focus', () => {
-            inputGlow.style.opacity = '1';
-        });
-        
-        urlInput.addEventListener('blur', () => {
-            inputGlow.style.opacity = '0';
-        });
+        // Utility functions
+        function showElement(element) {
+            element.classList.remove('hidden');
+            element.classList.add('animate-scale-up');
+        }
+
+        function hideElement(element) {
+            element.classList.add('hidden');
+            element.classList.remove('animate-scale-up');
+        }
 
         function showError(message) {
             errorText.textContent = message;
-            errorMessage.classList.remove('hidden');
-            videoInfo.classList.add('hidden');
-            loading.classList.add('hidden');
-        }
-
-        function hideError() {
-            errorMessage.classList.add('hidden');
-        }
-
-        function showLoading() {
-            loading.classList.remove('hidden');
-            hideError();
-            videoInfo.classList.add('hidden');
-        }
-
-        function hideLoading() {
-            loading.classList.add('hidden');
+            showElement(errorMessage);
+            hideElement(loading);
+            hideElement(videoInfo);
         }
 
         function formatDuration(seconds) {
-            if (!seconds) return 'Unknown';
             const hours = Math.floor(seconds / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
+            const remainingSeconds = seconds % 60;
             
             if (hours > 0) {
-                return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
             } else {
-                return `${minutes}:${secs.toString().padStart(2, '0')}`;
+                return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
             }
         }
 
         function formatViews(views) {
-            if (!views) return 'Unknown';
             if (views >= 1000000) {
-                return (views / 1000000).toFixed(1) + 'M views';
+                return (views / 1000000).toFixed(1) + 'M';
             } else if (views >= 1000) {
-                return (views / 1000).toFixed(1) + 'K views';
+                return (views / 1000).toFixed(1) + 'K';
             } else {
-                return views + ' views';
+                return views.toString();
             }
         }
 
-        function getQualityColor(quality) {
-            if (quality.includes('1080p')) return 'from-purple-500 to-purple-600';
-            if (quality.includes('720p')) return 'from-blue-500 to-blue-600';
-            if (quality.includes('480p')) return 'from-green-500 to-green-600';
-            if (quality.includes('360p')) return 'from-yellow-500 to-yellow-600';
-            return 'from-gray-500 to-gray-600';
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
         }
 
         function getQualityIcon(quality) {
-            if (quality.includes('1080p')) return 'fas fa-crown';
-            if (quality.includes('720p')) return 'fas fa-gem';
-            if (quality.includes('480p')) return 'fas fa-star';
-            if (quality.includes('360p')) return 'fas fa-play';
-            return 'fas fa-download';
+            if (quality.includes('1080')) return 'fas fa-crown';
+            if (quality.includes('720')) return 'fas fa-gem';
+            if (quality.includes('480')) return 'fas fa-star';
+            if (quality.includes('360')) return 'fas fa-circle';
+            return 'fas fa-play';
         }
 
-        function displayVideoInfo(video) {
-            videoThumbnail.src = video.thumbnail;
-            videoTitle.textContent = video.title;
-            videoUploader.textContent = video.uploader;
-            videoDuration.textContent = formatDuration(video.duration);
-            videoViews.textContent = formatViews(video.view_count);
+        function getQualityColor(quality) {
+            if (quality.includes('1080')) return 'from-yellow-500 to-yellow-600';
+            if (quality.includes('720')) return 'from-purple-500 to-purple-600';
+            if (quality.includes('480')) return 'from-blue-500 to-blue-600';
+            if (quality.includes('360')) return 'from-green-500 to-green-600';
+            return 'from-gray-500 to-gray-600';
+        }
 
-            downloadOptions.innerHTML = '';
+        function createDownloadButton(format) {
+            const qualityIcon = getQualityIcon(format.quality);
+            const qualityColor = getQualityColor(format.quality);
             
-            if (video.formats.length === 0) {
-                downloadOptions.innerHTML = `
-                    <div class="text-center py-8 text-slate-400">
-                        <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
-                        <p>No download formats available for this video</p>
+            return `
+                <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/10 transition-all duration-300 group">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br ${qualityColor} rounded-2xl flex items-center justify-center shadow-lg">
+                                <i class="${qualityIcon} text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-white font-semibold">${format.quality}</div>
+                                <div class="text-slate-400 text-sm">${format.ext.toUpperCase()} • ${format.filesize || 'Unknown size'}</div>
+                            </div>
+                        </div>
+                        <a href="/download/${format.video_id}/${format.format_id}" 
+                           class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-download mr-2"></i>
+                            Download
+                        </a>
+                    </div>
                 </div>
-                `;
-            } else {
-                video.formats.forEach(format => {
-                    const qualityColor = getQualityColor(format.quality);
-                    const qualityIcon = getQualityIcon(format.quality);
-                    
-                    const option = document.createElement('div');
-                    option.className = 'group bg-white/5 hover:bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105';
-                    
-                    option.innerHTML = `
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-gradient-to-br ${qualityColor} rounded-xl flex items-center justify-center shadow-lg">
-                                    <i class="${qualityIcon} text-white text-lg"></i>
-                </div>
-                                <div>
-                                    <h4 class="font-semibold text-lg">${format.quality} MP4</h4>
-                                    <p class="text-slate-400 text-sm">${format.size}</p>
-                </div>
-                </div>
-                            <button 
-                                class="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
-                                onclick="openVideo('${video.id}', '${format.format_id}')"
-                            >
-                                <i class="fas fa-external-link-alt"></i>
-                                Open Video
-                            </button>
-                </div>
-                    `;
-                    
-                    downloadOptions.appendChild(option);
-                });
-            }
-
-            videoInfo.classList.remove('hidden');
+            `;
         }
 
-        function openVideo(videoId, formatId) {
-            const downloadUrl = `/download/${videoId}/${encodeURIComponent(formatId)}`;
-            window.open(downloadUrl, '_blank');
-        }
-
-        async function extractVideo() {
+        // Event listeners
+        extractBtn.addEventListener('click', async function() {
             const url = urlInput.value.trim();
             if (!url) {
                 showError('Please enter a YouTube URL');
                 return;
             }
 
-            showLoading();
-            extractBtn.disabled = true;
-            extractBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Extracting...';
+            // Show loading state
+            hideElement(errorMessage);
+            hideElement(videoInfo);
+            showElement(loading);
 
             try {
                 const response = await fetch('/extract', {
@@ -433,37 +380,52 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ url: url })
+                    body: JSON.stringify({ url: url }),
                 });
 
-                const result = await response.json();
+                const data = await response.json();
 
-                if (result.success) {
-                    displayVideoInfo(result.video);
+                if (response.ok) {
+                    // Update video information
+                    videoThumbnail.src = data.thumbnail;
+                    videoTitle.textContent = data.title;
+                    videoUploader.textContent = data.uploader || 'Unknown';
+                    videoDuration.textContent = formatDuration(data.duration);
+                    videoDurationOverlay.textContent = formatDuration(data.duration);
+                    videoViews.textContent = formatViews(data.view_count || 0) + ' views';
+                    videoUploadDate.textContent = data.upload_date ? formatDate(data.upload_date) : 'Unknown';
+
+                    // Create download options
+                    downloadOptions.innerHTML = '';
+                    data.formats.forEach(format => {
+                        downloadOptions.innerHTML += createDownloadButton(format);
+                    });
+
+                    // Show video info
+                    hideElement(loading);
+                    showElement(videoInfo);
                 } else {
-                    showError(result.error || 'Failed to extract video information');
+                    showError(data.error || 'An error occurred while extracting video information');
                 }
             } catch (error) {
-                showError('Network error. Please try again.');
-            } finally {
-                hideLoading();
-                extractBtn.disabled = false;
-                extractBtn.innerHTML = '<i class="fas fa-search"></i> Extract';
-            }
-        }
-
-        // Event listeners
-        extractBtn.addEventListener('click', extractVideo);
-        urlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                extractVideo();
+                showError('Network error: ' + error.message);
             }
         });
 
-        // Clear previous results when URL changes
-        urlInput.addEventListener('input', () => {
-            hideError();
-            videoInfo.classList.add('hidden');
+        // Enter key support
+        urlInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                extractBtn.click();
+            }
+        });
+
+        // Input focus effects
+        urlInput.addEventListener('focus', function() {
+            this.parentElement.classList.add('scale-105');
+        });
+
+        urlInput.addEventListener('blur', function() {
+            this.parentElement.classList.remove('scale-105');
         });
     </script>
 </body>
