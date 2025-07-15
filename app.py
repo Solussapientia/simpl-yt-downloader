@@ -16,7 +16,6 @@ import subprocess
 import tempfile
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_file, Response, redirect, url_for
-from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from urllib.parse import urlparse, parse_qs
 from flask_cors import CORS
@@ -30,7 +29,6 @@ except ImportError:
     import yt_dlp
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
 # Global variables
 download_progress = {}
@@ -668,7 +666,6 @@ import os
 import logging
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
