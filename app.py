@@ -412,40 +412,112 @@ def download_video_file(video_id, format_id):
 
 @app.route('/stream/<video_id>/<format_id>')
 def stream_video(video_id, format_id):
-    """Stream video in new tab - exactly like ytmate"""
+    """Stream video in new tab - ytmate style"""
     try:
+        # Check if we have cached video info
+        if video_id not in video_cache:
+            return jsonify({'error': 'Video information not found. Please analyze the video first.'}), 404
+        
+        cached_info = video_cache[video_id]
+        video_info = cached_info['video']
+        
+        # Create downloads directory if it doesn't exist
+        downloads_dir = 'downloads'
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
+        
+        # Generate unique download filename
+        safe_title = re.sub(r'[<>:"/\\|?*]', '', video_info['title'])
+        safe_title = safe_title.replace(' ', '_')
+        
         # Reconstruct original URL from video_id
         original_url = f"https://www.youtube.com/watch?v={video_id}"
         
-        # Simple yt-dlp configuration for direct URL extraction
-        ydl_opts = {
-            'quiet': True,
-            'no_warnings': True,
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-        }
-        
-        # Set format based on what user requested
         if format_id == 'mp3':
-            ydl_opts['format'] = 'bestaudio'
+            filename = f"{safe_title}.mp3"
+            file_path = os.path.join(downloads_dir, filename)
+            
+            # Configure for MP3 download
+            ydl_opts = {
+                'format': 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best',
+                'outtmpl': file_path[:-4] + '.%(ext)s',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                'no_warnings': True,
+                'quiet': True,
+                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            }
+            
+            # Download the file
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([original_url])
+            
+            # Find the downloaded file
+            time.sleep(1)
+            actual_file = None
+            for file in os.listdir(downloads_dir):
+                if file.endswith('.mp3') and safe_title.split('_')[0] in file:
+                    actual_file = file
+                    break
+            
+            if actual_file:
+                actual_file_path = os.path.join(downloads_dir, actual_file)
+                return send_file(actual_file_path, mimetype='audio/mpeg', as_attachment=False)
+                
         else:
-            # For video formats, just use the best available without merging
-            ydl_opts['format'] = 'best'
-        
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # Extract info without downloading
-            info = ydl.extract_info(original_url, download=False)
+            filename = f"{safe_title}.mp4"
+            file_path = os.path.join(downloads_dir, filename)
             
-            # Get the direct URL
-            direct_url = info.get('url')
+            # Configure for MP4 download with quality selection
+            quality_lower = format_id.lower()
             
-            if direct_url:
-                # Simply redirect to the direct URL - this opens it in the browser
-                return redirect(direct_url)
+            if '2160' in quality_lower or '4k' in quality_lower:
+                format_selector = '401+140/313+140/271+140/337+140/best[height>=2160]/best'
+            elif '1440' in quality_lower:
+                format_selector = '264+140/271+140/308+140/best[height>=1440]/best'
+            elif '1080' in quality_lower:
+                format_selector = '137+140/299+140/248+140/303+140/best[height>=1080]/best'
+            elif '720' in quality_lower:
+                format_selector = '136+140/298+140/247+140/302+140/best[height>=720]/best'
+            elif '480' in quality_lower:
+                format_selector = '135+140/244+140/best[height>=480]/best'
+            elif '360' in quality_lower:
+                format_selector = '134+140/243+140/18/best[height>=360]/best'
             else:
-                return jsonify({'error': 'Could not get direct stream URL'}), 500
+                format_selector = f'{format_id}+140/{format_id}/best'
+            
+            ydl_opts = {
+                'format': format_selector,
+                'outtmpl': file_path[:-4] + '.%(ext)s',
+                'merge_output_format': 'mp4',
+                'no_warnings': True,
+                'quiet': True,
+                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            }
+            
+            # Download the file
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([original_url])
+            
+            # Find the downloaded file
+            time.sleep(1)
+            actual_file = None
+            for file in os.listdir(downloads_dir):
+                if file.endswith('.mp4') and safe_title.split('_')[0] in file:
+                    actual_file = file
+                    break
+            
+            if actual_file:
+                actual_file_path = os.path.join(downloads_dir, actual_file)
+                return send_file(actual_file_path, mimetype='video/mp4', as_attachment=False)
+        
+        return jsonify({'error': 'Could not download and stream file'}), 500
         
     except Exception as e:
-        return jsonify({'error': f'Failed to get stream: {str(e)}'}), 500
+        return jsonify({'error': f'Stream failed: {str(e)}'}), 500
 
 class ProgressHook:
     def __init__(self, download_id):
