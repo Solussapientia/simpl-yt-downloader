@@ -418,103 +418,38 @@ def stream_video(video_id, format_id):
         if video_id not in video_cache:
             return jsonify({'error': 'Video information not found. Please analyze the video first.'}), 404
         
-        cached_info = video_cache[video_id]
-        video_info = cached_info['video']
-        
-        # Create downloads directory if it doesn't exist
-        downloads_dir = 'downloads'
-        if not os.path.exists(downloads_dir):
-            os.makedirs(downloads_dir)
-        
-        # Generate unique download filename
-        safe_title = re.sub(r'[<>:"/\\|?*]', '', video_info['title'])
-        safe_title = safe_title.replace(' ', '_')
-        
         # Reconstruct original URL from video_id
         original_url = f"https://www.youtube.com/watch?v={video_id}"
         
-        if format_id == 'mp3':
-            filename = f"{safe_title}.mp3"
-            file_path = os.path.join(downloads_dir, filename)
-            
-            # Configure for MP3 download
-            ydl_opts = {
-                'format': 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best',
-                'outtmpl': file_path[:-4] + '.%(ext)s',
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192',
-                }],
-                'no_warnings': True,
-                'quiet': True,
-                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-            }
-            
-            # Download the file
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([original_url])
-            
-            # Find the downloaded file
-            time.sleep(1)
-            actual_file = None
-            for file in os.listdir(downloads_dir):
-                if file.endswith('.mp3') and safe_title.split('_')[0] in file:
-                    actual_file = file
-                    break
-            
-            if actual_file:
-                actual_file_path = os.path.join(downloads_dir, actual_file)
-                return send_file(actual_file_path, mimetype='audio/mpeg', as_attachment=False)
-                
-        else:
-            filename = f"{safe_title}.mp4"
-            file_path = os.path.join(downloads_dir, filename)
-            
-            # Configure for MP4 download with quality selection
-            quality_lower = format_id.lower()
-            
-            if '2160' in quality_lower or '4k' in quality_lower:
-                format_selector = '401+140/313+140/271+140/337+140/best[height>=2160]/best'
-            elif '1440' in quality_lower:
-                format_selector = '264+140/271+140/308+140/best[height>=1440]/best'
-            elif '1080' in quality_lower:
-                format_selector = '137+140/299+140/248+140/303+140/best[height>=1080]/best'
-            elif '720' in quality_lower:
-                format_selector = '136+140/298+140/247+140/302+140/best[height>=720]/best'
-            elif '480' in quality_lower:
-                format_selector = '135+140/244+140/best[height>=480]/best'
-            elif '360' in quality_lower:
-                format_selector = '134+140/243+140/18/best[height>=360]/best'
-            else:
-                format_selector = f'{format_id}+140/{format_id}/best'
-            
-            ydl_opts = {
-                'format': format_selector,
-                'outtmpl': file_path[:-4] + '.%(ext)s',
-                'merge_output_format': 'mp4',
-                'no_warnings': True,
-                'quiet': True,
-                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-            }
-            
-            # Download the file
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([original_url])
-            
-            # Find the downloaded file
-            time.sleep(1)
-            actual_file = None
-            for file in os.listdir(downloads_dir):
-                if file.endswith('.mp4') and safe_title.split('_')[0] in file:
-                    actual_file = file
-                    break
-            
-            if actual_file:
-                actual_file_path = os.path.join(downloads_dir, actual_file)
-                return send_file(actual_file_path, mimetype='video/mp4', as_attachment=False)
+        # Configure yt-dlp to get direct stream URL (no downloading)
+        ydl_opts = {
+            'format': 'best[height<=?720]' if format_id == 'mp3' else f'best[height<=?{format_id[:-1] if format_id.endswith("p") else "720"}]',
+            'no_warnings': True,
+            'quiet': True,
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        }
         
-        return jsonify({'error': 'Could not download and stream file'}), 500
+        # For MP3, use audio-only format
+        if format_id == 'mp3':
+            ydl_opts['format'] = 'bestaudio/best'
+        else:
+            # For video, use video-only format (no audio merging needed)
+            # Higher quality video formats often don't have audio, so we use video-only
+            quality_num = format_id.replace('p', '') if format_id.endswith('p') else '720'
+            ydl_opts['format'] = f'best[height<=?{quality_num}][vcodec!=none]/best'
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            # Extract video info with direct URLs (no download)
+            info = ydl.extract_info(original_url, download=False)
+            
+            # Get the direct stream URL
+            stream_url = info.get('url')
+            
+            if stream_url:
+                # Redirect to the direct YouTube stream URL
+                return redirect(stream_url)
+            else:
+                return jsonify({'error': 'Could not extract stream URL'}), 500
         
     except Exception as e:
         return jsonify({'error': f'Stream failed: {str(e)}'}), 500
