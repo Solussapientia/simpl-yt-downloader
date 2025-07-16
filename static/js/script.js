@@ -179,32 +179,40 @@ document.addEventListener('DOMContentLoaded', function() {
             videoThumbnail.alt = videoData.title || 'Video thumbnail';
         }
 
-        // Populate quality options for video downloads
-        if (currentDownloadType === 'video' && qualitySelect) {
-            qualitySelect.innerHTML = '';
-            if (videoData.formats && videoData.formats.length > 0) {
+        // Create direct download buttons (ytmate style)
+        const downloadOptionsContainer = document.getElementById('download-options');
+        if (downloadOptionsContainer) {
+            downloadOptionsContainer.innerHTML = '';
+            
+            if (currentDownloadType === 'video' && videoData.formats) {
+                // Add video format download buttons
                 videoData.formats.forEach(format => {
-                    const option = document.createElement('option');
-                    // Store the actual format_id in a data attribute
-                    option.value = format.display_name || format.format_note || format.format_id;
-                    option.setAttribute('data-format-id', format.format_id);
-                    option.textContent = format.display_name || format.format_note || format.format_id;
-                    qualitySelect.appendChild(option);
+                    if (format.format_id !== 'mp3') {  // Skip audio format for video downloads
+                        const button = document.createElement('button');
+                        button.className = 'hero-button w-full bg-hero-blue hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-hero mb-2';
+                        button.innerHTML = `<i class="fas fa-download mr-2"></i>${format.display_name || format.format_id}`;
+                        button.onclick = () => {
+                            const streamUrl = `/stream/${videoData.video_id}/${format.format_id}`;
+                            window.open(streamUrl, '_blank');
+                        };
+                        downloadOptionsContainer.appendChild(button);
+                    }
                 });
+            } else if (currentDownloadType === 'mp3') {
+                // Add MP3 download button
+                const button = document.createElement('button');
+                button.className = 'hero-button w-full bg-hero-green hover:bg-green-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-hero mb-2';
+                button.innerHTML = `<i class="fas fa-music mr-2"></i>Download MP3 Audio`;
+                button.onclick = () => {
+                    const streamUrl = `/stream/${videoData.video_id}/mp3`;
+                    window.open(streamUrl, '_blank');
+                };
+                downloadOptionsContainer.appendChild(button);
             }
-            // If no formats available, add a default option
-            if (qualitySelect.children.length === 0) {
-                const option = document.createElement('option');
-                option.value = 'best';
-                option.setAttribute('data-format-id', 'best');
-                option.textContent = 'Best Quality (Auto)';
-                qualitySelect.appendChild(option);
-            }
-            if (qualitySelect.parentElement) {
-                qualitySelect.parentElement.classList.remove('hidden');
-            }
-        } else if (qualitySelect && qualitySelect.parentElement) {
-            // Hide quality selection for MP3 downloads
+        }
+
+        // Hide quality selection - using direct buttons instead
+        if (qualitySelect && qualitySelect.parentElement) {
             qualitySelect.parentElement.classList.add('hidden');
         }
 
@@ -298,201 +306,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle start download button click
-    if (startDownloadBtn) {
-        startDownloadBtn.addEventListener('click', async function() {
-            const url = urlInput.value.trim();
-            if (!url) {
-                showError('Please enter a YouTube URL');
-                return;
-            }
+    // Start download button is no longer needed - using direct download buttons
 
-            // Hide video info and show progress
-            if (videoInfo) {
-                videoInfo.classList.add('hidden');
-            }
-            if (downloadProgress) {
-                downloadProgress.classList.remove('hidden');
-            }
-            
-            // Reset progress
-            if (downloadSpeed) {
-                downloadSpeed.textContent = '--';
-            }
-            if (downloadStatus) {
-                downloadStatus.textContent = 'Starting...';
-            }
+    // Progress tracking is no longer needed - using direct download buttons
 
-            try {
-                let format_id = 'best';
-                
-                if (currentDownloadType === 'video') {
-                    // For video downloads, use the selected format
-                    if (qualitySelect && qualitySelect.value) {
-                        // Get the actual format_id from the selected option
-                        const selectedOption = qualitySelect.options[qualitySelect.selectedIndex];
-                        format_id = selectedOption.getAttribute('data-format-id') || selectedOption.value;
-                    }
-                } else {
-                    // For MP3 downloads, use audio extraction
-                    format_id = 'bestaudio/best';
-                }
-
-                const response = await fetch('/download', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        url: url, 
-                        format_id: format_id
-                    })
-                });
-
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to start download');
-                }
-
-                currentDownloadId = data.download_id;
-                startProgressTracking();
-                
-            } catch (error) {
-                showError(error.message);
-            }
-        });
-    }
-
-    // Start tracking download progress
-    function startProgressTracking() {
-        if (!currentDownloadId) return;
-
-        const pollProgress = async () => {
-            try {
-                const response = await fetch(`/progress/${currentDownloadId}`);
-                const data = await response.json();
-
-                // Handle progress updates
-                if (data.status === 'extracting') {
-                    // Show extracting status
-                    if (downloadSpeed) {
-                        downloadSpeed.textContent = 'Extracting...';
-                    }
-                    if (downloadStatus) {
-                        downloadStatus.textContent = 'Extracting download URL...';
-                    }
-                    
-                    // Continue polling
-                    setTimeout(pollProgress, 1000);
-                } else if (data.status === 'ready_for_download') {
-                    // Download URL is ready, start direct download
-                    if (downloadSpeed) {
-                        downloadSpeed.textContent = 'Ready';
-                    }
-                    if (downloadStatus) {
-                        downloadStatus.textContent = 'Starting download...';
-                    }
-                    
-                    // Trigger direct download
-                    triggerDirectDownload(currentDownloadId, data.filename);
-                    
-                    // Show completion message
-                    setTimeout(() => {
-                        if (downloadProgress) {
-                            downloadProgress.classList.add('hidden');
-                        }
-                        if (downloadComplete) {
-                            downloadComplete.classList.remove('hidden');
-                        }
-                        
-                        // Update the final download button text
-                        if (finalDownloadBtn) {
-                            finalDownloadBtn.textContent = `Download completed: ${data.filename}`;
-                            finalDownloadBtn.setAttribute('data-filename', data.filename);
-                            finalDownloadBtn.setAttribute('data-download-id', currentDownloadId);
-                        }
-                    }, 1000);
-                    
-                } else if (data.status === 'downloading') {
-                    // Update progress stats during streaming
-                    updateProgressStats(data.speed_text, data.eta_text, data.file_size);
-                    
-                    // Continue polling
-                    setTimeout(pollProgress, 1000);
-                } else if (data.status === 'completed') {
-                    // Download completed
-                    if (downloadSpeed) {
-                        downloadSpeed.textContent = 'Completed';
-                    }
-                    if (downloadStatus) {
-                        downloadStatus.textContent = 'Download completed';
-                    }
-                    
-                    // Show completion message
-                    if (downloadProgress) {
-                        downloadProgress.classList.add('hidden');
-                    }
-                    if (downloadComplete) {
-                        downloadComplete.classList.remove('hidden');
-                    }
-                    
-                    // Set download button data
-                    if (finalDownloadBtn) {
-                        finalDownloadBtn.textContent = `Download completed: ${data.filename}`;
-                        finalDownloadBtn.setAttribute('data-filename', data.filename);
-                        finalDownloadBtn.setAttribute('data-download-id', currentDownloadId);
-                    }
-                    
-                    console.log('Download completed:', data.filename);
-                } else if (data.status === 'error') {
-                    // Download failed
-                    showError(data.error || 'Download failed');
-                    if (downloadProgress) {
-                        downloadProgress.classList.add('hidden');
-                    }
-                } else {
-                    // Continue polling for other statuses
-                    setTimeout(pollProgress, 1000);
-                }
-            } catch (error) {
-                console.error('Failed to get download progress:', error);
-                // Re-attempt polling after a short delay
-                setTimeout(pollProgress, 2000);
-            }
-        };
-
-        // Initial poll
-        pollProgress();
-    }
-
-    // Trigger direct download
+    // Direct download function - no longer used with new ytmate-style buttons
     function triggerDirectDownload(downloadId, filename) {
-        const downloadUrl = `/direct_download/${downloadId}`;
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = filename || 'download';
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        console.log('Direct download triggered:', filename);
+        // This function is kept for compatibility but not used with new direct buttons
+        const streamUrl = `/direct_download/${downloadId}?stream=true`;
+        window.open(streamUrl, '_blank');
+        console.log('Stream opened in new tab:', filename);
     }
 
-    // Update progress display (simplified)
-    function updateProgressStats(speed, eta, total) {
-        if (downloadSpeed) {
-            downloadSpeed.textContent = speed || '--';
-        }
-        if (downloadStatus) {
-            downloadStatus.textContent = `Downloading... ${eta ? `ETA: ${eta}` : ''}`;
-        }
-    }
-
-    // Show download complete
-    function showDownloadComplete() {
-        // This function is now handled by startProgressTracking's polling
-    }
+    // Helper functions no longer needed - using direct download buttons
 
     // Handle download file button click - for re-downloading
     if (finalDownloadBtn) {

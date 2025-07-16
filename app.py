@@ -393,12 +393,131 @@ def download_video_file(video_id, format_id):
         
         if actual_file:
             actual_file_path = os.path.join(downloads_dir, actual_file)
-            return send_file(actual_file_path, as_attachment=True, download_name=actual_file)
+            # Check if it's a stream request (for opening in new tab)
+            stream_mode = request.args.get('stream', 'false').lower() == 'true'
+            
+            if stream_mode:
+                # For streaming mode, don't force download - let browser handle it
+                return send_file(actual_file_path, 
+                               mimetype='video/mp4' if format_id != 'mp3' else 'audio/mpeg',
+                               as_attachment=False)
+            else:
+                # For download mode, force download
+                return send_file(actual_file_path, as_attachment=True, download_name=actual_file)
         else:
             return jsonify({'error': 'Download completed but file not found'}), 500
             
     except Exception as e:
         return jsonify({'error': f'Download failed: {str(e)}'}), 500
+
+@app.route('/stream/<video_id>/<format_id>')
+def stream_video(video_id, format_id):
+    """Stream video in new tab - ytmate style"""
+    try:
+        # Check if we have cached video info
+        if video_id not in video_cache:
+            return jsonify({'error': 'Video information not found. Please analyze the video first.'}), 404
+        
+        cached_info = video_cache[video_id]
+        video_info = cached_info['video']
+        
+        # Create downloads directory if it doesn't exist
+        downloads_dir = 'downloads'
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
+        
+        # Generate unique download filename
+        safe_title = re.sub(r'[<>:"/\\|?*]', '', video_info['title'])
+        safe_title = safe_title.replace(' ', '_')
+        
+        # Reconstruct original URL from video_id
+        original_url = f"https://www.youtube.com/watch?v={video_id}"
+        
+        if format_id == 'mp3':
+            filename = f"{safe_title}.mp3"
+            file_path = os.path.join(downloads_dir, filename)
+            
+            # Configure for MP3 download
+            ydl_opts = {
+                'format': 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best',
+                'outtmpl': file_path[:-4] + '.%(ext)s',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                'no_warnings': True,
+                'quiet': True,
+                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            }
+            
+            # Download the file
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([original_url])
+            
+            # Find the downloaded file
+            time.sleep(1)
+            actual_file = None
+            for file in os.listdir(downloads_dir):
+                if file.endswith('.mp3') and safe_title.split('_')[0] in file:
+                    actual_file = file
+                    break
+            
+            if actual_file:
+                actual_file_path = os.path.join(downloads_dir, actual_file)
+                return send_file(actual_file_path, mimetype='audio/mpeg', as_attachment=False)
+                
+        else:
+            filename = f"{safe_title}.mp4"
+            file_path = os.path.join(downloads_dir, filename)
+            
+            # Configure for MP4 download with quality selection
+            quality_lower = format_id.lower()
+            
+            if '2160' in quality_lower or '4k' in quality_lower:
+                format_selector = '401+140/313+140/271+140/337+140/best[height>=2160]/best'
+            elif '1440' in quality_lower:
+                format_selector = '264+140/271+140/308+140/best[height>=1440]/best'
+            elif '1080' in quality_lower:
+                format_selector = '137+140/299+140/248+140/303+140/best[height>=1080]/best'
+            elif '720' in quality_lower:
+                format_selector = '136+140/298+140/247+140/302+140/best[height>=720]/best'
+            elif '480' in quality_lower:
+                format_selector = '135+140/244+140/best[height>=480]/best'
+            elif '360' in quality_lower:
+                format_selector = '134+140/243+140/18/best[height>=360]/best'
+            else:
+                format_selector = f'{format_id}+140/{format_id}/best'
+            
+            ydl_opts = {
+                'format': format_selector,
+                'outtmpl': file_path[:-4] + '.%(ext)s',
+                'merge_output_format': 'mp4',
+                'no_warnings': True,
+                'quiet': True,
+                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            }
+            
+            # Download the file
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([original_url])
+            
+            # Find the downloaded file
+            time.sleep(1)
+            actual_file = None
+            for file in os.listdir(downloads_dir):
+                if file.endswith('.mp4') and safe_title.split('_')[0] in file:
+                    actual_file = file
+                    break
+            
+            if actual_file:
+                actual_file_path = os.path.join(downloads_dir, actual_file)
+                return send_file(actual_file_path, mimetype='video/mp4', as_attachment=False)
+        
+        return jsonify({'error': 'Could not download and stream file'}), 500
+        
+    except Exception as e:
+        return jsonify({'error': f'Stream failed: {str(e)}'}), 500
 
 class ProgressHook:
     def __init__(self, download_id):
@@ -767,6 +886,11 @@ def get_video_info():
         return jsonify({'error': 'Please provide a valid YouTube URL'}), 400
     
     try:
+        # Extract video ID for caching and frontend
+        video_id = extract_video_id(url)
+        if not video_id:
+            return jsonify({'error': 'Invalid YouTube URL'}), 400
+        
         # Simplified yt-dlp configuration to avoid the 'bool' object is not iterable error
         ydl_opts = {
             'quiet': True,
@@ -863,7 +987,20 @@ def get_video_info():
                     {'format_id': 'worst', 'format_note': 'Lowest Quality', 'height': 360, 'sort_key': 360}
                 ]
             
+            # Cache the video info for later use
+            video_cache[video_id] = {
+                'video': {
+                    'title': info.get('title', 'Unknown Title'),
+                    'uploader': info.get('uploader', 'Unknown'),
+                    'duration': info.get('duration', 0),
+                    'thumbnail': info.get('thumbnail', ''),
+                    'view_count': info.get('view_count', 0),
+                },
+                'formats': formats
+            }
+            
             return jsonify({
+                'video_id': video_id,
                 'title': info.get('title', 'Unknown Title'),
                 'uploader': info.get('uploader', 'Unknown'),
                 'duration': info.get('duration', 0),
