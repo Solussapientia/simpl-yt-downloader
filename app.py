@@ -5,7 +5,7 @@ import os
 # Add current directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from flask import Flask, render_template, request, jsonify, send_file, url_for, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_file, url_for, send_from_directory, redirect
 from datetime import datetime, timedelta
 import yt_dlp
 import tempfile
@@ -14,6 +14,7 @@ import time
 from urllib.parse import urlparse
 import re
 import glob
+import uuid
 
 app = Flask(__name__)
 
@@ -45,6 +46,7 @@ def after_request(response):
 
 # Global variables
 download_progress = {}
+video_cache = {}  # Cache video info to avoid re-extraction
 
 # SEO Routes
 @app.route('/robots.txt')
@@ -123,6 +125,281 @@ def format_eta(eta):
         minutes = int((eta % 3600) // 60)
         return f"{hours}h {minutes}m"
 
+def is_valid_youtube_url(url):
+    youtube_regex = re.compile(
+        r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/'
+        r'(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})'
+    )
+    return youtube_regex.match(url) is not None
+
+def extract_video_id(url):
+    """Extract YouTube video ID from URL"""
+    youtube_regex = re.compile(
+        r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/'
+        r'(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})'
+    )
+    match = youtube_regex.match(url)
+    if match:
+        return match.group(6)
+    return None
+
+def format_filesize(size):
+    """Format file size in human readable format"""
+    if not size:
+        return "Unknown"
+    
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if size < 1024.0:
+            return f"{size:.1f} {unit}"
+        size /= 1024.0
+    return f"{size:.1f} TB"
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/extract', methods=['POST'])
+def extract_video():
+    """Extract video information - matches what the frontend expects"""
+    data = request.get_json()
+    url = data.get('url', '').strip()
+    
+    if not url:
+        return jsonify({'success': False, 'error': 'Please provide a YouTube URL'}), 400
+    
+    if not is_valid_youtube_url(url):
+        return jsonify({'success': False, 'error': 'Please provide a valid YouTube URL'}), 400
+    
+    try:
+        # Extract video ID for caching
+        video_id = extract_video_id(url)
+        if not video_id:
+            return jsonify({'success': False, 'error': 'Invalid YouTube URL'}), 400
+        
+        # Check cache first
+        if video_id in video_cache:
+            cached_info = video_cache[video_id]
+            return jsonify({
+                'success': True,
+                'video_id': video_id,
+                'video': cached_info['video'],
+                'formats': cached_info['formats']
+            })
+        
+        # Extract video info
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'ignoreerrors': False,
+            'retries': 3,
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        }
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            
+            if not info:
+                return jsonify({'success': False, 'error': 'Failed to extract video information'}), 500
+            
+            # Build video info object
+            video_info = {
+                'title': info.get('title', 'Unknown Title'),
+                'uploader': info.get('uploader', 'Unknown'),
+                'duration': info.get('duration', 0),
+                'thumbnail': info.get('thumbnail', ''),
+                'view_count': info.get('view_count', 0),
+                'upload_date': info.get('upload_date', '')
+            }
+            
+            # Process formats
+            formats = []
+            raw_formats = info.get('formats', [])
+            
+            # Video formats
+            video_qualities = {}
+            for f in raw_formats:
+                if not isinstance(f, dict):
+                    continue
+                
+                format_id = f.get('format_id', '')
+                height = f.get('height')
+                vcodec = f.get('vcodec', '')
+                filesize = f.get('filesize') or f.get('filesize_approx', 0)
+                
+                # Skip if no format ID or audio-only
+                if not format_id or vcodec == 'none' or not height:
+                    continue
+                
+                # Determine quality label
+                if height >= 2160:
+                    quality_label = "4K (2160p)"
+                    sort_key = 2160
+                elif height >= 1440:
+                    quality_label = "1440p"
+                    sort_key = 1440
+                elif height >= 1080:
+                    quality_label = "1080p"
+                    sort_key = 1080
+                elif height >= 720:
+                    quality_label = "720p"
+                    sort_key = 720
+                elif height >= 480:
+                    quality_label = "480p"
+                    sort_key = 480
+                elif height >= 360:
+                    quality_label = "360p"
+                    sort_key = 360
+                else:
+                    continue  # Skip very low quality
+                
+                # Only keep the best format for each quality
+                if quality_label not in video_qualities or sort_key > video_qualities[quality_label]['sort_key']:
+                    video_qualities[quality_label] = {
+                        'format_id': format_id,
+                        'display_name': f"MP4 Video - {quality_label}",
+                        'quality': quality_label,
+                        'ext': 'mp4',
+                        'filesize': filesize,
+                        'sort_key': sort_key
+                    }
+            
+            # Convert to list and sort by quality
+            formats.extend(video_qualities.values())
+            formats.sort(key=lambda x: x['sort_key'], reverse=True)
+            
+            # Add MP3 audio format
+            formats.append({
+                'format_id': 'mp3',
+                'display_name': 'MP3 Audio',
+                'quality': 'audio',
+                'ext': 'mp3',
+                'filesize': None,
+                'sort_key': 0
+            })
+            
+            # Cache the result
+            video_cache[video_id] = {
+                'video': video_info,
+                'formats': formats
+            }
+            
+            return jsonify({
+                'success': True,
+                'video_id': video_id,
+                'video': video_info,
+                'formats': formats
+            })
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Failed to extract video information: {str(e)}'}), 500
+
+@app.route('/download/<video_id>/<format_id>')
+def download_video_file(video_id, format_id):
+    """Download video file - matches what the frontend expects"""
+    
+    # Check if we have cached video info
+    if video_id not in video_cache:
+        return jsonify({'error': 'Video information not found. Please analyze the video first.'}), 404
+    
+    cached_info = video_cache[video_id]
+    video_info = cached_info['video']
+    
+    # Create downloads directory if it doesn't exist
+    downloads_dir = 'downloads'
+    if not os.path.exists(downloads_dir):
+        os.makedirs(downloads_dir)
+    
+    # Generate unique download filename
+    safe_title = re.sub(r'[<>:"/\\|?*]', '', video_info['title'])
+    safe_title = safe_title.replace(' ', '_')
+    
+    if format_id == 'mp3':
+        filename = f"{safe_title}.mp3"
+        file_path = os.path.join(downloads_dir, filename)
+        
+        # Configure for MP3 download
+        ydl_opts = {
+            'format': 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best',
+            'outtmpl': file_path[:-4] + '.%(ext)s',  # Remove .mp3 extension, let yt-dlp handle it
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'no_warnings': True,
+            'quiet': True,
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        }
+        
+    else:
+        filename = f"{safe_title}.mp4"
+        file_path = os.path.join(downloads_dir, filename)
+        
+        # Configure for MP4 download
+        quality_lower = format_id.lower()
+        
+        if '2160' in quality_lower or '4k' in quality_lower:
+            format_selector = '401+140/313+140/271+140/337+140/best[height>=2160]/best'
+        elif '1440' in quality_lower:
+            format_selector = '264+140/271+140/308+140/best[height>=1440]/best'
+        elif '1080' in quality_lower:
+            format_selector = '137+140/299+140/248+140/303+140/best[height>=1080]/best'
+        elif '720' in quality_lower:
+            format_selector = '136+140/298+140/247+140/302+140/best[height>=720]/best'
+        elif '480' in quality_lower:
+            format_selector = '135+140/244+140/best[height>=480]/best'
+        elif '360' in quality_lower:
+            format_selector = '134+140/243+140/18/best[height>=360]/best'
+        else:
+            format_selector = f'{format_id}+140/{format_id}/best'
+        
+        ydl_opts = {
+            'format': format_selector,
+            'outtmpl': file_path[:-4] + '.%(ext)s',  # Remove .mp4 extension, let yt-dlp handle it
+            'merge_output_format': 'mp4',
+            'no_warnings': True,
+            'quiet': True,
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        }
+    
+    try:
+        # Reconstruct original URL from video_id
+        original_url = f"https://www.youtube.com/watch?v={video_id}"
+        
+        # Download the file
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([original_url])
+        
+        # Find the actual downloaded file
+        time.sleep(1)  # Wait for download to complete
+        
+        # Look for the downloaded file
+        actual_file = None
+        for file in os.listdir(downloads_dir):
+            if file.startswith(safe_title.split('_')[0]) and file.endswith('.mp3' if format_id == 'mp3' else '.mp4'):
+                actual_file = file
+                break
+        
+        if not actual_file:
+            # Fallback: look for any file with the expected extension
+            expected_ext = '.mp3' if format_id == 'mp3' else '.mp4'
+            for file in os.listdir(downloads_dir):
+                if file.endswith(expected_ext):
+                    # Check if it's a recent file (within last 10 seconds)
+                    file_path = os.path.join(downloads_dir, file)
+                    if os.path.getmtime(file_path) > time.time() - 10:
+                        actual_file = file
+                        break
+        
+        if actual_file:
+            actual_file_path = os.path.join(downloads_dir, actual_file)
+            return send_file(actual_file_path, as_attachment=True, download_name=actual_file)
+        else:
+            return jsonify({'error': 'Download completed but file not found'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': f'Download failed: {str(e)}'}), 500
+
 class ProgressHook:
     def __init__(self, download_id):
         self.download_id = download_id
@@ -184,44 +461,6 @@ class ProgressHook:
                 'eta_text': "Failed",
                 'file_size': "-- MB"
             }
-
-def is_valid_youtube_url(url):
-    youtube_regex = re.compile(
-        r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/'
-        r'(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})'
-    )
-    return youtube_regex.match(url) is not None
-
-def format_description(format_info):
-    """Create a simple resolution string for video format"""
-    height = format_info.get('height', 0)
-    width = format_info.get('width', 0)
-    fps = format_info.get('fps', 0)
-    
-    if height >= 2160:
-        quality = "4K (2160p)"
-    elif height >= 1440:
-        quality = "2K (1440p)"
-    elif height >= 1080:
-        quality = "1080p"
-    elif height >= 720:
-        quality = "720p"
-    elif height >= 480:
-        quality = "480p"
-    elif height >= 360:
-        quality = "360p"
-    elif height >= 240:
-        quality = "240p"
-    elif height >= 144:
-        quality = "144p"
-    else:
-        quality = "Unknown Quality"
-    
-    # Add fps info if available and not standard
-    if fps and fps > 30:
-        quality += f" {int(fps)}fps"
-    
-    return quality
 
 def download_thread_func(url, ydl_opts, download_id):
     """Function to handle download in a separate thread"""
@@ -358,10 +597,6 @@ def download_thread_func(url, ydl_opts, download_id):
             'eta_text': "Failed",
             'file_size': "-- MB"
         }
-
-@app.route('/')
-def index():
-    return render_template('index.html')
 
 @app.route('/download', methods=['POST'])
 def download_video():
