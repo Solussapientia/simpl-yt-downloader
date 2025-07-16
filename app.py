@@ -412,47 +412,40 @@ def download_video_file(video_id, format_id):
 
 @app.route('/stream/<video_id>/<format_id>')
 def stream_video(video_id, format_id):
-    """Stream video in new tab - ytmate style"""
+    """Stream video in new tab - exactly like ytmate"""
     try:
-        # Check if we have cached video info
-        if video_id not in video_cache:
-            return jsonify({'error': 'Video information not found. Please analyze the video first.'}), 404
-        
         # Reconstruct original URL from video_id
         original_url = f"https://www.youtube.com/watch?v={video_id}"
         
-        # Configure yt-dlp to get direct stream URL (no downloading)
+        # Simple yt-dlp configuration for direct URL extraction
         ydl_opts = {
-            'format': 'best[height<=?720]' if format_id == 'mp3' else f'best[height<=?{format_id[:-1] if format_id.endswith("p") else "720"}]',
-            'no_warnings': True,
             'quiet': True,
+            'no_warnings': True,
             'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
         }
         
-        # For MP3, use audio-only format
+        # Set format based on what user requested
         if format_id == 'mp3':
-            ydl_opts['format'] = 'bestaudio/best'
+            ydl_opts['format'] = 'bestaudio'
         else:
-            # For video, use video-only format (no audio merging needed)
-            # Higher quality video formats often don't have audio, so we use video-only
-            quality_num = format_id.replace('p', '') if format_id.endswith('p') else '720'
-            ydl_opts['format'] = f'best[height<=?{quality_num}][vcodec!=none]/best'
+            # For video formats, just use the best available without merging
+            ydl_opts['format'] = 'best'
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # Extract video info with direct URLs (no download)
+            # Extract info without downloading
             info = ydl.extract_info(original_url, download=False)
             
-            # Get the direct stream URL
-            stream_url = info.get('url')
+            # Get the direct URL
+            direct_url = info.get('url')
             
-            if stream_url:
-                # Redirect to the direct YouTube stream URL
-                return redirect(stream_url)
+            if direct_url:
+                # Simply redirect to the direct URL - this opens it in the browser
+                return redirect(direct_url)
             else:
-                return jsonify({'error': 'Could not extract stream URL'}), 500
+                return jsonify({'error': 'Could not get direct stream URL'}), 500
         
     except Exception as e:
-        return jsonify({'error': f'Stream failed: {str(e)}'}), 500
+        return jsonify({'error': f'Failed to get stream: {str(e)}'}), 500
 
 class ProgressHook:
     def __init__(self, download_id):

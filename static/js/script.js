@@ -190,8 +190,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (format.format_id !== 'mp3') {  // Skip audio format for video downloads
                         const button = document.createElement('button');
                         button.className = 'hero-button w-full bg-hero-blue hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-hero mb-2';
-                        button.innerHTML = `<i class="fas fa-download mr-2"></i>${format.display_name || format.format_id}`;
+                        button.innerHTML = `<i class="fas fa-download mr-2"></i>${format.format_note || format.format_id}`;
                         button.onclick = () => {
+                            // Direct link to stream endpoint - opens in new tab
                             const streamUrl = `/stream/${videoData.video_id}/${format.format_id}`;
                             window.open(streamUrl, '_blank');
                         };
@@ -204,6 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 button.className = 'hero-button w-full bg-hero-green hover:bg-green-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-hero mb-2';
                 button.innerHTML = `<i class="fas fa-music mr-2"></i>Download MP3 Audio`;
                 button.onclick = () => {
+                    // Direct link to stream endpoint for MP3
                     const streamUrl = `/stream/${videoData.video_id}/mp3`;
                     window.open(streamUrl, '_blank');
                 };
