@@ -55,40 +55,165 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
     <link rel="manifest" href="/static/manifest.json">
     
-    <!-- NextUI CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/@nextui-org/theme@2.2.9/dist/components.min.css" rel="stylesheet">
-    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Configure Tailwind with NextUI -->
+    <!-- Configure Tailwind -->
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                            950: '#172554'
+                        'hero-blue': '#0070f3',
+                        'hero-purple': '#7c3aed',
+                        'hero-pink': '#ec4899',
+                        'hero-green': '#10b981',
+                        'hero-orange': '#f59e0b',
+                        'hero-red': '#ef4444',
+                        'hero-gray': {
+                            50: '#f9fafb',
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            900: '#111827',
+                            950: '#030712'
                         }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    fontSize: {
+                        'xs': '0.75rem',
+                        'sm': '0.875rem',
+                        'base': '1rem',
+                        'lg': '1.125rem',
+                        'xl': '1.25rem',
+                        '2xl': '1.5rem',
+                        '3xl': '1.875rem',
+                        '4xl': '2.25rem',
+                    },
+                    spacing: {
+                        '18': '4.5rem',
+                        '88': '22rem',
+                    },
+                    borderRadius: {
+                        'xl': '0.75rem',
+                        '2xl': '1rem',
+                        '3xl': '1.5rem',
+                    },
+                    boxShadow: {
+                        'hero': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        'hero-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'hero-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                     }
                 }
             }
         }
     </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .hero-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .hero-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .hero-button {
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        
+        .hero-button:hover {
+            transform: translateY(-1px);
+        }
+        
+        .hero-input {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .hero-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #0070f3;
+            box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+        }
+        
+        .hero-chip {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .hero-badge {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-spinner {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(0, 112, 243, 0.3);
+            border-top: 2px solid #0070f3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hero-feature-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+    </style>
     
     <!-- Structured Data - JSON-LD -->
     <script type="application/ld+json">
@@ -134,267 +259,259 @@
     }
     </script>
 </head>
-<body class="dark bg-background text-foreground">
-    <!-- NextUI Provider -->
-    <div class="nextui-provider">
-        <div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
-            
-            <!-- Header -->
-            <header class="py-12 text-center">
-                <h1 class="text-3xl font-bold mb-2">Simpl YT Downloader</h1>
-                <p class="text-small text-default-500 mb-4">Free YouTube video and MP3 downloader</p>
-                <div class="flex justify-center gap-4 text-tiny text-default-400">
-                    <div class="flex items-center gap-1">
+<body class="bg-hero-gray-950 text-white min-h-screen">
+    <div class="min-h-screen bg-gradient-to-br from-hero-gray-950 via-hero-gray-900 to-hero-gray-800">
+        
+        <!-- Header -->
+        <header class="py-8 text-center">
+            <div class="max-w-2xl mx-auto px-4">
+                <h1 class="text-3xl font-bold mb-2">
+                    Make <span class="gradient-text">beautiful</span> downloads
+                </h1>
+                <p class="text-hero-gray-400 text-sm mb-4">
+                    Beautiful, fast and modern YouTube downloader for building accessible downloads.
+                </p>
+                <div class="flex justify-center items-center gap-4 text-xs text-hero-gray-500">
+                    <span class="flex items-center gap-1">
                         <i class="fas fa-shield-alt"></i>
                         <span>Safe</span>
-                    </div>
-                    <div class="flex items-center gap-1">
+                    </span>
+                    <span class="flex items-center gap-1">
                         <i class="fas fa-bolt"></i>
                         <span>Fast</span>
-                    </div>
-                    <div class="flex items-center gap-1">
+                    </span>
+                    <span class="flex items-center gap-1">
                         <i class="fas fa-mobile-alt"></i>
                         <span>Mobile</span>
-                    </div>
+                    </span>
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <!-- Main Content -->
-            <main class="max-w-4xl mx-auto px-4">
-                
-                <!-- Download Section -->
-                <div class="nextui-card p-4 mb-6 bg-content1 shadow-medium rounded-large">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="nextui-chip bg-primary text-primary-foreground">
-                            <span class="text-small font-medium">1</span>
-                        </div>
-                        <h2 class="text-large font-semibold">Enter YouTube URL</h2>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <div class="nextui-input-wrapper">
-                            <input 
-                                type="url" 
-                                id="url-input"
-                                class="nextui-input w-full px-3 py-2 bg-content2 border border-divider rounded-medium text-foreground placeholder-default-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Paste YouTube URL here..."
-                                autocomplete="off"
-                            >
-                        </div>
-                        
-                        <button 
-                            id="download-btn"
-                            class="nextui-button w-full bg-primary text-primary-foreground hover:bg-primary-600 px-4 py-2 rounded-medium font-medium transition-colors"
-                        >
-                            <i class="fas fa-search mr-2"></i>
-                            Analyze Video
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Loading State -->
-                <div id="loading" class="hidden text-center py-6">
-                    <div class="nextui-card p-6 bg-content1 shadow-medium rounded-large">
-                        <div class="flex flex-col items-center gap-3">
-                            <div class="nextui-spinner w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                            <h3 class="text-medium font-medium">Analyzing video...</h3>
-                            <p class="text-small text-default-500">Please wait</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Error State -->
-                <div id="error-container" class="hidden mb-6">
-                    <div class="nextui-card p-4 bg-danger-50 border border-danger-200 rounded-large">
-                        <div class="flex items-center gap-3">
-                            <div class="nextui-avatar w-8 h-8 bg-danger text-danger-foreground rounded-full flex items-center justify-center">
-                                <i class="fas fa-exclamation-triangle text-small"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-medium font-medium text-danger">Error</h3>
-                                <p id="error-message" class="text-small text-danger-600"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Success State -->
-                <div id="success-container" class="hidden mb-6">
-                    <div class="nextui-card p-4 bg-success-50 border border-success-200 rounded-large">
-                        <div class="flex items-center gap-3">
-                            <div class="nextui-avatar w-8 h-8 bg-success text-success-foreground rounded-full flex items-center justify-center">
-                                <i class="fas fa-check-circle text-small"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-medium font-medium text-success">Success</h3>
-                                <p id="success-message" class="text-small text-success-600"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Video Info -->
-                <div id="video-info" class="hidden">
-                    <div class="nextui-card p-4 mb-6 bg-content1 shadow-medium rounded-large">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="nextui-chip bg-primary text-primary-foreground">
-                                <span class="text-small font-medium">2</span>
-                            </div>
-                            <h2 class="text-large font-semibold">Video Information</h2>
-                        </div>
-                        
-                        <div id="video-details" class="mb-4">
-                            <!-- Video details will be populated here -->
-                        </div>
-                        
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="nextui-chip bg-primary text-primary-foreground">
-                                <span class="text-small font-medium">3</span>
-                            </div>
-                            <h2 class="text-large font-semibold">Download Options</h2>
-                        </div>
-                        
-                        <div id="download-options" class="space-y-3">
-                            <!-- Download options will be populated here -->
-                        </div>
-                    </div>
-                </div>
-            </main>
+        <!-- Main Content -->
+        <main class="max-w-3xl mx-auto px-4">
             
-            <!-- SEO Content -->
-            <div class="max-w-6xl mx-auto px-4 mt-12 space-y-8">
+            <!-- Download Section -->
+            <div class="hero-card rounded-xl p-5 mb-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="hero-badge bg-hero-blue text-white">1</div>
+                    <h2 class="text-lg font-semibold">Enter YouTube URL</h2>
+                </div>
                 
-                <!-- How to Use -->
-                <section class="nextui-card p-6 bg-content1 shadow-medium rounded-large">
-                    <h2 class="text-xl font-bold mb-4 text-center">How to Use</h2>
-                    <div class="grid md:grid-cols-3 gap-4">
-                        <div class="text-center">
-                            <div class="nextui-avatar w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-copy text-small"></i>
-                            </div>
-                            <h3 class="text-medium font-medium mb-1">Copy URL</h3>
-                            <p class="text-small text-default-500">Copy the YouTube video URL</p>
-                        </div>
-                        <div class="text-center">
-                            <div class="nextui-avatar w-10 h-10 bg-secondary text-secondary-foreground rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-paste text-small"></i>
-                            </div>
-                            <h3 class="text-medium font-medium mb-1">Paste & Analyze</h3>
-                            <p class="text-small text-default-500">Paste URL and click analyze</p>
-                        </div>
-                        <div class="text-center">
-                            <div class="nextui-avatar w-10 h-10 bg-success text-success-foreground rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-download text-small"></i>
-                            </div>
-                            <h3 class="text-medium font-medium mb-1">Download</h3>
-                            <p class="text-small text-default-500">Choose quality and download</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Features -->
-                <section class="nextui-card p-6 bg-content1 shadow-medium rounded-large">
-                    <h2 class="text-xl font-bold mb-4 text-center">Features</h2>
-                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        <div class="flex items-center gap-3">
-                            <div class="nextui-avatar w-8 h-8 bg-primary text-primary-foreground rounded-medium flex items-center justify-center">
-                                <i class="fas fa-bolt text-tiny"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-small font-medium">Fast Downloads</h3>
-                                <p class="text-tiny text-default-500">Quick processing</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="nextui-avatar w-8 h-8 bg-success text-success-foreground rounded-medium flex items-center justify-center">
-                                <i class="fas fa-shield-alt text-tiny"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-small font-medium">100% Safe</h3>
-                                <p class="text-tiny text-default-500">No malware</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="nextui-avatar w-8 h-8 bg-secondary text-secondary-foreground rounded-medium flex items-center justify-center">
-                                <i class="fas fa-mobile-alt text-tiny"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-small font-medium">Mobile Friendly</h3>
-                                <p class="text-tiny text-default-500">All devices</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="nextui-avatar w-8 h-8 bg-warning text-warning-foreground rounded-medium flex items-center justify-center">
-                                <i class="fas fa-hd-video text-tiny"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-small font-medium">HD Quality</h3>
-                                <p class="text-tiny text-default-500">Up to 4K</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="nextui-avatar w-8 h-8 bg-danger text-danger-foreground rounded-medium flex items-center justify-center">
-                                <i class="fas fa-user-times text-tiny"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-small font-medium">No Registration</h3>
-                                <p class="text-tiny text-default-500">Free access</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="nextui-avatar w-8 h-8 bg-primary text-primary-foreground rounded-medium flex items-center justify-center">
-                                <i class="fas fa-infinity text-tiny"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-small font-medium">Unlimited</h3>
-                                <p class="text-tiny text-default-500">No limits</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- FAQ -->
-                <section class="nextui-card p-6 bg-content1 shadow-medium rounded-large">
-                    <h2 class="text-xl font-bold mb-4 text-center">FAQ</h2>
-                    <div class="space-y-3">
-                        <div class="nextui-card p-3 bg-content2 rounded-medium border-l-4 border-primary">
-                            <h3 class="text-medium font-medium mb-1">Is it free?</h3>
-                            <p class="text-small text-default-500">Yes, completely free with no registration required.</p>
-                        </div>
-                        <div class="nextui-card p-3 bg-content2 rounded-medium border-l-4 border-secondary">
-                            <h3 class="text-medium font-medium mb-1">What qualities are supported?</h3>
-                            <p class="text-small text-default-500">360p, 480p, 720p HD, 1080p Full HD, and 4K when available.</p>
-                        </div>
-                        <div class="nextui-card p-3 bg-content2 rounded-medium border-l-4 border-success">
-                            <h3 class="text-medium font-medium mb-1">Is it safe?</h3>
-                            <p class="text-small text-default-500">Yes, we don't store your data or downloaded videos.</p>
-                        </div>
-                        <div class="nextui-card p-3 bg-content2 rounded-medium border-l-4 border-warning">
-                            <h3 class="text-medium font-medium mb-1">Works on mobile?</h3>
-                            <p class="text-small text-default-500">Yes, optimized for all devices including mobile.</p>
-                        </div>
-                    </div>
-                </section>
+                <div class="space-y-3">
+                    <input 
+                        type="url" 
+                        id="url-input"
+                        class="hero-input w-full px-3 py-2.5 rounded-lg text-white text-sm placeholder-hero-gray-400 focus:outline-none"
+                        placeholder="Paste YouTube URL here..."
+                        autocomplete="off"
+                    >
+                    
+                    <button 
+                        id="download-btn"
+                        class="hero-button w-full bg-hero-blue hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-hero"
+                    >
+                        <i class="fas fa-search mr-2"></i>
+                        Analyze Video
+                    </button>
+                </div>
             </div>
             
-            <!-- Footer -->
-            <footer class="text-center py-8 mt-12">
-                <div class="nextui-card p-4 bg-content1 shadow-medium rounded-large max-w-sm mx-auto">
-                    <h2 class="text-large font-bold mb-2">Simpl YT Downloader</h2>
-                    <p class="text-small text-default-500 mb-3">Free YouTube video downloader</p>
-                    <div class="flex justify-center gap-3 text-small text-default-400">
-                        <a href="/about" class="hover:text-primary transition-colors">About</a>
-                        <a href="/privacy" class="hover:text-primary transition-colors">Privacy</a>
-                        <a href="/terms" class="hover:text-primary transition-colors">Terms</a>
+            <!-- Loading State -->
+            <div id="loading" class="hidden text-center py-6">
+                <div class="hero-card rounded-xl p-6">
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="hero-spinner"></div>
+                        <h3 class="text-sm font-medium">Analyzing video...</h3>
+                        <p class="text-xs text-hero-gray-400">Please wait</p>
                     </div>
-                    <p class="mt-2 text-tiny text-default-300">&copy; 2024 Simpl YT. All rights reserved.</p>
                 </div>
-            </footer>
+            </div>
+            
+            <!-- Error State -->
+            <div id="error-container" class="hidden mb-6">
+                <div class="hero-card rounded-xl p-4 border-hero-red/50 bg-hero-red/5">
+                    <div class="flex items-center gap-3">
+                        <div class="hero-badge bg-hero-red text-white">
+                            <i class="fas fa-exclamation-triangle text-xs"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-red-300">Error</h3>
+                            <p id="error-message" class="text-xs text-red-200"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Success State -->
+            <div id="success-container" class="hidden mb-6">
+                <div class="hero-card rounded-xl p-4 border-hero-green/50 bg-hero-green/5">
+                    <div class="flex items-center gap-3">
+                        <div class="hero-badge bg-hero-green text-white">
+                            <i class="fas fa-check-circle text-xs"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-green-300">Success</h3>
+                            <p id="success-message" class="text-xs text-green-200"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Video Info -->
+            <div id="video-info" class="hidden">
+                <div class="hero-card rounded-xl p-5 mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="hero-badge bg-hero-blue text-white">2</div>
+                        <h2 class="text-lg font-semibold">Video Information</h2>
+                    </div>
+                    
+                    <div id="video-details" class="mb-4">
+                        <!-- Video details will be populated here -->
+                    </div>
+                    
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="hero-badge bg-hero-blue text-white">3</div>
+                        <h2 class="text-lg font-semibold">Download Options</h2>
+                    </div>
+                    
+                    <div id="download-options" class="space-y-2">
+                        <!-- Download options will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Features Section -->
+        <div class="max-w-4xl mx-auto px-4 mt-12 space-y-8">
+            
+            <!-- How to Use -->
+            <section class="hero-card rounded-xl p-5">
+                <h2 class="text-xl font-semibold mb-4 text-center">How to Use</h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <div class="hero-feature-icon bg-hero-blue text-white mx-auto mb-3">
+                            <i class="fas fa-copy"></i>
+                        </div>
+                        <h3 class="text-sm font-medium mb-1">Copy URL</h3>
+                        <p class="text-xs text-hero-gray-400">Copy the YouTube video URL</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="hero-feature-icon bg-hero-purple text-white mx-auto mb-3">
+                            <i class="fas fa-paste"></i>
+                        </div>
+                        <h3 class="text-sm font-medium mb-1">Paste & Analyze</h3>
+                        <p class="text-xs text-hero-gray-400">Paste URL and click analyze</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="hero-feature-icon bg-hero-green text-white mx-auto mb-3">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <h3 class="text-sm font-medium mb-1">Download</h3>
+                        <p class="text-xs text-hero-gray-400">Choose quality and download</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features -->
+            <section class="hero-card rounded-xl p-5">
+                <h2 class="text-xl font-semibold mb-4 text-center">Features</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="hero-feature-icon bg-hero-blue text-white">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium">Fast Downloads</h3>
+                            <p class="text-xs text-hero-gray-400">Quick processing</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="hero-feature-icon bg-hero-green text-white">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium">100% Safe</h3>
+                            <p class="text-xs text-hero-gray-400">No malware</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="hero-feature-icon bg-hero-purple text-white">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium">Mobile Friendly</h3>
+                            <p class="text-xs text-hero-gray-400">All devices</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="hero-feature-icon bg-hero-orange text-white">
+                            <i class="fas fa-hd-video"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium">HD Quality</h3>
+                            <p class="text-xs text-hero-gray-400">Up to 4K</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="hero-feature-icon bg-hero-red text-white">
+                            <i class="fas fa-user-times"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium">No Registration</h3>
+                            <p class="text-xs text-hero-gray-400">Free access</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="hero-feature-icon bg-hero-blue text-white">
+                            <i class="fas fa-infinity"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium">Unlimited</h3>
+                            <p class="text-xs text-hero-gray-400">No limits</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ -->
+            <section class="hero-card rounded-xl p-5">
+                <h2 class="text-xl font-semibold mb-4 text-center">FAQ</h2>
+                <div class="space-y-3">
+                    <div class="hero-card rounded-lg p-3 border-l-4 border-hero-blue">
+                        <h3 class="text-sm font-medium mb-1">Is it free?</h3>
+                        <p class="text-xs text-hero-gray-400">Yes, completely free with no registration required.</p>
+                    </div>
+                    <div class="hero-card rounded-lg p-3 border-l-4 border-hero-purple">
+                        <h3 class="text-sm font-medium mb-1">What qualities are supported?</h3>
+                        <p class="text-xs text-hero-gray-400">360p, 480p, 720p HD, 1080p Full HD, and 4K when available.</p>
+                    </div>
+                    <div class="hero-card rounded-lg p-3 border-l-4 border-hero-green">
+                        <h3 class="text-sm font-medium mb-1">Is it safe?</h3>
+                        <p class="text-xs text-hero-gray-400">Yes, we don't store your data or downloaded videos.</p>
+                    </div>
+                    <div class="hero-card rounded-lg p-3 border-l-4 border-hero-orange">
+                        <h3 class="text-sm font-medium mb-1">Works on mobile?</h3>
+                        <p class="text-xs text-hero-gray-400">Yes, optimized for all devices including mobile.</p>
+                    </div>
+                </div>
+            </section>
         </div>
+        
+        <!-- Footer -->
+        <footer class="text-center py-8 mt-12">
+            <div class="hero-card rounded-xl p-4 max-w-sm mx-auto">
+                <h2 class="text-lg font-semibold mb-2">Simpl YT Downloader</h2>
+                <p class="text-xs text-hero-gray-400 mb-3">Free YouTube video downloader</p>
+                <div class="flex justify-center gap-4 text-xs text-hero-gray-500">
+                    <a href="/about" class="hover:text-hero-blue transition-colors">About</a>
+                    <a href="/privacy" class="hover:text-hero-blue transition-colors">Privacy</a>
+                    <a href="/terms" class="hover:text-hero-blue transition-colors">Terms</a>
+                </div>
+                <p class="mt-2 text-xs text-hero-gray-600">&copy; 2024 Simpl YT. All rights reserved.</p>
+            </div>
+        </footer>
     </div>
-    
-    <!-- NextUI JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/@nextui-org/theme@2.2.9/dist/components.min.js"></script>
     
     <!-- Custom JavaScript -->
     <script>
@@ -455,11 +572,11 @@
             return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
         }
 
-        function getQualityChipColor(quality) {
-            if (quality.includes('1080') || quality.includes('720')) return 'bg-primary text-primary-foreground';
-            if (quality.includes('480') || quality.includes('360')) return 'bg-success text-success-foreground';
-            if (quality.includes('audio') || quality.includes('mp3')) return 'bg-warning text-warning-foreground';
-            return 'bg-secondary text-secondary-foreground';
+        function getQualityChipClass(quality) {
+            if (quality.includes('1080') || quality.includes('720')) return 'bg-hero-blue text-white';
+            if (quality.includes('480') || quality.includes('360')) return 'bg-hero-green text-white';
+            if (quality.includes('audio') || quality.includes('mp3')) return 'bg-hero-orange text-white';
+            return 'bg-hero-purple text-white';
         }
 
         // Main download handler
@@ -499,26 +616,26 @@
                     // Display video information
                     videoDetails.innerHTML = `
                         <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full md:w-40 h-24 bg-content2 rounded-medium overflow-hidden flex-shrink-0">
+                            <div class="w-full md:w-32 h-20 bg-hero-gray-800 rounded-lg overflow-hidden flex-shrink-0">
                                 <img src="${video.thumbnail}" alt="Video thumbnail" class="w-full h-full object-cover">
                             </div>
                             <div class="flex-1 min-w-0">
-                                <h3 class="text-medium font-medium mb-2 text-foreground leading-tight">${video.title}</h3>
-                                <div class="grid grid-cols-2 gap-2 text-small">
-                                    <div class="flex items-center gap-2 text-default-500">
-                                        <i class="fas fa-user text-primary"></i>
+                                <h3 class="text-sm font-medium mb-2 text-white leading-tight">${video.title}</h3>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div class="flex items-center gap-2 text-hero-gray-400">
+                                        <i class="fas fa-user text-hero-blue"></i>
                                         <span class="truncate">${video.uploader || 'Unknown'}</span>
                                     </div>
-                                    <div class="flex items-center gap-2 text-default-500">
-                                        <i class="fas fa-clock text-success"></i>
+                                    <div class="flex items-center gap-2 text-hero-gray-400">
+                                        <i class="fas fa-clock text-hero-green"></i>
                                         <span>${formatDuration(video.duration)}</span>
                                     </div>
-                                    <div class="flex items-center gap-2 text-default-500">
-                                        <i class="fas fa-eye text-warning"></i>
+                                    <div class="flex items-center gap-2 text-hero-gray-400">
+                                        <i class="fas fa-eye text-hero-orange"></i>
                                         <span>${formatViews(video.view_count)} views</span>
                                     </div>
-                                    <div class="flex items-center gap-2 text-default-500">
-                                        <i class="fas fa-calendar text-secondary"></i>
+                                    <div class="flex items-center gap-2 text-hero-gray-400">
+                                        <i class="fas fa-calendar text-hero-purple"></i>
                                         <span>${video.upload_date || 'Unknown'}</span>
                                     </div>
                                 </div>
@@ -530,24 +647,24 @@
                     downloadOptions.innerHTML = '';
                     data.formats.forEach(format => {
                         const card = document.createElement('div');
-                        card.className = 'nextui-card p-4 bg-content2 rounded-medium hover:bg-content3 transition-colors';
+                        card.className = 'hero-card rounded-lg p-3 hover:bg-white/10 transition-colors';
                         card.innerHTML = `
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="nextui-avatar w-10 h-10 bg-gradient-to-br from-primary to-secondary text-white rounded-medium flex items-center justify-center">
-                                        <i class="fas fa-${format.ext === 'mp3' ? 'music' : 'video'} text-small"></i>
+                                    <div class="hero-feature-icon bg-gradient-to-br from-hero-blue to-hero-purple text-white">
+                                        <i class="fas fa-${format.ext === 'mp3' ? 'music' : 'video'}"></i>
                                     </div>
                                     <div>
-                                        <h4 class="text-small font-medium text-foreground">${format.display_name}</h4>
+                                        <h4 class="text-sm font-medium text-white">${format.display_name}</h4>
                                         <div class="flex items-center gap-2 mt-1">
-                                            <span class="nextui-chip text-tiny ${getQualityChipColor(format.quality)}">${format.quality}</span>
-                                            <span class="text-tiny text-default-400">${format.ext.toUpperCase()}</span>
-                                            ${format.filesize ? `<span class="text-tiny text-default-400">${formatFileSize(format.filesize)}</span>` : ''}
+                                            <span class="hero-chip ${getQualityChipClass(format.quality)}">${format.quality}</span>
+                                            <span class="text-xs text-hero-gray-400">${format.ext.toUpperCase()}</span>
+                                            ${format.filesize ? `<span class="text-xs text-hero-gray-400">${formatFileSize(format.filesize)}</span>` : ''}
                                         </div>
                                     </div>
                                 </div>
                                 <a href="/download/${data.video_id}/${format.format_id}" 
-                                   class="nextui-button bg-primary text-primary-foreground hover:bg-primary-600 px-4 py-2 rounded-medium text-small font-medium transition-colors">
+                                   class="hero-button bg-hero-blue hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-hero">
                                     <i class="fas fa-download mr-1"></i>
                                     Download
                                 </a>
@@ -579,11 +696,9 @@
         urlInput.addEventListener('input', function() {
             const url = this.value.trim();
             if (url && !url.includes('youtube.com') && !url.includes('youtu.be')) {
-                this.classList.add('border-danger');
-                this.classList.remove('border-divider');
+                this.style.borderColor = '#ef4444';
             } else {
-                this.classList.remove('border-danger');
-                this.classList.add('border-divider');
+                this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
             }
         });
     </script>
